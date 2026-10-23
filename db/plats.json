@@ -1,0 +1,202 @@
+[
+  {
+    "id": 1,
+    "categorieId": 1,
+    "nom": "Salade de crudités",
+    "description": "Tomates, concombre, oignons rouges, vinaigrette maison",
+    "prix": 3.5,
+    "tempsPreparationMin": 8,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 2,
+    "categorieId": 1,
+    "nom": "Samoussas au boeuf",
+    "description": "Quatre pièces, sauce pili-pili",
+    "prix": 4.0,
+    "tempsPreparationMin": 10,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 3,
+    "categorieId": 1,
+    "nom": "Soupe de poisson",
+    "description": "Bouillon de tilapia aux herbes",
+    "prix": 4.5,
+    "tempsPreparationMin": 12,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 4,
+    "categorieId": 2,
+    "nom": "Poulet braisé",
+    "description": "Demi-poulet mariné, servi avec frites ou bananes",
+    "prix": 9.5,
+    "tempsPreparationMin": 25,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 5,
+    "categorieId": 2,
+    "nom": "Brochettes de chèvre",
+    "description": "Cinq brochettes, oignons grillés",
+    "prix": 8.0,
+    "tempsPreparationMin": 20,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 6,
+    "categorieId": 2,
+    "nom": "Côtes de porc grillées",
+    "description": "Marinade au citron et à l'ail",
+    "prix": 10.0,
+    "tempsPreparationMin": 25,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 7,
+    "categorieId": 3,
+    "nom": "Ugali sauce poisson",
+    "description": "Pâte de manioc et sauce de poisson",
+    "prix": 7.0,
+    "tempsPreparationMin": 20,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 8,
+    "categorieId": 3,
+    "nom": "Riz pilaou",
+    "description": "Riz parfumé aux épices, viande de boeuf",
+    "prix": 6.5,
+    "tempsPreparationMin": 20,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 9,
+    "categorieId": 3,
+    "nom": "Matoke au boeuf",
+    "description": "Bananes plantain mijotées avec du boeuf",
+    "prix": 7.5,
+    "tempsPreparationMin": 25,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 10,
+    "categorieId": 3,
+    "nom": "Fufu et feuilles de manioc",
+    "description": "Plat végétarien traditionnel",
+    "prix": 7.0,
+    "tempsPreparationMin": 20,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 11,
+    "categorieId": 4,
+    "nom": "Sambaza frits",
+    "description": "Petits poissons du lac, croustillants",
+    "prix": 6.0,
+    "tempsPreparationMin": 15,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 12,
+    "categorieId": 4,
+    "nom": "Capitaine grillé",
+    "description": "Poisson entier grillé, sauce tomate",
+    "prix": 12.0,
+    "tempsPreparationMin": 25,
+    "disponible": false,
+    "imageUrl": ""
+  },
+  {
+    "id": 13,
+    "categorieId": 4,
+    "nom": "Tilapia entier",
+    "description": "Frit ou grillé, au choix",
+    "prix": 11.0,
+    "tempsPreparationMin": 25,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 14,
+    "categorieId": 5,
+    "nom": "Primus 65cl",
+    "description": "Bière blonde bien fraîche",
+    "prix": 3.0,
+    "tempsPreparationMin": 1,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 15,
+    "categorieId": 5,
+    "nom": "Fanta",
+    "description": "Bouteille 30cl",
+    "prix": 1.5,
+    "tempsPreparationMin": 1,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 16,
+    "categorieId": 5,
+    "nom": "Jus de fruit de la passion",
+    "description": "Pressé le jour même",
+    "prix": 2.5,
+    "tempsPreparationMin": 4,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 17,
+    "categorieId": 5,
+    "nom": "Café du Kivu",
+    "description": "Café local, grain torréfié",
+    "prix": 2.0,
+    "tempsPreparationMin": 4,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 18,
+    "categorieId": 5,
+    "nom": "Eau minérale",
+    "description": "Bouteille 50cl",
+    "prix": 1.0,
+    "tempsPreparationMin": 1,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 19,
+    "categorieId": 6,
+    "nom": "Mandazi",
+    "description": "Beignets sucrés, trois pièces",
+    "prix": 2.0,
+    "tempsPreparationMin": 8,
+    "disponible": true,
+    "imageUrl": ""
+  },
+  {
+    "id": 20,
+    "categorieId": 6,
+    "nom": "Salade de fruits",
+    "description": "Fruits de saison",
+    "prix": 3.0,
+    "tempsPreparationMin": 6,
+    "disponible": true,
+    "imageUrl": ""
+  }
+]

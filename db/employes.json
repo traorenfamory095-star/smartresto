@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1,
+    "nom": "Administrateur",
+    "email": "admin@smartresto.cd",
+    "motDePasse": "1234",
+    "role": "admin",
+    "actif": true,
+    "creeLe": "2026-10-01"
+  },
+  {
+    "id": 2,
+    "nom": "Neema Bahati",
+    "email": "neema@smartresto.cd",
+    "motDePasse": "1234",
+    "role": "gerant",
+    "actif": true,
+    "creeLe": "2026-10-01"
+  },
+  {
+    "id": 3,
+    "nom": "Amani Kasereka",
+    "email": "amani@smartresto.cd",
+    "motDePasse": "1234",
+    "role": "serveur",
+    "actif": true,
+    "creeLe": "2026-10-02"
+  },
+  {
+    "id": 4,
+    "nom": "Zawadi Mukeni",
+    "email": "zawadi@smartresto.cd",
+    "motDePasse": "1234",
+    "role": "serveur",
+    "actif": true,
+    "creeLe": "2026-10-02"
+  },
+  {
+    "id": 5,
+    "nom": "Baraka Mumbere",
+    "email": "baraka@smartresto.cd",
+    "motDePasse": "1234",
+    "role": "cuisinier",
+    "actif": true,
+    "creeLe": "2026-10-02"
+  },
+  {
+    "id": 6,
+    "nom": "Furaha Nyota",
+    "email": "furaha@smartresto.cd",
+    "motDePasse": "1234",
+    "role": "caissier",
+    "actif": true,
+    "creeLe": "2026-10-03"
+  },
+  {
+    "id": 7,
+    "nom": "Jengo Paluku",
+    "email": "jengo@smartresto.cd",
+    "motDePasse": "1234",
+    "role": "serveur",
+    "actif": false,
+    "creeLe": "2026-10-03"
+  }
+]

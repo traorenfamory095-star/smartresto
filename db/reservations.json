@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "tableId": 10,
+    "nomClient": "Famille Tshibangu",
+    "telephone": "+243 990 000 101",
+    "nbPersonnes": 7,
+    "date": "2026-10-22",
+    "heure": "19:30",
+    "statut": "confirmee",
+    "note": "Anniversaire"
+  },
+  {
+    "id": 2,
+    "tableId": 3,
+    "nomClient": "Mme Aïcha Safari",
+    "telephone": "+243 990 000 102",
+    "nbPersonnes": 4,
+    "date": "2026-10-22",
+    "heure": "20:00",
+    "statut": "confirmee",
+    "note": ""
+  },
+  {
+    "id": 3,
+    "tableId": 8,
+    "nomClient": "Société Virunga Conseil",
+    "telephone": "+243 990 000 103",
+    "nbPersonnes": 6,
+    "date": "2026-10-23",
+    "heure": "12:30",
+    "statut": "confirmee",
+    "note": "Déjeuner d'affaires"
+  },
+  {
+    "id": 4,
+    "tableId": 5,
+    "nomClient": "M. Patrick Lwanzo",
+    "telephone": "+243 990 000 104",
+    "nbPersonnes": 2,
+    "date": "2026-10-21",
+    "heure": "20:30",
+    "statut": "confirmee",
+    "note": ""
+  },
+  {
+    "id": 5,
+    "tableId": 2,
+    "nomClient": "Mlle Grâce Kahindo",
+    "telephone": "+243 990 000 105",
+    "nbPersonnes": 2,
+    "date": "2026-10-20",
+    "heure": "19:00",
+    "statut": "annulee",
+    "note": "A annulé par téléphone"
+  }
+]

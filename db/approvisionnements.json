@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "fournisseurId": 4,
+    "dateCommande": "2026-10-10",
+    "dateReception": "2026-10-12",
+    "statut": "recue",
+    "lignes": [
+      {
+        "ingredientId": 13,
+        "quantite": 144,
+        "prixUnitaire": 1.8
+      },
+      {
+        "ingredientId": 14,
+        "quantite": 60,
+        "prixUnitaire": 0.7
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "fournisseurId": 1,
+    "dateCommande": "2026-10-19",
+    "dateReception": null,
+    "statut": "commande",
+    "lignes": [
+      {
+        "ingredientId": 7,
+        "quantite": 15,
+        "prixUnitaire": 6.5
+      },
+      {
+        "ingredientId": 6,
+        "quantite": 10,
+        "prixUnitaire": 9.0
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "fournisseurId": 2,
+    "dateCommande": "2026-10-20",
+    "dateReception": null,
+    "statut": "commande",
+    "lignes": [
+      {
+        "ingredientId": 4,
+        "quantite": 12,
+        "prixUnitaire": 8.0
+      }
+    ]
+  }
+]

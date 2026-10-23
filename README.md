@@ -1,75 +1,40 @@
-# Nuxt Minimal Starter
+# SmartResto
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Application de gestion de restaurant, projet d'équipe Nuxt.
 
-## Setup
+## Lancer le projet
 
-Make sure to install dependencies:
+Il faut **deux terminaux ouverts en même temps**.
+
+### 1. Première fois seulement
 
 ```bash
-# npm
+git clone <adresse-du-depot>
+cd smartresto
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+### 2. Terminal 1 : l'API (données)
 
 ```bash
-# npm
+npm run api
+```
+
+L'API tourne sur http://localhost:3001. Pour vérifier, ouvre
+http://localhost:3001/plats : tu dois voir du JSON.
+
+⚠️ Cette commande **remet tes données à zéro** à chaque lancement.
+Pour garder tes données, utilise `npm run api:garder`.
+
+### 3. Terminal 2 : le site
+
+```bash
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+Le site tourne sur http://localhost:3000.
 
-Build the application for production:
+### Si ça ne marche pas
 
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+- `Port already in use` : un ancien terminal est encore ouvert. Ferme-le.
+- Page blanche : vérifie que l'API (terminal 1) tourne bien.

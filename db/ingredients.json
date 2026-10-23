@@ -1,0 +1,128 @@
+[
+  {
+    "id": 1,
+    "nom": "Poulet",
+    "unite": "kg",
+    "stock": 25,
+    "seuilAlerte": 10,
+    "prixUnitaire": 5.5,
+    "fournisseurId": 2
+  },
+  {
+    "id": 2,
+    "nom": "Viande de chèvre",
+    "unite": "kg",
+    "stock": 12,
+    "seuilAlerte": 8,
+    "prixUnitaire": 7.0,
+    "fournisseurId": 2
+  },
+  {
+    "id": 3,
+    "nom": "Porc",
+    "unite": "kg",
+    "stock": 15,
+    "seuilAlerte": 8,
+    "prixUnitaire": 6.0,
+    "fournisseurId": 2
+  },
+  {
+    "id": 4,
+    "nom": "Boeuf",
+    "unite": "kg",
+    "stock": 6,
+    "seuilAlerte": 8,
+    "prixUnitaire": 8.0,
+    "fournisseurId": 2
+  },
+  {
+    "id": 5,
+    "nom": "Sambaza",
+    "unite": "kg",
+    "stock": 10,
+    "seuilAlerte": 5,
+    "prixUnitaire": 4.0,
+    "fournisseurId": 1
+  },
+  {
+    "id": 6,
+    "nom": "Capitaine",
+    "unite": "kg",
+    "stock": 8,
+    "seuilAlerte": 5,
+    "prixUnitaire": 9.0,
+    "fournisseurId": 1
+  },
+  {
+    "id": 7,
+    "nom": "Tilapia",
+    "unite": "kg",
+    "stock": 3,
+    "seuilAlerte": 6,
+    "prixUnitaire": 6.5,
+    "fournisseurId": 1
+  },
+  {
+    "id": 8,
+    "nom": "Farine de manioc",
+    "unite": "kg",
+    "stock": 30,
+    "seuilAlerte": 10,
+    "prixUnitaire": 1.2,
+    "fournisseurId": 3
+  },
+  {
+    "id": 9,
+    "nom": "Riz",
+    "unite": "kg",
+    "stock": 40,
+    "seuilAlerte": 15,
+    "prixUnitaire": 1.4,
+    "fournisseurId": 3
+  },
+  {
+    "id": 10,
+    "nom": "Bananes plantain",
+    "unite": "kg",
+    "stock": 20,
+    "seuilAlerte": 8,
+    "prixUnitaire": 0.9,
+    "fournisseurId": 3
+  },
+  {
+    "id": 11,
+    "nom": "Tomates",
+    "unite": "kg",
+    "stock": 9,
+    "seuilAlerte": 6,
+    "prixUnitaire": 1.5,
+    "fournisseurId": 3
+  },
+  {
+    "id": 12,
+    "nom": "Huile de cuisson",
+    "unite": "l",
+    "stock": 20,
+    "seuilAlerte": 8,
+    "prixUnitaire": 2.6,
+    "fournisseurId": 3
+  },
+  {
+    "id": 13,
+    "nom": "Primus 65cl",
+    "unite": "piece",
+    "stock": 120,
+    "seuilAlerte": 48,
+    "prixUnitaire": 1.8,
+    "fournisseurId": 4
+  },
+  {
+    "id": 14,
+    "nom": "Fanta 30cl",
+    "unite": "piece",
+    "stock": 60,
+    "seuilAlerte": 24,
+    "prixUnitaire": 0.7,
+    "fournisseurId": 4
+  }
+]

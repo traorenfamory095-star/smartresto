@@ -1,0 +1,209 @@
+[
+  {
+    "id": 1,
+    "tableId": 6,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-12T12:40:00",
+    "nbCouverts": 3,
+    "note": ""
+  },
+  {
+    "id": 2,
+    "tableId": 9,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-12T19:35:00",
+    "nbCouverts": 1,
+    "note": ""
+  },
+  {
+    "id": 3,
+    "tableId": 7,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-13T12:40:00",
+    "nbCouverts": 4,
+    "note": ""
+  },
+  {
+    "id": 4,
+    "tableId": 4,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-13T19:35:00",
+    "nbCouverts": 4,
+    "note": ""
+  },
+  {
+    "id": 5,
+    "tableId": 2,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-14T12:40:00",
+    "nbCouverts": 2,
+    "note": ""
+  },
+  {
+    "id": 6,
+    "tableId": 8,
+    "serveurId": 4,
+    "statut": "payee",
+    "creeLe": "2026-10-14T19:35:00",
+    "nbCouverts": 2,
+    "note": ""
+  },
+  {
+    "id": 7,
+    "tableId": 8,
+    "serveurId": 4,
+    "statut": "payee",
+    "creeLe": "2026-10-15T12:40:00",
+    "nbCouverts": 3,
+    "note": ""
+  },
+  {
+    "id": 8,
+    "tableId": 1,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-15T19:35:00",
+    "nbCouverts": 4,
+    "note": ""
+  },
+  {
+    "id": 9,
+    "tableId": 2,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-16T12:40:00",
+    "nbCouverts": 2,
+    "note": ""
+  },
+  {
+    "id": 10,
+    "tableId": 5,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-16T19:35:00",
+    "nbCouverts": 2,
+    "note": ""
+  },
+  {
+    "id": 11,
+    "tableId": 7,
+    "serveurId": 4,
+    "statut": "payee",
+    "creeLe": "2026-10-17T12:40:00",
+    "nbCouverts": 3,
+    "note": ""
+  },
+  {
+    "id": 12,
+    "tableId": 10,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-17T19:35:00",
+    "nbCouverts": 2,
+    "note": ""
+  },
+  {
+    "id": 13,
+    "tableId": 9,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-18T12:40:00",
+    "nbCouverts": 3,
+    "note": ""
+  },
+  {
+    "id": 14,
+    "tableId": 2,
+    "serveurId": 4,
+    "statut": "payee",
+    "creeLe": "2026-10-18T19:35:00",
+    "nbCouverts": 4,
+    "note": ""
+  },
+  {
+    "id": 15,
+    "tableId": 6,
+    "serveurId": 3,
+    "statut": "payee",
+    "creeLe": "2026-10-19T12:40:00",
+    "nbCouverts": 1,
+    "note": ""
+  },
+  {
+    "id": 16,
+    "tableId": 8,
+    "serveurId": 4,
+    "statut": "payee",
+    "creeLe": "2026-10-19T19:35:00",
+    "nbCouverts": 3,
+    "note": ""
+  },
+  {
+    "id": 17,
+    "tableId": 4,
+    "serveurId": 4,
+    "statut": "payee",
+    "creeLe": "2026-10-20T12:40:00",
+    "nbCouverts": 2,
+    "note": ""
+  },
+  {
+    "id": 18,
+    "tableId": 9,
+    "serveurId": 4,
+    "statut": "payee",
+    "creeLe": "2026-10-20T19:35:00",
+    "nbCouverts": 2,
+    "note": ""
+  },
+  {
+    "id": 19,
+    "tableId": 6,
+    "serveurId": 3,
+    "statut": "annulee",
+    "creeLe": "2026-10-18T20:10:00",
+    "nbCouverts": 2,
+    "note": "Client parti avant d'être servi"
+  },
+  {
+    "id": 20,
+    "tableId": 3,
+    "serveurId": 4,
+    "statut": "servie",
+    "creeLe": "2026-10-21T12:05:00",
+    "nbCouverts": 1,
+    "note": "Addition demandée"
+  },
+  {
+    "id": 21,
+    "tableId": 7,
+    "serveurId": 3,
+    "statut": "prete",
+    "creeLe": "2026-10-21T12:30:00",
+    "nbCouverts": 3,
+    "note": ""
+  },
+  {
+    "id": 22,
+    "tableId": 5,
+    "serveurId": 3,
+    "statut": "en_preparation",
+    "creeLe": "2026-10-21T12:42:00",
+    "nbCouverts": 3,
+    "note": ""
+  },
+  {
+    "id": 23,
+    "tableId": 9,
+    "serveurId": 4,
+    "statut": "en_attente",
+    "creeLe": "2026-10-21T12:55:00",
+    "nbCouverts": 2,
+    "note": "Allergie aux arachides"
+  }
+]
