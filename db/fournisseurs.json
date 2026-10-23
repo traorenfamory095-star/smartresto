@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "nom": "Pêcherie du Lac Kivu",
+    "categorie": "Poissons",
+    "contact": "M. Safari Mugisho",
+    "telephone": "+243 990 000 201",
+    "email": "contact@pecherie-kivu.example",
+    "adresse": "Port de Goma"
+  },
+  {
+    "id": 2,
+    "nom": "Boucherie Bwiza",
+    "categorie": "Viandes",
+    "contact": "Mme Bwiza Nshobole",
+    "telephone": "+243 990 000 202",
+    "email": "commandes@bwiza.example",
+    "adresse": "Marché central, Goma"
+  },
+  {
+    "id": 3,
+    "nom": "Maraîchers de Virunga",
+    "categorie": "Légumes et fruits",
+    "contact": "M. Désiré Kambale",
+    "telephone": "+243 990 000 203",
+    "email": "",
+    "adresse": "Route de Sake"
+  },
+  {
+    "id": 4,
+    "nom": "Distribution Boissons Kivu",
+    "categorie": "Boissons",
+    "contact": "Mme Esther Mbusa",
+    "telephone": "+243 990 000 204",
+    "email": "ventes@boissons-kivu.example",
+    "adresse": "Zone industrielle, Goma"
+  }
+]

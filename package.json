@@ -7,7 +7,11 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "api": "node scripts/build-db.js && json-server --watch db.json --port 3001",
+    "api:garder": "json-server --watch db.json --port 3001",
+    "db:check": "node scripts/verifier-db.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "nuxt": "^4.6.2",

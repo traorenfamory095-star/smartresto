@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "nom": "Entrées",
+    "ordre": 1,
+    "description": "Pour commencer le repas"
+  },
+  {
+    "id": 2,
+    "nom": "Grillades",
+    "ordre": 2,
+    "description": "Viandes cuites au feu de bois"
+  },
+  {
+    "id": 3,
+    "nom": "Plats traditionnels",
+    "ordre": 3,
+    "description": "La cuisine de la région des Grands Lacs"
+  },
+  {
+    "id": 4,
+    "nom": "Poissons du lac",
+    "ordre": 4,
+    "description": "Pêche du jour du lac Kivu"
+  },
+  {
+    "id": 5,
+    "nom": "Boissons",
+    "ordre": 5,
+    "description": "Bières, sodas, jus et boissons chaudes"
+  },
+  {
+    "id": 6,
+    "nom": "Desserts",
+    "ordre": 6,
+    "description": "Pour finir en douceur"
+  }
+]

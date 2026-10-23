@@ -1,0 +1,211 @@
+[
+  {
+    "id": 1,
+    "commandeId": 1,
+    "numero": "F-2026-0001",
+    "sousTotal": 8.5,
+    "remise": 0.0,
+    "taxe": 1.36,
+    "total": 9.86,
+    "statut": "payee",
+    "creeLe": "2026-10-12T13:55:00"
+  },
+  {
+    "id": 2,
+    "commandeId": 2,
+    "numero": "F-2026-0002",
+    "sousTotal": 4.5,
+    "remise": 0.0,
+    "taxe": 0.72,
+    "total": 5.22,
+    "statut": "payee",
+    "creeLe": "2026-10-12T20:50:00"
+  },
+  {
+    "id": 3,
+    "commandeId": 3,
+    "numero": "F-2026-0003",
+    "sousTotal": 17.0,
+    "remise": 0.0,
+    "taxe": 2.72,
+    "total": 19.72,
+    "statut": "payee",
+    "creeLe": "2026-10-13T13:55:00"
+  },
+  {
+    "id": 4,
+    "commandeId": 4,
+    "numero": "F-2026-0004",
+    "sousTotal": 33.0,
+    "remise": 0.0,
+    "taxe": 5.28,
+    "total": 38.28,
+    "statut": "payee",
+    "creeLe": "2026-10-13T20:50:00"
+  },
+  {
+    "id": 5,
+    "commandeId": 5,
+    "numero": "F-2026-0005",
+    "sousTotal": 13.0,
+    "remise": 0.0,
+    "taxe": 2.08,
+    "total": 15.08,
+    "statut": "payee",
+    "creeLe": "2026-10-14T13:55:00"
+  },
+  {
+    "id": 6,
+    "commandeId": 6,
+    "numero": "F-2026-0006",
+    "sousTotal": 26.0,
+    "remise": 0.0,
+    "taxe": 4.16,
+    "total": 30.16,
+    "statut": "payee",
+    "creeLe": "2026-10-14T20:50:00"
+  },
+  {
+    "id": 7,
+    "commandeId": 7,
+    "numero": "F-2026-0007",
+    "sousTotal": 15.0,
+    "remise": 1.5,
+    "taxe": 2.16,
+    "total": 15.66,
+    "statut": "payee",
+    "creeLe": "2026-10-15T13:55:00"
+  },
+  {
+    "id": 8,
+    "commandeId": 8,
+    "numero": "F-2026-0008",
+    "sousTotal": 25.0,
+    "remise": 0.0,
+    "taxe": 4.0,
+    "total": 29.0,
+    "statut": "payee",
+    "creeLe": "2026-10-15T20:50:00"
+  },
+  {
+    "id": 9,
+    "commandeId": 9,
+    "numero": "F-2026-0009",
+    "sousTotal": 24.5,
+    "remise": 0.0,
+    "taxe": 3.92,
+    "total": 28.42,
+    "statut": "payee",
+    "creeLe": "2026-10-16T13:55:00"
+  },
+  {
+    "id": 10,
+    "commandeId": 10,
+    "numero": "F-2026-0010",
+    "sousTotal": 31.5,
+    "remise": 0.0,
+    "taxe": 5.04,
+    "total": 36.54,
+    "statut": "payee",
+    "creeLe": "2026-10-16T20:50:00"
+  },
+  {
+    "id": 11,
+    "commandeId": 11,
+    "numero": "F-2026-0011",
+    "sousTotal": 27.0,
+    "remise": 0.0,
+    "taxe": 4.32,
+    "total": 31.32,
+    "statut": "payee",
+    "creeLe": "2026-10-17T13:55:00"
+  },
+  {
+    "id": 12,
+    "commandeId": 12,
+    "numero": "F-2026-0012",
+    "sousTotal": 24.5,
+    "remise": 0.0,
+    "taxe": 3.92,
+    "total": 28.42,
+    "statut": "payee",
+    "creeLe": "2026-10-17T20:50:00"
+  },
+  {
+    "id": 13,
+    "commandeId": 13,
+    "numero": "F-2026-0013",
+    "sousTotal": 17.5,
+    "remise": 0.0,
+    "taxe": 2.8,
+    "total": 20.3,
+    "statut": "payee",
+    "creeLe": "2026-10-18T13:55:00"
+  },
+  {
+    "id": 14,
+    "commandeId": 14,
+    "numero": "F-2026-0014",
+    "sousTotal": 26.0,
+    "remise": 0.0,
+    "taxe": 4.16,
+    "total": 30.16,
+    "statut": "payee",
+    "creeLe": "2026-10-18T20:50:00"
+  },
+  {
+    "id": 15,
+    "commandeId": 15,
+    "numero": "F-2026-0015",
+    "sousTotal": 18.5,
+    "remise": 0.0,
+    "taxe": 2.96,
+    "total": 21.46,
+    "statut": "payee",
+    "creeLe": "2026-10-19T13:55:00"
+  },
+  {
+    "id": 16,
+    "commandeId": 16,
+    "numero": "F-2026-0016",
+    "sousTotal": 50.0,
+    "remise": 0.0,
+    "taxe": 8.0,
+    "total": 58.0,
+    "statut": "payee",
+    "creeLe": "2026-10-19T20:50:00"
+  },
+  {
+    "id": 17,
+    "commandeId": 17,
+    "numero": "F-2026-0017",
+    "sousTotal": 16.0,
+    "remise": 0.0,
+    "taxe": 2.56,
+    "total": 18.56,
+    "statut": "payee",
+    "creeLe": "2026-10-20T13:55:00"
+  },
+  {
+    "id": 18,
+    "commandeId": 18,
+    "numero": "F-2026-0018",
+    "sousTotal": 11.5,
+    "remise": 0.0,
+    "taxe": 1.84,
+    "total": 13.34,
+    "statut": "payee",
+    "creeLe": "2026-10-20T20:50:00"
+  },
+  {
+    "id": 19,
+    "commandeId": 20,
+    "numero": "F-2026-0019",
+    "sousTotal": 20.0,
+    "remise": 0.0,
+    "taxe": 3.2,
+    "total": 23.2,
+    "statut": "emise",
+    "creeLe": "2026-10-21T13:20:00"
+  }
+]

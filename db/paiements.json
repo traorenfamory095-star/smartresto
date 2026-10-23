@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "factureId": 1,
+    "montant": 9.86,
+    "mode": "mobile_money",
+    "date": "2026-10-12T13:55:00"
+  },
+  {
+    "id": 2,
+    "factureId": 2,
+    "montant": 5.22,
+    "mode": "carte",
+    "date": "2026-10-12T20:50:00"
+  },
+  {
+    "id": 3,
+    "factureId": 3,
+    "montant": 19.72,
+    "mode": "mobile_money",
+    "date": "2026-10-13T13:55:00"
+  },
+  {
+    "id": 4,
+    "factureId": 4,
+    "montant": 19.14,
+    "mode": "especes",
+    "date": "2026-10-13T20:50:00"
+  },
+  {
+    "id": 5,
+    "factureId": 4,
+    "montant": 19.14,
+    "mode": "mobile_money",
+    "date": "2026-10-13T20:50:00"
+  },
+  {
+    "id": 6,
+    "factureId": 5,
+    "montant": 15.08,
+    "mode": "mobile_money",
+    "date": "2026-10-14T13:55:00"
+  },
+  {
+    "id": 7,
+    "factureId": 6,
+    "montant": 30.16,
+    "mode": "carte",
+    "date": "2026-10-14T20:50:00"
+  },
+  {
+    "id": 8,
+    "factureId": 7,
+    "montant": 15.66,
+    "mode": "mobile_money",
+    "date": "2026-10-15T13:55:00"
+  },
+  {
+    "id": 9,
+    "factureId": 8,
+    "montant": 29.0,
+    "mode": "especes",
+    "date": "2026-10-15T20:50:00"
+  },
+  {
+    "id": 10,
+    "factureId": 9,
+    "montant": 28.42,
+    "mode": "especes",
+    "date": "2026-10-16T13:55:00"
+  },
+  {
+    "id": 11,
+    "factureId": 10,
+    "montant": 36.54,
+    "mode": "mobile_money",
+    "date": "2026-10-16T20:50:00"
+  },
+  {
+    "id": 12,
+    "factureId": 11,
+    "montant": 15.66,
+    "mode": "especes",
+    "date": "2026-10-17T13:55:00"
+  },
+  {
+    "id": 13,
+    "factureId": 11,
+    "montant": 15.66,
+    "mode": "mobile_money",
+    "date": "2026-10-17T13:55:00"
+  },
+  {
+    "id": 14,
+    "factureId": 12,
+    "montant": 28.42,
+    "mode": "especes",
+    "date": "2026-10-17T20:50:00"
+  },
+  {
+    "id": 15,
+    "factureId": 13,
+    "montant": 20.3,
+    "mode": "especes",
+    "date": "2026-10-18T13:55:00"
+  },
+  {
+    "id": 16,
+    "factureId": 14,
+    "montant": 30.16,
+    "mode": "mobile_money",
+    "date": "2026-10-18T20:50:00"
+  },
+  {
+    "id": 17,
+    "factureId": 15,
+    "montant": 21.46,
+    "mode": "carte",
+    "date": "2026-10-19T13:55:00"
+  },
+  {
+    "id": 18,
+    "factureId": 16,
+    "montant": 58.0,
+    "mode": "mobile_money",
+    "date": "2026-10-19T20:50:00"
+  },
+  {
+    "id": 19,
+    "factureId": 17,
+    "montant": 18.56,
+    "mode": "especes",
+    "date": "2026-10-20T13:55:00"
+  },
+  {
+    "id": 20,
+    "factureId": 18,
+    "montant": 13.34,
+    "mode": "especes",
+    "date": "2026-10-20T20:50:00"
+  }
+]

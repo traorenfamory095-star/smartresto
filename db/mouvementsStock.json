@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "ingredientId": 1,
+    "type": "entree",
+    "quantite": 30,
+    "date": "2026-10-12",
+    "motif": "Stock initial"
+  },
+  {
+    "id": 2,
+    "ingredientId": 13,
+    "type": "entree",
+    "quantite": 144,
+    "date": "2026-10-12",
+    "motif": "Stock initial"
+  },
+  {
+    "id": 3,
+    "ingredientId": 1,
+    "type": "sortie",
+    "quantite": 5,
+    "date": "2026-10-15",
+    "motif": "Consommation de la semaine"
+  },
+  {
+    "id": 4,
+    "ingredientId": 7,
+    "type": "sortie",
+    "quantite": 4,
+    "date": "2026-10-18",
+    "motif": "Consommation de la semaine"
+  },
+  {
+    "id": 5,
+    "ingredientId": 4,
+    "type": "ajustement",
+    "quantite": -2,
+    "date": "2026-10-19",
+    "motif": "Perte constatée à l'inventaire"
+  },
+  {
+    "id": 6,
+    "ingredientId": 13,
+    "type": "sortie",
+    "quantite": 24,
+    "date": "2026-10-20",
+    "motif": "Ventes du week-end"
+  }
+]
