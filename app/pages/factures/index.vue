@@ -6,6 +6,6 @@ useHead({ title: 'Factures' })
 <template>
   <section>
     <h1 class="text-3xl font-bold">Factures</h1>
-    <p class="mt-2 text-gris">Page provisoire (Jean-Pierre) : la liste des factures s'affichera ici.</p>
+    <p class="mt-2 text-gris">Page provisoire (Jean-Pierre) : la liste des factures s'affichera ici meme.</p>
   </section>
 </template>
