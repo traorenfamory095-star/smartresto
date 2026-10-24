@@ -45,7 +45,7 @@ Ce document précise le propriétaire de chaque fichier et les limites de modifi
 
 ## Membres et périmètres
 
-- **Traoré — Tech Leader + Commandes** : socle Nuxt, layout, API commune, notifications, formatage, configuration, scripts de base de données, commandes et lignes de commande. Fusionne les PR dans `main`. Les PR de Traoré doivent être relues par un autre membre.
+- **Traoré — Tech Leader + Commandes** : socle Nuxt, layout, API commune, notifications, formatage, configuration, scripts de base de données, commandes et lignes de commande. Fusionne les PR dans `main`. Les PR de Traoré doivent être relues par un autre membre. Possède aussi les composants et fonctions partagés (`app/components/ui/`, `app/utils/`, couleurs du thème) et le site public (accueil, à propos, spéciaux, contact).
 - **Théophile — Tables et réservations** : pages, composants, composable et données de tables/réservations.
 - **Tresor — Plats** : page, composants, composable et données des plats.
 - **Shammah — Catégories et carte** : pages, composants, composable et données des catégories ; affiche les plats via l’API.
@@ -66,6 +66,14 @@ Ce document précise le propriétaire de chaque fichier et les limites de modifi
 | `app/composables/useApi.js` | Traoré | Client API commun |
 | `app/composables/useNotifier.js` | Traoré | Notifications communes |
 | `app/utils/format.js` | Traoré | Formatage commun |
+| `app/layouts/public.vue` | Traoré | Layout du site public (barre du haut, pied de page) ; changement coordonné uniquement |
+| `app/assets/css/theme.css` | Traoré | Couleurs, arrondis et police du prototype (`@theme`) ; nouvelle couleur par Issue |
+| `app/components/ui/*` | Traoré | Composants partagés (`UiBouton`, `UiCarte`, `UiBadge`, `UiBadgeStatut`, `UiChamp`, `UiEtat`, `UiModal`, `UiConfirmer`, `UiIcone`, `UiNotification`) ; utilisables par tous, modifiables par Traoré seul |
+| `app/components/public/*` | Traoré | Composants du site public |
+| `app/utils/navigation.js` | Traoré | Source unique des liens du menu admin, du menu public et des routes publiques ; nouveau lien par Issue |
+| `app/utils/roles.js` | Traoré | Liste et libellés des rôles ; les droits par rôle restent à Gaël |
+| `app/utils/statuts.js` | Traoré | Libellés et couleurs des statuts, cycle de vie des commandes |
+| `app/utils/erreurApi.js` | Traoré | Messages d’erreur de l’API (utilisé par `useApi`) |
 | `app/composables/useAuth.js` | Gaël ; interface initiale coordonnée par Traoré | Conserver l’interface convenue et prévenir les consommateurs avant tout changement |
 | `app/pages/commandes/index.vue` | Traoré | Commandes ; autres modules ne changent que les champs autorisés via API |
 | `app/pages/tables/index.vue` | Théophile | Tables |
@@ -81,6 +89,12 @@ Ce document précise le propriétaire de chaque fichier et les limites de modifi
 | `app/pages/fournisseurs/index.vue` | Sammy | Fournisseurs |
 | `app/pages/approvisionnements/index.vue` | Sammy | Approvisionnements et réception |
 | `app/pages/rapports/index.vue` | Resia | Rapports en lecture seule |
+| `app/pages/index.vue` | Traoré | Accueil du site public |
+| `app/pages/tableau-de-bord.vue` | Traoré | Accueil de l’administration : raccourcis vers les modules |
+| `app/pages/a-propos.vue` | Traoré | Page publique |
+| `app/pages/speciaux.vue` | Traoré | Page publique ; plats lus via l’API |
+| `app/pages/contact.vue` | Traoré | Page publique ; formulaire de démonstration, rien n’est envoyé |
+| `app/pages/reserver.vue` | Théophile | Formulaire de réservation côté client ; écrit dans `reservations` |
 | `nuxt.config.ts` | Traoré | Configuration Nuxt partagée |
 | `tailwind.config.js` | Traoré | Configuration Tailwind partagée |
 | `tsconfig.json` | Traoré | Configuration TypeScript partagée |
@@ -92,6 +106,7 @@ Ce document précise le propriétaire de chaque fichier et les limites de modifi
 | `.gitignore` | Traoré | Fichiers exclus de Git |
 | `.github/pull_request_template.md` | Traoré | Modèle partagé des PR |
 | `CONTRIBUTING.md` (à la racine du dépôt) | Traoré, avec règles communes à l’équipe | Document de référence ; changements annoncés à toute l’équipe |
+| `tests/exemple.test.js`, `tests/socle/*` | Traoré | Tests du socle (formatage, navigation, statuts, erreurs de l’API) |
 
 ## Propriétaire des données JSON
 
@@ -133,6 +148,19 @@ Ces fichiers n’étaient pas tous présents dans l’archive. Créez-les seulem
 | `app/components/rapports/*`, `app/composables/useRapports.js` | Resia |
 | `tests/<module>/*` | Propriétaire du module correspondant |
 
+## Composants et fonctions partagés du socle
+
+Le socle fournit à tous les modules :
+
+- les composants `app/components/ui/*` (`UiBouton`, `UiCarte`, `UiBadge`, `UiBadgeStatut`, `UiChamp`, `UiEtat`, `UiModal`, `UiConfirmer`, `UiIcone`, `UiNotification`) ;
+- les fonctions `formaterPrix`, `formaterDate`, `formaterHeure` (`app/utils/format.js`), `infoStatut` et `transitionCommandeValide` (`app/utils/statuts.js`), `libelleRole` (`app/utils/roles.js`) ;
+- les couleurs et arrondis de `app/assets/css/theme.css` (`bg-fond`, `bg-carte`, `text-gris`, `border-bordure`, `text-accent`, `rounded-carte`, `bg-degrade-orange`...) ;
+- la liste des liens `app/utils/navigation.js` : le layout admin affiche `MENU_ADMIN` filtré par `useAuth().peut(chemin)`, et le middleware de Gaël lit `ROUTES_PUBLIQUES`.
+
+Ils s’utilisent sans import (Nuxt les importe tout seul). Ce n’est pas « importer le fichier d’un autre module » : aucun malus. Les modifier est interdit : un besoin (nouvelle variante, couleur, lien de menu) passe par une Issue à Traoré. Les composants propres à un module restent dans `app/components/<module>/` et appartiennent à ce module.
+
+Contrat de `useAuth().peut(chemin)` : il reçoit un chemin (`"/plats"`, `"/stock/mouvements"`) ; une sous-page suit le droit de son module (`trouverLien(chemin)` renvoie le module). `seConnecter(email, motDePasse)` renvoie `{ ok: true }` ou `{ ok: false, erreur: 'message lisible' }`.
+
 ## Règles non négociables
 
 1. Ne modifier que ses fichiers. Si un changement est nécessaire ailleurs, ouvrir une Issue et obtenir l’accord du propriétaire.
@@ -142,3 +170,4 @@ Ces fichiers n’étaient pas tous présents dans l’archive. Créez-les seulem
 5. Aucune dépendance nouvelle sans accord de Traoré.
 6. `npm run api` reconstruit `db.json` et réinitialise les données ; `npm run api:garder` relance l’API sans cette reconstruction.
 7. Cycle des commandes : `en_attente → en_preparation → prete → servie → payee`; l’annulation est possible avant `payee`.
+8. Les composants et fonctions du socle (section précédente) s’utilisent librement mais ne se modifient pas : Issue à Traoré. Pas de bibliothèque de composants ni d’icônes ajoutée.
