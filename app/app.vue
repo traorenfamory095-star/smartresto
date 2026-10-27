@@ -1,5 +1,13 @@
+<script setup>
+useHead({
+  htmlAttrs: { lang: 'fr' },
+  titleTemplate: (titre) => (titre ? `${titre} · SmartResto` : 'SmartResto'),
+}) 
+</script>
+
 <template>
-  <div>
-    <h1 class="text-green-600 font-bold">Bon courage chers camarades</h1>
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
+  <UiNotification />
 </template>
