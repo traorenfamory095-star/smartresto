@@ -172,12 +172,20 @@ const ingredientsFiltres = computed(() => {
               :key="ingredient.id"
               class="transition hover:bg-gray-50"
             >
-              <td class="px-5 py-4 font-medium text-gray-900">
-                {{ ingredient.nom }}
-                <p class="mt-1 text-xs font-normal text-gray-500">
-                  Référence #{{ ingredient.id }}
-                </p>
-              </td>
+              
+<td class="px-5 py-4 font-medium text-gray-900">
+  <NuxtLink
+    :to="`/stock/${ingredient.id}`"
+    class="text-orange-700 hover:underline focus:outline-none focus:ring-2 focus:ring-orange-500"
+  >
+    {{ ingredient.nom }}
+  </NuxtLink>
+
+  <p class="mt-1 text-xs font-normal text-gray-500">
+    Référence #{{ ingredient.id }}
+  </p>
+</td>
+
 
               <td class="px-5 py-4">
                 <span class="font-semibold text-gray-900">
