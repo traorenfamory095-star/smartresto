@@ -1,12 +1,40 @@
 <script setup>
 // PAGE PROVISOIRE. Propriétaire : Théophile (module Tables). Remplacez ce fichier.
 
-const { lire } = useApi()
-
-const { data:tables, pending, error } = await useAsyncData('plan-salle-tables', () => lire('/tables') )
+const { recupererTables, recupererCommandes, recupererReservations } = useTables()
+const { data: tables, pending, error } = await useAsyncData('plan-salle-tables', recupererTables)
+const { data: commandes, error: erreurCommandes } = await useAsyncData('plan-salle-commandes', recupererCommandes)
+const { data: reservations, error: erreurReservations } = await useAsyncData('plan-salle-reservations', recupererReservations)
 
 useHead({ title: 'Plan de salle | SmartResto' })
 
+function calculerEtatTable(table){
+    const commandesActives = (commandes.value || []).some(
+      (commande) => String(commande.tabeId) === String(table.id) && 
+      !['payee', 'annulee'].includes(commande.statut)
+    )
+    if(commandesActives) return 'occupée'
+
+    const maintenant = new Date ()
+    const limite = new Date(maintenant.getTime() + 2 * 60 * 60 * 1000)
+
+    const reservationActive = (reservations.value || []).some(
+      (reservation) => {
+        if(
+          String(reservation.tabeId) !== String(table.id) || 
+          reservation.statut !== 'confirmée')
+          {
+            return false
+          }
+          const dateReservation = new Date (
+            `${reservation.date}T${reservation.heure}`
+          )
+          return dateReservation >= maintenant && dateReservation <= limite
+      }
+
+    )
+    return reservationActive ? 'réservé' : 'libre'
+}
 </script>
 
 <template>
@@ -29,6 +57,9 @@ useHead({ title: 'Plan de salle | SmartResto' })
         <p class="text-sm text-gray-600">
           Capacité : {{ table.capacite }}
           {{ table.capacite > 1 ? 'personnes' : 'personne' }}
+        </p>
+        <p class="mt-3 text-sm font-semibold">
+          État : {{ calculerEtatTable(table) }}
         </p>
       </article>
       <p v-if="!pending && !error && tables?.length === 0" class="mt-6 text-gray-500"> Aucune table enregistrée.</p>
