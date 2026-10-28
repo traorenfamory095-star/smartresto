@@ -27,6 +27,12 @@ const {
     <p class="mt-2 text-gris">
       Les employés du restaurant, leurs rôles et leurs statuts.
     </p>
+    <NuxtLink
+        to="/personnel/nouveau"
+        class="mt-4 inline-block rounded-lg border border-bordure px-4 py-3 font-semibold focus-visible:outline-2 focus-visible:outline-accent"
+      >
+        Ajouter un employé
+      </NuxtLink>
 
     <p
       v-if="status === 'pending' || status === 'idle'"
