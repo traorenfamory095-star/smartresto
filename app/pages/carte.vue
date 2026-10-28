@@ -11,4 +11,4 @@ useHead({ title: 'Carte' })
     <p class="mt-2 text-gris">Page provisoire (Shammah) : la carte du restaurant s'affichera ici.</p>
     <NuxtLink to="/tableau-de-bord" class="mt-4 inline-block text-accent underline">Retour à l'administration</NuxtLink>
   </main>
-</template>
+</template> 

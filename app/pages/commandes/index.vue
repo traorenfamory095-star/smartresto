@@ -1,6 +1,16 @@
 <script setup>
 // PAGE PROVISOIRE. Propriétaire : Traoré (module Commandes). Sera remplacée par la liste des commandes.
 useHead({ title: 'Commandes' })
+const { lire } = useApi()
+
+const {
+  data: commandes,
+  pending,
+  error
+} = await useAsyncData(
+  'commandes',
+  () => lire('/commandes')
+)
 </script>
 
 <template>
