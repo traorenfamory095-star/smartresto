@@ -1,5 +1,45 @@
-import { describe, it, expect } from 'vitest'
-import { calculerTotalAppro, filtrerFournisseurs } from '../composables/useFournisseurs.js'
+import { afterEach, describe, it, expect, vi } from 'vitest'
+import { calculerTotalAppro, filtrerFournisseurs, useFournisseurs } from '../composables/useFournisseurs.js'
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+describe('fournisseurs : accès API', () => {
+  it('utilise les méthodes et chemins de useApi', async () => {
+    const api = {
+      lire: vi.fn().mockResolvedValue([]),
+      creer: vi.fn().mockResolvedValue({ id: 1 }),
+      modifier: vi.fn().mockResolvedValue({ id: 1 }),
+      supprimer: vi.fn().mockResolvedValue({}),
+    }
+    vi.stubGlobal('useApi', () => api)
+
+    const fournisseurs = useFournisseurs()
+    await fournisseurs.lister()
+    await fournisseurs.lire(1)
+    await fournisseurs.creer({ nom: 'Primeur' })
+    await fournisseurs.modifier(1, { nom: 'Nouveau nom' })
+
+    expect(api.lire).toHaveBeenNthCalledWith(1, '/fournisseurs')
+    expect(api.lire).toHaveBeenNthCalledWith(2, '/fournisseurs/1')
+    expect(api.creer).toHaveBeenCalledWith('/fournisseurs', { nom: 'Primeur' })
+    expect(api.modifier).toHaveBeenCalledWith('/fournisseurs/1', { nom: 'Nouveau nom' })
+  })
+
+  it('empêche la suppression d’un fournisseur lié à des approvisionnements', async () => {
+    const api = {
+      lire: vi.fn().mockResolvedValue([{ id: 5 }]),
+      supprimer: vi.fn(),
+    }
+    vi.stubGlobal('useApi', () => api)
+
+    await expect(useFournisseurs().supprimer(1)).rejects.toThrow(
+      'Ce fournisseur a des approvisionnements, impossible à supprimer.',
+    )
+    expect(api.supprimer).not.toHaveBeenCalled()
+  })
+})
 
 describe('fournisseurs : calculerTotalAppro', () => {
   it('somme correctement le total d’un approvisionnement', () => {

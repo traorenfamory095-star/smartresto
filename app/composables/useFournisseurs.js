@@ -1,42 +1,42 @@
 export function useFournisseurs() {
   const api = useApi()
 
-  const lister = () => api.get('fournisseurs')
-  const lire = (id) => api.get('fournisseurs', { id })
-  const creer = (f) => api.post('fournisseurs', f)
-  const modifier = (id, f) => api.patch('fournisseurs', id, f)
+  const lister = () => api.lire('/fournisseurs')
+  const lire = (id) => api.lire(`/fournisseurs/${id}`)
+  const creer = (f) => api.creer('/fournisseurs', f)
+  const modifier = (id, f) => api.modifier(`/fournisseurs/${id}`, f)
 
   async function supprimer(id) {
-    const appros = await api.get('approvisionnements', { fournisseurId: id })
+    const appros = await api.lire('/approvisionnements', { fournisseurId: id })
     if (appros.length > 0) throw new Error('Ce fournisseur a des approvisionnements, impossible à supprimer.')
-    return api.supprimer('fournisseurs', id)
+    return api.supprimer(`/fournisseurs/${id}`)
   }
 
-  const listerAppro = () => api.get('approvisionnements', { _sort: 'dateCommande', _order: 'desc' })
-  const lireAppro = (id) => api.get('approvisionnements', { id })
-  const creerAppro = (a) => api.post('approvisionnements', a)
+  const listerAppro = () => api.lire('/approvisionnements', { _sort: 'dateCommande', _order: 'desc' })
+  const lireAppro = (id) => api.lire(`/approvisionnements/${id}`)
+  const creerAppro = (a) => api.creer('/approvisionnements', a)
 
   async function receptionner(appro) {
     if (appro.statut !== 'commande') throw new Error('Cet approvisionnement est déjà traité.')
     // Double check avant écriture (protection contre double-clic)
-    const fresh = (await lireAppro(appro.id))[0]
+    const fresh = await lireAppro(appro.id)
     if (fresh.statut !== 'commande') throw new Error('Déjà reçu par une autre session.')
 
     // Marquer d'abord l'appro (idempotence)
-    await api.patch('approvisionnements', appro.id, {
+    await api.modifier(`/approvisionnements/${appro.id}`, {
       statut: 'recue',
       dateReception: new Date().toISOString().slice(0, 10)
     })
 
     // Puis pour chaque ligne : mouvement entree + incrément du stock
     for (const ligne of appro.lignes) {
-      const ing = (await api.get('ingredients', { id: ligne.ingredientId }))[0]
+      const ing = await api.lire(`/ingredients/${ligne.ingredientId}`)
       if (!ing) continue
-      await api.post('mouvementsStock', {
+      await api.creer('/mouvementsStock', {
         ingredientId: ing.id, type: 'entree', quantite: ligne.quantite,
         date: new Date().toISOString().slice(0, 19), motif: `Appro #${appro.id}`
       })
-      await api.patch('ingredients', ing.id, { stock: Number(ing.stock) + Number(ligne.quantite) })
+      await api.modifier(`/ingredients/${ing.id}`, { stock: Number(ing.stock) + Number(ligne.quantite) })
     }
   }
 
