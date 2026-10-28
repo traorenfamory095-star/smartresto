@@ -1,48 +1,102 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import "tailwindcss";
 
 /*
- * Couleurs, arrondis et police du prototype SmartResto (Tailwind CSS v4).
- * Propriétaire : Traoré (socle). Les autres modules utilisent ces noms de classes :
- *   bg-fond, bg-carte, text-gris, border-bordure, text-accent, rounded-carte...
- * Pour ajouter une couleur : Issue à Traoré.
+ * Palette SmartResto : noir et orange de la maquette Figma.
+ * Propriétaire : Traoré (socle). Nouvelle couleur : Issue à Traoré.
+ * Classes : bg, card, soft (fonds) | ink, mut, head (textes) | pri, cy, acc (orange)
+ *           line (bordures) | ok, err | bg-degrade + text-on-pri (bouton orange)
  */
-@theme {
-  --color-fond: #0a0a0a;
-  --color-section: #111111;
-  --color-carte: rgb(20 20 20 / 0.7);
-  --color-carte-solide: #141414;
-  --color-bordure: rgb(255 255 255 / 0.12);
 
-  --color-accent: #f97316;
-  --color-accent-clair: #ffa64d;
-  --color-orange-debut: #ff8a00;
-  --color-orange-fin: #f15a00;
-
-  --color-texte: #ffffff;
-  --color-gris: #a3a3a3;
-  --color-gris-doux: #7a7a7a;
-  --color-clair: #ededed;
-
-  --color-succes: #22c55e;
-  --color-erreur: #ef4444;
-
-  --radius-carte: 1.5rem;
-  --radius-carte-lg: 2rem;
-
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+/* 1. Les valeurs réelles, claires par défaut (version claire déduite de la maquette) */
+:root {
+  --bg: #FAFAFA;
+  --card: #FFFFFF;
+  --ink: #0A0A0A;
+  --mut: #525252;
+  --head: #0A0A0A;
+  --pri: #F97316;
+  --on-pri: #0A0A0A;
+  --pri-a: #FF8A00;
+  --pri-b: #F15A00;
+  --cy: #EA580C;
+  --acc: #C2410C;
+  --line: rgb(0 0 0 / 0.12);
+  --soft: #F1F1F1;
+  --ok: #15803D;
+  --err: #B91C1C;
 }
 
-/* Dégradé des boutons et des liens actifs : class="bg-degrade-orange" */
-@utility bg-degrade-orange {
-  background-image: linear-gradient(135deg, var(--color-orange-debut), var(--color-orange-fin));
+/* 2. Les valeurs sombres (celles de la maquette), si le téléphone est en mode sombre */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A0A0A;
+    --card: #141414;
+    --ink: #FFFFFF;
+    --mut: #A3A3A3;
+    --head: #FFFFFF;
+    --pri: #F97316;
+    --on-pri: #0A0A0A;
+    --pri-a: #FF8A00;
+    --pri-b: #F15A00;
+    --cy: #FFA64D;
+    --acc: #F97316;
+    --line: rgb(255 255 255 / 0.13);
+    --soft: #111111;
+    --ok: #22C55E;
+    --err: #EF4444;
+  }
+}
+
+/* 3. Mode sombre forcé (utile pour un futur bouton) */
+:root[data-theme="dark"] {
+  --bg: #0A0A0A;
+  --card: #141414;
+  --ink: #FFFFFF;
+  --mut: #A3A3A3;
+  --head: #FFFFFF;
+  --pri: #F97316;
+  --on-pri: #0A0A0A;
+  --pri-a: #FF8A00;
+  --pri-b: #F15A00;
+  --cy: #FFA64D;
+  --acc: #F97316;
+  --line: rgb(255 255 255 / 0.13);
+  --soft: #111111;
+  --ok: #22C55E;
+  --err: #EF4444;
+}
+
+/* 4. On branche ces variables sur Tailwind */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-mut: var(--mut);
+  --color-head: var(--head);
+  --color-pri: var(--pri);
+  --color-on-pri: var(--on-pri);
+  --color-cy: var(--cy);
+  --color-acc: var(--acc);
+  --color-line: var(--line);
+  --color-soft: var(--soft);
+  --color-ok: var(--ok);
+  --color-err: var(--err);
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+/* Arrondis des cartes : rounded-carte, rounded-carte-lg */
+@theme {
+  --radius-carte: 1.5rem;
+  --radius-carte-lg: 2rem;
+}
+
+/* Dégradé des boutons de la maquette : class="bg-degrade text-on-pri" */
+@utility bg-degrade {
+  background-image: linear-gradient(135deg, var(--pri-a), var(--pri-b));
 }
 
 body {
-  background-color: var(--color-fond);
-  color: var(--color-texte);
+  background: var(--bg);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
