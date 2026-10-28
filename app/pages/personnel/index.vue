@@ -33,7 +33,7 @@ const {
       >
         Ajouter un employé
       </NuxtLink>
-      <th scope="col" class="px-4 py-3">Actions</th>
+     
 
     <p
       v-if="status === 'pending' || status === 'idle'"
@@ -71,52 +71,54 @@ const {
       class="mt-6 overflow-x-auto rounded-xl border border-bordure focus-visible:outline-2 focus-visible:outline-accent"
     >
       <table class="w-full text-left text-sm">
-        <caption class="sr-only">
-          Employés, rôles et statuts
-        </caption>
+  <caption class="sr-only">
+    Employés, rôles et statuts
+  </caption>
 
-        <thead class="border-b border-bordure">
-          <tr>
-            <th scope="col" class="px-4 py-3">Nom</th>
-            <th scope="col" class="px-4 py-3">E-mail</th>
-            <th scope="col" class="px-4 py-3">Rôle</th>
-            <th scope="col" class="px-4 py-3">Statut</th>
-          </tr>
-        </thead>
+  <thead class="border-b border-bordure">
+    <tr>
+      <th scope="col" class="px-4 py-3">Nom</th>
+      <th scope="col" class="px-4 py-3">E-mail</th>
+      <th scope="col" class="px-4 py-3">Rôle</th>
+      <th scope="col" class="px-4 py-3">Statut</th>
+      <th scope="col" class="px-4 py-3">Actions</th>
+    </tr>
+  </thead>
 
-        <tbody>
-          <tr
-            v-for="employe in employes"
-            :key="employe.id"
-            class="border-b border-bordure last:border-b-0"
-          >
-            <th scope="row" class="px-4 py-3 font-medium">
-              {{ employe.nom }}
-            </th>
+  <tbody>
+    <tr
+      v-for="employe in employes"
+      :key="employe.id"
+      class="border-b border-bordure last:border-b-0"
+    >
+      <th scope="row" class="px-4 py-3 font-medium">
+        {{ employe.nom }}
+      </th>
 
-            <td class="px-4 py-3">
-              {{ employe.email }}
-            </td>
+      <td class="px-4 py-3">
+        {{ employe.email }}
+      </td>
 
-            <td class="px-4 py-3">
-              {{ libelleRole(employe.role) }}
-            </td>
+      <td class="px-4 py-3">
+        {{ libelleRole(employe.role) }}
+      </td>
 
-            <td class="px-4 py-3">
-              {{ employe.actif ? 'Actif' : 'Inactif' }}
-            </td>
-            <td class="px-4 py-3">
-            <NuxtLink
-              :to="`/personnel/${employe.id}`"
-              :aria-label="`Modifier ${employe.nom}`"
-              class="inline-block rounded-lg border border-bordure px-3 py-2 focus-visible:outline-2 focus-visible:outline-accent"
-            >
-              Modifier
-            </NuxtLink>
-          </td>
-          </tr>
-        </tbody>
-      </table>
+      <td class="px-4 py-3">
+        {{ employe.actif ? 'Actif' : 'Inactif' }}
+      </td>
+
+      <td class="px-4 py-3">
+        <NuxtLink
+          :to="`/personnel/${employe.id}`"
+          :aria-label="`Modifier ${employe.nom}`"
+          class="inline-block rounded-lg border border-bordure px-3 py-2 focus-visible:outline-2 focus-visible:outline-accent"
+        >
+          Modifier
+        </NuxtLink>
+      </td>
+    </tr>
+  </tbody>
+</table>
     </div>
   </section>
 </template>
