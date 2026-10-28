@@ -23,7 +23,7 @@ const {
     <h1 id="titre-personnel" class="text-3xl font-bold">
       Personnel
     </h1>
-
+    
     <p class="mt-2 text-gris">
       Les employés du restaurant, leurs rôles et leurs statuts.
     </p>
@@ -33,6 +33,7 @@ const {
       >
         Ajouter un employé
       </NuxtLink>
+      <th scope="col" class="px-4 py-3">Actions</th>
 
     <p
       v-if="status === 'pending' || status === 'idle'"
@@ -104,6 +105,15 @@ const {
             <td class="px-4 py-3">
               {{ employe.actif ? 'Actif' : 'Inactif' }}
             </td>
+            <td class="px-4 py-3">
+            <NuxtLink
+              :to="`/personnel/${employe.id}`"
+              :aria-label="`Modifier ${employe.nom}`"
+              class="inline-block rounded-lg border border-bordure px-3 py-2 focus-visible:outline-2 focus-visible:outline-accent"
+            >
+              Modifier
+            </NuxtLink>
+          </td>
           </tr>
         </tbody>
       </table>
