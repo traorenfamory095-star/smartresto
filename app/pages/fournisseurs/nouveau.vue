@@ -68,3 +68,5 @@ async function soumettre() {
     </template>
   </section>
 </template>
+
+//page d'approvisionnement pour créer un nouvel approvisionnement, avec sélection du fournisseur et des ingrédients, calcul du total et soumission du formulaire.//
