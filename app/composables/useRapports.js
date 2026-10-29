@@ -1,4 +1,4 @@
-
+// composables/useRapports.js
 function useRapports() {
   const { $api } = useNuxtApp()
 
@@ -20,7 +20,6 @@ function useRapports() {
     chargement.value = true
     erreur.value = null
     try {
-      // Sécurisation individuelle de chaque appel API pour éviter un blocage global en cas d'erreur sur une route
       const safeFetch = async (url) => {
         try {
           return await $api(url)
@@ -55,27 +54,45 @@ function useRapports() {
     }
   }
 
-  const commandesFiltrees = computed(() => {
+  // Calcul des dates de début et fin selon la période sélectionnée
+  const datesActuelles = computed(() => {
     const maintenant = new Date()
+    let debut = new Date()
+    let fin = new Date()
+
+    if (periode.value === 'aujourdhui') {
+      debut = new Date(maintenant)
+      fin = new Date(maintenant)
+    } else if (periode.value === '7jours') {
+      debut.setDate(maintenant.getDate() - 7)
+    } else if (periode.value === '30jours') {
+      debut.setDate(maintenant.getDate() - 30)
+    } else if (periode.value === 'personnalise' && dateDebut.value && dateFin.value) {
+      debut = new Date(dateDebut.value)
+      fin = new Date(dateFin.value)
+    }
+    return { debut, fin }
+  })
+
+  // Libellé formaté pour l'affichage (ex: "01 oct. 2026 → 21 oct. 2026")
+  const libellePeriode = computed(() => {
+    const options = { day: '2-digit', month: 'short', year: 'numeric' }
+    const { debut, fin } = datesActuelles.value
+    const dStr = debut.toLocaleDateString('fr-FR', options)
+    const fStr = fin.toLocaleDateString('fr-FR', options)
+    return `${dStr} → ${fStr}`
+  })
+
+  const commandesFiltrees = computed(() => {
+    const { debut, fin } = datesActuelles.value
+    fin.setHours(23, 59, 59)
+
     return commandes.value.filter(cmd => {
       const dateCmd = new Date(cmd.creeLe || cmd.date || Date.now())
       if (periode.value === 'aujourdhui') {
-        return dateCmd.toDateString() === maintenant.toDateString()
-      } else if (periode.value === '7jours') {
-        const ilYASeptJours = new Date()
-        ilYASeptJours.setDate(maintenant.getDate() - 7)
-        return dateCmd >= ilYASeptJours
-      } else if (periode.value === '30jours') {
-        const ilYATrenteJours = new Date()
-        ilYATrenteJours.setDate(maintenant.getDate() - 30)
-        return dateCmd >= ilYATrenteJours
-      } else if (periode.value === 'personnalise' && dateDebut.value && dateFin.value) {
-        const debut = new Date(dateDebut.value)
-        const fin = new Date(dateFin.value)
-        fin.setHours(23, 59, 59)
-        return dateCmd >= debut && dateCmd <= fin
+        return dateCmd.toDateString() === debut.toDateString()
       }
-      return true
+      return dateCmd >= debut && dateCmd <= fin
     })
   })
 
@@ -216,6 +233,7 @@ function useRapports() {
     periode,
     dateDebut,
     dateFin,
+    libellePeriode,
     chargement,
     erreur,
     chargerDonnees,
