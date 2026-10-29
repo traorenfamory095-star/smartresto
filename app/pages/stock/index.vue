@@ -1,10 +1,14 @@
-
+```vue
 <script setup>
 import { computed, ref } from 'vue'
 
 useHead({ title: 'Gestion du stock | SmartResto' })
 
 const { lire } = useApi()
+
+const recherche = ref('')
+const filtre = ref('tous')
+const tri = ref('nom')
 
 const {
   data: ingredients,
@@ -17,212 +21,364 @@ const {
   { default: () => [] },
 )
 
-const recherche = ref('')
-const seulementAlertes = ref(false)
-const tri = ref('nom')
+const listeIngredients = computed(() => ingredients.value ?? [])
+
+const estEnAlerte = (ingredient) =>
+  Number(ingredient.stock) <= Number(ingredient.seuilAlerte)
 
 const nombreAlertes = computed(
-  () => (ingredients.value ?? []).filter(
-    (ingredient) => Number(ingredient.stock) <= Number(ingredient.seuilAlerte),
-  ).length,
+  () => listeIngredients.value.filter(estEnAlerte).length,
 )
 
 const ingredientsFiltres = computed(() => {
-  const terme = recherche.value.trim().toLocaleLowerCase()
+  const terme = recherche.value.trim().toLowerCase()
 
-  return [...(ingredients.value ?? [])]
-    .filter((ingredient) => {
-      const correspondNom = ingredient.nom.toLocaleLowerCase().includes(terme)
-      const estEnAlerte = Number(ingredient.stock) <= Number(ingredient.seuilAlerte)
+  let resultat = listeIngredients.value.filter((ingredient) => {
+    const correspondRecherche = ingredient.nom
+      ?.toLowerCase()
+      .includes(terme)
 
-      return correspondNom && (!seulementAlertes.value || estEnAlerte)
-    })
-    .sort((a, b) => {
-      if (tri.value === 'stock') return Number(a.stock) - Number(b.stock)
-      return a.nom.localeCompare(b.nom, 'fr')
-    })
+    const correspondFiltre =
+      filtre.value === 'tous' ||
+      (filtre.value === 'alerte' && estEnAlerte(ingredient)) ||
+      (filtre.value === 'normal' && !estEnAlerte(ingredient))
+
+    return correspondRecherche && correspondFiltre
+  })
+
+  resultat = [...resultat]
+
+  if (tri.value === 'nom') {
+    resultat.sort((a, b) => a.nom.localeCompare(b.nom))
+  } else if (tri.value === 'stock-croissant') {
+    resultat.sort((a, b) => Number(a.stock) - Number(b.stock))
+  } else if (tri.value === 'stock-decroissant') {
+    resultat.sort((a, b) => Number(b.stock) - Number(a.stock))
+  }
+
+  return resultat
 })
+
+const niveauStock = (ingredient) => {
+  const seuil = Number(ingredient.seuilAlerte)
+  const stock = Number(ingredient.stock)
+
+  if (seuil <= 0) return stock > 0 ? 100 : 0
+
+  return Math.min(100, Math.max(0, (stock / (seuil * 2)) * 100))
+}
+
+const classeJauge = (ingredient) =>
+  estEnAlerte(ingredient) ? 'bg-err' : 'bg-pri'
+
+const libelleEtat = (ingredient) =>
+  estEnAlerte(ingredient) ? 'Stock faible' : 'Normal'
+
+const formaterNombre = (valeur) =>
+  new Intl.NumberFormat('fr-FR', {
+    maximumFractionDigits: 2,
+  }).format(Number(valeur) || 0)
 </script>
 
 <template>
-  <main class="space-y-6">
+  <main class="min-h-screen space-y-6 bg-bg p-4 text-ink sm:p-6">
+    <!-- En-tête -->
     <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
       <div>
-        <p class="text-sm font-medium text-orange-600">GESTION DU RESTAURANT</p>
-        <h1 class="mt-1 text-3xl font-bold text-gray-900">Gestion du stock</h1>
-        <p class="mt-2 text-sm text-gray-500">
-          Suivez les ingrédients et anticipez les ruptures de stock.
+        <p class="mt-2 text-sm text-mut">
+          Administration / Stock
+        </p>
+        <h1 class="text-2xl font-bold tracking-tight text-head sm:text-3xl">
+          Stock
+        </h1>
+        <p class="mt-2 text-sm text-mut">
+          Gardez un oeil sur vos ingrédients.
         </p>
       </div>
 
       <NuxtLink
         to="/stock/nouveau"
-        class="inline-flex items-center justify-center rounded-lg bg-orange-600 px-5 py-3 font-semibold text-white transition hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+        class="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-degrade px-4 py-3 font-semibold text-on-pri transition-opacity hover:opacity-90"
       >
-        + Nouvel ingrédient
+        <span class="text-lg">+</span>
+        Nouvel ingrédient
       </NuxtLink>
     </header>
 
-    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <p class="text-sm text-gray-500">Total des ingrédients</p>
-        <p class="mt-2 text-3xl font-bold text-gray-900">
-          {{ ingredients.length }}
-        </p>
-        <p class="mt-1 text-sm text-gray-500">Références enregistrées</p>
-      </div>
-
-      <div class="rounded-xl border border-red-200 bg-red-50 p-5 shadow-sm">
-        <p class="text-sm font-medium text-red-700">Ingrédients en alerte</p>
-        <p class="mt-2 text-3xl font-bold text-red-700">
-          {{ nombreAlertes }}
-        </p>
-        <p class="mt-1 text-sm text-red-600">Stock inférieur ou égal au seuil</p>
-      </div>
-    </section>
-
-    <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div class="flex flex-col gap-4 lg:flex-row lg:items-end">
-        <div class="flex-1">
-          <label for="recherche-stock" class="mb-2 block text-sm font-medium text-gray-700">
-            Rechercher un ingrédient
-          </label>
-          <input
-            id="recherche-stock"
-            v-model="recherche"
-            type="search"
-            placeholder="Ex. : Poulet, Riz, Tomates..."
-            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-          />
-        </div>
+    <!-- Alerte -->
+    <section
+      v-if="nombreAlertes > 0"
+      class="flex flex-col gap-3 rounded-carte border border-err/30 bg-err/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+      role="status"
+    >
+      <div class="flex items-start gap-3">
+        <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-err/10 text-xl text-err">
+          !
+        </span>
 
         <div>
-          <label for="tri-stock" class="mb-2 block text-sm font-medium text-gray-700">
-            Trier par
-          </label>
-          <select
-            id="tri-stock"
-            v-model="tri"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-          >
-            <option value="nom">Nom (A à Z)</option>
-            <option value="stock">Stock le plus faible</option>
-          </select>
+          <h2 class="font-semibold text-err">
+            Attention : stock faible
+          </h2>
+          <p class="mt-1 text-sm text-mut">
+            {{ nombreAlertes }}
+            ingrédient{{ nombreAlertes > 1 ? 's sont' : ' est' }}
+            au seuil d’alerte ou en dessous.
+          </p>
         </div>
+      </div>
 
-        <label class="flex items-center gap-2 pb-3 text-sm text-gray-700">
+      <button
+        type="button"
+        class="self-start text-sm font-semibold text-err underline underline-offset-4 sm:self-center"
+        @click="filtre = 'alerte'"
+      >
+        Voir les alertes
+      </button>
+    </section>
+
+    <!-- Indicateurs -->
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <article class="rounded-carte border border-line bg-card p-5">
+        <p class="text-sm font-medium text-mut">
+          Total des ingrédients
+        </p>
+
+        <div class="mt-3 flex items-end justify-between gap-3">
+          <p class="text-3xl font-bold text-head">
+            {{ listeIngredients.length }}
+          </p>
+          <span class="rounded-xl bg-soft px-3 py-2 text-sm text-mut">
+            Références
+          </span>
+        </div>
+      </article>
+
+      <article class="rounded-carte border border-line bg-card p-5">
+        <p class="text-sm font-medium text-mut">
+          Ingrédients en alerte
+        </p>
+
+        <div class="mt-3 flex items-end justify-between gap-3">
+          <p
+            class="text-3xl font-bold"
+            :class="nombreAlertes > 0 ? 'text-err' : 'text-ok'"
+          >
+            {{ nombreAlertes }}
+          </p>
+          <span
+            class="rounded-xl px-3 py-2 text-sm"
+            :class="nombreAlertes > 0
+              ? 'bg-err/10 text-err'
+              : 'bg-ok/10 text-ok'"
+          >
+            {{ nombreAlertes > 0 ? 'À surveiller' : 'Tout va bien' }}
+          </span>
+        </div>
+      </article>
+    </section>
+
+    <!-- Navigation du stock -->
+    <nav class="flex flex-wrap gap-2 border-b border-line pb-3">
+      <NuxtLink
+        to="/stock"
+        class="rounded-xl bg-degrade px-4 py-2 text-sm font-semibold text-on-pri"
+      >
+        État du stock
+      </NuxtLink>
+
+      <NuxtLink
+        to="/stock/mouvements"
+        class="rounded-xl border border-line bg-card px-4 py-2 text-sm font-medium text-mut transition-colors hover:text-pri"
+      >
+        Historique des mouvements
+      </NuxtLink>
+    </nav>
+
+    <!-- Recherche et filtres -->
+    <section class="space-y-4 rounded-carte border border-line bg-card p-4 sm:p-5">
+      <div>
+        <h2 class="font-semibold text-head">
+          Liste des ingrédients
+        </h2>
+        <p class="mt-1 text-sm text-mut">
+          {{ ingredientsFiltres.length }} résultat{{ ingredientsFiltres.length > 1 ? 's' : '' }}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_200px_220px]">
+        <label class="block">
+          <span class="mb-1.5 block text-sm font-medium text-mut">
+            Rechercher
+          </span>
           <input
-            v-model="seulementAlertes"
-            type="checkbox"
-            class="h-4 w-4 rounded border-gray-300 accent-orange-600"
+            v-model="recherche"
+            type="search"
+            placeholder="Nom d’un ingrédient..."
+            class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none transition focus:border-pri focus:ring-2 focus:ring-pri/20"
           />
-          Alertes uniquement
+        </label>
+
+        <label class="block">
+          <span class="mb-1.5 block text-sm font-medium text-mut">
+            État du stock
+          </span>
+          <select
+            v-model="filtre"
+            class="w-full rounded-xl border border-line bg-bg px-3 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+          >
+            <option value="tous">Tous les ingrédients</option>
+            <option value="alerte">Stock faible</option>
+            <option value="normal">Stock normal</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="mb-1.5 block text-sm font-medium text-mut">
+            Trier par
+          </span>
+          <select
+            v-model="tri"
+            class="w-full rounded-xl border border-line bg-bg px-3 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+          >
+            <option value="nom">Nom (A–Z)</option>
+            <option value="stock-croissant">Stock croissant</option>
+            <option value="stock-decroissant">Stock décroissant</option>
+          </select>
         </label>
       </div>
     </section>
 
-    <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-        <h2 class="font-semibold text-gray-900">Inventaire des ingrédients</h2>
-        <span class="text-sm text-gray-500">
-          {{ ingredientsFiltres.length }} résultat(s)
-        </span>
-      </div>
+    <!-- Chargement -->
+    <section
+      v-if="pending"
+      class="rounded-carte border border-line bg-card p-10 text-center"
+    >
+      <p class="text-mut">Chargement des ingrédients...</p>
+    </section>
 
-      <div v-if="pending" class="p-10 text-center text-gray-500" role="status">
-        Chargement des ingrédients...
-      </div>
+    <!-- Erreur -->
+    <section
+      v-else-if="error"
+      class="rounded-carte border border-err/30 bg-card p-6 text-center"
+    >
+      <p class="font-semibold text-err">
+        Impossible de charger les ingrédients.
+      </p>
+      <p class="mt-2 text-sm text-mut">
+        Vérifiez que l’API est démarrée, puis réessayez.
+      </p>
+      <button
+        type="button"
+        class="mt-4 rounded-xl bg-degrade px-4 py-2.5 font-semibold text-on-pri"
+        @click="refresh()"
+      >
+        Réessayer
+      </button>
+    </section>
 
-      <div v-else-if="error" class="p-8 text-center">
-        <p class="font-medium text-red-700">Impossible de charger le stock.</p>
-        <p class="mt-2 text-sm text-gray-500">
-          Vérifie que le serveur API fonctionne, puis réessaie.
-        </p>
-        <button
-          type="button"
-          class="mt-4 rounded-lg bg-orange-600 px-4 py-2 font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          @click="refresh()"
-        >
-          Réessayer
-        </button>
-      </div>
-
-      <div v-else-if="ingredientsFiltres.length === 0" class="p-10 text-center">
-        <p class="font-medium text-gray-800">Aucun ingrédient trouvé.</p>
-        <p class="mt-1 text-sm text-gray-500">
-          Modifie ta recherche ou désactive le filtre des alertes.
-        </p>
-      </div>
-
-      <div v-else class="overflow-x-auto">
-        <table class="w-full min-w-[680px] text-left text-sm">
-          <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+    <!-- Tableau -->
+    <section
+      v-else
+      class="overflow-hidden rounded-carte border border-line bg-card"
+    >
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left text-sm">
+          <thead class="border-b border-line bg-soft">
             <tr>
-              <th scope="col" class="px-5 py-4">Ingrédient</th>
-              <th scope="col" class="px-5 py-4">Stock disponible</th>
-              <th scope="col" class="px-5 py-4">Seuil d'alerte</th>
-              <th scope="col" class="px-5 py-4">Prix unitaire</th>
-              <th scope="col" class="px-5 py-4">État</th>
+              <th class="px-5 py-4 font-semibold text-mut">Ingrédient</th>
+              <th class="px-5 py-4 font-semibold text-mut">Stock actuel</th>
+              <th class="px-5 py-4 font-semibold text-mut">Seuil d’alerte</th>
+              <th class="px-5 py-4 font-semibold text-mut">Niveau du stock</th>
+              <th class="px-5 py-4 font-semibold text-mut">État</th>
+              <th class="px-5 py-4 text-right font-semibold text-mut">Action</th>
             </tr>
           </thead>
 
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-line">
             <tr
               v-for="ingredient in ingredientsFiltres"
               :key="ingredient.id"
-              class="transition hover:bg-gray-50"
+              class="transition-colors hover:bg-soft/60"
             >
-              
-<td class="px-5 py-4 font-medium text-gray-900">
-  <NuxtLink
-    :to="`/stock/${ingredient.id}`"
-    class="text-orange-700 hover:underline focus:outline-none focus:ring-2 focus:ring-orange-500"
-  >
-    {{ ingredient.nom }}
-  </NuxtLink>
-
-  <p class="mt-1 text-xs font-normal text-gray-500">
-    Référence #{{ ingredient.id }}
-  </p>
-</td>
-
+              <td class="px-5 py-4">
+                <NuxtLink
+                  :to="`/stock/${ingredient.id}`"
+                  class="font-semibold text-head transition-colors hover:text-pri"
+                >
+                  {{ ingredient.nom }}
+                </NuxtLink>
+                <p class="mt-1 text-xs text-mut">
+                  Unité : {{ ingredient.unite }}
+                </p>
+              </td>
 
               <td class="px-5 py-4">
-                <span class="font-semibold text-gray-900">
-                  {{ ingredient.stock }} {{ ingredient.unite }}
+                <span
+                  class="font-semibold"
+                  :class="estEnAlerte(ingredient) ? 'text-err' : 'text-ink'"
+                >
+                  {{ formaterNombre(ingredient.stock) }}
                 </span>
-                <div class="mt-2 h-2 w-28 overflow-hidden rounded-full bg-gray-100">
-                  <div
-                    class="h-full rounded-full"
-                    :class="Number(ingredient.stock) <= Number(ingredient.seuilAlerte)
-                      ? 'bg-red-500'
-                      : 'bg-emerald-500'"
-                    :style="{
-                      width: `${Math.min(100, Math.max(0, Number(ingredient.stock) / Math.max(Number(ingredient.seuilAlerte) * 2, 1) * 100))}%`,
-                    }"
-                  />
+                <span class="ml-1 text-mut">{{ ingredient.unite }}</span>
+              </td>
+
+              <td class="px-5 py-4 text-mut">
+                {{ formaterNombre(ingredient.seuilAlerte) }}
+                {{ ingredient.unite }}
+              </td>
+
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="h-2 w-28 overflow-hidden rounded-full bg-soft">
+                    <div
+                      class="h-full rounded-full transition-all"
+                      :class="classeJauge(ingredient)"
+                      :style="{ width: `${niveauStock(ingredient)}%` }"
+                    />
+                  </div>
+                  <span class="text-xs text-mut">
+                    {{ Math.round(niveauStock(ingredient)) }}%
+                  </span>
                 </div>
-              </td>
-
-              <td class="px-5 py-4 text-gray-600">
-                {{ ingredient.seuilAlerte }} {{ ingredient.unite }}
-              </td>
-
-              <td class="px-5 py-4 text-gray-600">
-                {{ Number(ingredient.prixUnitaire).toFixed(2) }} $
               </td>
 
               <td class="px-5 py-4">
                 <span
                   class="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
-                  :class="Number(ingredient.stock) <= Number(ingredient.seuilAlerte)
-                    ? 'bg-red-100 text-red-700'
-                    : 'bg-emerald-100 text-emerald-700'"
+                  :class="estEnAlerte(ingredient)
+                    ? 'bg-err/10 text-err'
+                    : 'bg-ok/10 text-ok'"
                 >
-                  {{ Number(ingredient.stock) <= Number(ingredient.seuilAlerte)
-                    ? 'Stock bas'
-                    : 'Disponible' }}
+                  {{ libelleEtat(ingredient) }}
                 </span>
+              </td>
+
+              <td class="px-5 py-4 text-right">
+                <NuxtLink
+                  :to="`/stock/mouvement?ingredientId=${ingredient.id}`"
+                  class="inline-flex items-center justify-center rounded-lg border border-line px-3 py-2 text-xs font-semibold text-pri transition-colors hover:bg-pri/10"
+                >
+                  Mouvement
+                </NuxtLink>
+              </td>
+            </tr>
+
+            <tr v-if="ingredientsFiltres.length === 0">
+              <td colspan="6" class="px-5 py-12 text-center">
+                <p class="font-semibold text-head">
+                  Aucun ingrédient trouvé
+                </p>
+                <p class="mt-2 text-sm text-mut">
+                  Modifiez la recherche ou les filtres pour voir les résultats.
+                </p>
+                <button
+                  type="button"
+                  class="mt-4 text-sm font-semibold text-pri underline underline-offset-4"
+                  @click="recherche = ''; filtre = 'tous'; tri = 'nom'"
+                >
+                  Réinitialiser les filtres
+                </button>
               </td>
             </tr>
           </tbody>
@@ -231,4 +387,4 @@ const ingredientsFiltres = computed(() => {
     </section>
   </main>
 </template>
-
+```
