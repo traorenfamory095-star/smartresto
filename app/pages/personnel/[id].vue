@@ -76,7 +76,8 @@ async function enregistrer() {
   enregistrement.value = true
 
   try {
-    await modifierEmploye(id, formulaire)
+    const resultat = await modifierEmploye(id, formulaire)
+notifier.succes(resultat.message)
   } catch (erreur) {
     erreurGenerale.value =
       erreur.message || 'Impossible de modifier cet employé.'
@@ -88,7 +89,7 @@ async function enregistrer() {
   }
 
   clearNuxtData('personnel-liste')
-  notifier.succes('Employé modifié avec succès.')
+  
 
   await navigateTo('/personnel')
 }

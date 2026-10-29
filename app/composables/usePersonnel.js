@@ -53,9 +53,10 @@ export function usePersonnel() {
     creeLe: new Date().toISOString(),
   })
 }
-
 async function obtenirEmploye(id) {
-  const employe = await lire(`/employes/${encodeURIComponent(id)}`)
+  const employe = await lire(
+    `/employes/${encodeURIComponent(id)}`,
+  )
 
   return {
     id: employe.id,
@@ -65,7 +66,6 @@ async function obtenirEmploye(id) {
     actif: employe.actif,
   }
 }
-
 async function modifierEmploye(id, donnees) {
   const nom = String(donnees.nom ?? '').trim()
   const email = String(donnees.email ?? '').trim().toLowerCase()
@@ -116,13 +116,36 @@ async function modifierEmploye(id, donnees) {
     )
   }
 
-  // PATCH conserve le mot de passe et la date de création.
+  const desactivation =
+    employeActuel.actif === true && donnees.actif === false
+
+  let nombreCommandes = 0
+
+  if (desactivation) {
+    const commandes = await lire('/commandes', {
+      serveurId: id,
+    })
+
+    nombreCommandes = commandes.length
+  }
+
+  // Modifie l’employé sans supprimer ses commandes.
   await modifier(`/employes/${encodeURIComponent(id)}`, {
     nom,
     email,
     role: donnees.role,
     actif: donnees.actif === true,
   })
+
+  let message = 'Employé modifié avec succès.'
+
+  if (desactivation) {
+    message = nombreCommandes > 0
+      ? `Employé désactivé. Ses ${nombreCommandes} commande(s) sont conservées.`
+      : 'Employé désactivé.'
+  }
+
+  return { message }
 }
 
 return {

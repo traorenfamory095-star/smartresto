@@ -149,3 +149,51 @@ describe('Protection du dernier administrateur', () => {
     expect(modifier).not.toHaveBeenCalled()
   })
 })
+
+describe('Désactivation d’un serveur avec commandes', () => {
+  it('désactive le serveur et signale les commandes conservées', async () => {
+    lire
+      .mockResolvedValueOnce([
+        {
+          id: 3,
+          nom: 'Amani Kasereka',
+          email: 'amani@smartresto.cd',
+          role: 'serveur',
+          actif: true,
+        },
+      ])
+      .mockResolvedValueOnce([
+        { id: 1, serveurId: 3 },
+        { id: 2, serveurId: 3 },
+      ])
+
+    modifier.mockResolvedValueOnce({})
+
+    const { modifierEmploye } = usePersonnel()
+
+    const resultat = await modifierEmploye('3', {
+      nom: 'Amani Kasereka',
+      email: 'amani@smartresto.cd',
+      role: 'serveur',
+      actif: false,
+    })
+
+    expect(lire).toHaveBeenNthCalledWith(
+      2,
+      '/commandes',
+      { serveurId: '3' },
+    )
+
+    expect(modifier).toHaveBeenCalledTimes(1)
+
+    expect(modifier).toHaveBeenCalledWith('/employes/3', {
+      nom: 'Amani Kasereka',
+      email: 'amani@smartresto.cd',
+      role: 'serveur',
+      actif: false,
+    })
+
+    expect(resultat.message).toContain('2 commande(s)')
+    expect(resultat.message).toContain('conservées')
+  })
+})
