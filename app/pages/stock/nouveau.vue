@@ -1,15 +1,12 @@
-
+```vue
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 useHead({ title: 'Nouvel ingrédient | SmartResto' })
 
-const { creer, lire } = useApi()
+const router = useRouter()
+const { lire, creer } = useApi()
 const { succes, erreur } = useNotifier()
-
-const fournisseurs = ref([])
-const chargement = ref(false)
-const chargementFournisseurs = ref(true)
 
 const formulaire = reactive({
   nom: '',
@@ -20,54 +17,66 @@ const formulaire = reactive({
   fournisseurId: '',
 })
 
-const erreurs = reactive({
-  nom: '',
-  stock: '',
-  seuilAlerte: '',
-  prixUnitaire: '',
-})
+const enregistrement = ref(false)
+const erreurFormulaire = ref('')
 
-async function chargerFournisseurs() {
-  try {
-    fournisseurs.value = await lire('/fournisseurs')
-  } catch (e) {
-    erreur(e)
-  } finally {
-    chargementFournisseurs.value = false
-  }
-}
+const {
+  data: fournisseurs,
+  pending: chargementFournisseurs,
+  error: erreurFournisseurs,
+  refresh: rechargerFournisseurs,
+} = await useAsyncData(
+  'stock-nouveau-fournisseurs',
+  () => lire('/fournisseurs'),
+  { default: () => [] },
+)
 
-await chargerFournisseurs()
+const formulaireValide = computed(() =>
+  formulaire.nom.trim().length > 0 &&
+  Number(formulaire.stock) >= 0 &&
+  Number(formulaire.seuilAlerte) >= 0 &&
+  Number(formulaire.prixUnitaire) >= 0,
+)
 
-function validerFormulaire() {
-  erreurs.nom = ''
-  erreurs.stock = ''
-  erreurs.seuilAlerte = ''
-  erreurs.prixUnitaire = ''
-
+function valider() {
   if (!formulaire.nom.trim()) {
-    erreurs.nom = 'Le nom de l’ingrédient est obligatoire.'
+    return 'Le nom de l’ingrédient est obligatoire.'
   }
 
-  if (formulaire.stock === '' || !Number.isFinite(Number(formulaire.stock)) || Number(formulaire.stock) < 0) {
-    erreurs.stock = 'Le stock doit être un nombre positif ou nul.'
+  if (!formulaire.unite) {
+    return 'Sélectionne une unité.'
   }
 
-  if (formulaire.seuilAlerte === '' || !Number.isFinite(Number(formulaire.seuilAlerte)) || Number(formulaire.seuilAlerte) < 0) {
-    erreurs.seuilAlerte = 'Le seuil doit être un nombre positif ou nul.'
+  if (
+    !Number.isFinite(Number(formulaire.stock)) ||
+    Number(formulaire.stock) < 0
+  ) {
+    return 'Le stock initial doit être positif ou nul.'
   }
 
-  if (formulaire.prixUnitaire === '' || !Number.isFinite(Number(formulaire.prixUnitaire)) || Number(formulaire.prixUnitaire) < 0) {
-    erreurs.prixUnitaire = 'Le prix doit être un nombre positif ou nul.'
+  if (
+    !Number.isFinite(Number(formulaire.seuilAlerte)) ||
+    Number(formulaire.seuilAlerte) < 0
+  ) {
+    return 'Le seuil d’alerte doit être positif ou nul.'
   }
 
-  return !Object.values(erreurs).some(Boolean)
+  if (
+    !Number.isFinite(Number(formulaire.prixUnitaire)) ||
+    Number(formulaire.prixUnitaire) < 0
+  ) {
+    return 'Le prix unitaire doit être positif ou nul.'
+  }
+
+  return ''
 }
 
-async function enregistrerIngredient() {
-  if (!validerFormulaire()) return
+async function enregistrer() {
+  erreurFormulaire.value = valider()
 
-  chargement.value = true
+  if (erreurFormulaire.value || enregistrement.value) return
+
+  enregistrement.value = true
 
   try {
     const donnees = {
@@ -76,146 +85,173 @@ async function enregistrerIngredient() {
       stock: Number(formulaire.stock),
       seuilAlerte: Number(formulaire.seuilAlerte),
       prixUnitaire: Number(formulaire.prixUnitaire),
-      fournisseurId: formulaire.fournisseurId || null,
+      fournisseurId: formulaire.fournisseurId
+        ? Number(formulaire.fournisseurId)
+        : null,
     }
 
     await creer('/ingredients', donnees)
 
-    succes('Ingrédient ajouté avec succès.')
-    await navigateTo('/stock')
+    succes('Ingrédient créé avec succès.')
+    await router.push('/stock')
   } catch (e) {
     erreur(e)
   } finally {
-    chargement.value = false
+    enregistrement.value = false
   }
 }
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl space-y-6">
-    <header>
-      <NuxtLink
-        to="/stock"
-        class="text-sm font-medium text-orange-600 hover:text-orange-700"
-      >
-        ← Retour au stock
-      </NuxtLink>
-
-      <h1 class="mt-3 text-3xl font-bold text-gray-900">
-        Nouvel ingrédient
-      </h1>
-
-      <p class="mt-2 text-sm text-gray-500">
-        Enregistre un ingrédient et définis son seuil d’alerte.
-      </p>
-    </header>
-
-    <form
-      class="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-      @submit.prevent="enregistrerIngredient"
-    >
+  <main class="min-h-screen space-y-6 bg-bg p-4 text-ink sm:p-6">
+    <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
       <div>
-        <label for="nom" class="mb-2 block text-sm font-medium text-gray-700">
-          Nom de l’ingrédient *
-        </label>
-        <input
-          id="nom"
-          v-model="formulaire.nom"
-          required
-          maxlength="100"
-          placeholder="Ex. : Haricots"
-          class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-          :aria-invalid="Boolean(erreurs.nom)"
-          aria-describedby="erreur-nom"
-        />
-        <p v-if="erreurs.nom" id="erreur-nom" class="mt-1 text-sm text-red-600">
-          {{ erreurs.nom }}
+        <h1 class="text-2xl font-bold tracking-tight text-head sm:text-3xl">
+          Nouvel ingrédient
+        </h1>
+        <p class="mt-2 text-sm text-mut">
+          Ajoutez un ingrédient à l’inventaire de votre restaurant.
         </p>
       </div>
 
-      <div class="grid gap-5 sm:grid-cols-2">
+      <NuxtLink
+        to="/stock"
+        class="inline-flex items-center justify-center rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold text-ink transition-colors hover:border-pri hover:text-pri"
+      >
+        ← Retour au stock
+      </NuxtLink>
+    </header>
+
+    <section class="mx-auto max-w-3xl rounded-carte border border-line bg-card p-5 sm:p-7">
+      <div class="mb-6 border-b border-line pb-5">
+        <h2 class="text-lg font-bold text-head">
+          Informations de l’ingrédient
+        </h2>
+        <p class="mt-1 text-sm text-mut">
+          Renseignez les informations nécessaires à la gestion du stock.
+        </p>
+      </div>
+
+      <div
+        v-if="chargementFournisseurs"
+        class="mb-5 rounded-xl bg-soft p-3 text-sm text-mut"
+      >
+        Chargement des fournisseurs...
+      </div>
+
+      <div
+        v-else-if="erreurFournisseurs"
+        class="mb-5 rounded-xl border border-err/30 bg-err/5 p-4"
+      >
+        <p class="text-sm text-err">
+          Impossible de charger les fournisseurs. Vous pouvez réessayer.
+        </p>
+        <button
+          type="button"
+          class="mt-2 text-sm font-semibold text-pri underline underline-offset-4"
+          @click="rechargerFournisseurs()"
+        >
+          Réessayer
+        </button>
+      </div>
+
+      <form class="space-y-5" @submit.prevent="enregistrer">
         <div>
-          <label for="unite" class="mb-2 block text-sm font-medium text-gray-700">
-            Unité *
+          <label for="nom" class="mb-2 block text-sm font-medium text-ink">
+            Nom de l’ingrédient *
           </label>
-          <select
-            id="unite"
-            v-model="formulaire.unite"
+          <input
+            id="nom"
+            v-model="formulaire.nom"
+            type="text"
             required
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-          >
-            <option value="kg">Kilogramme (kg)</option>
-            <option value="L">Litre (L)</option>
-            <option value="pièce">Pièce</option>
-            <option value="paquet">Paquet</option>
-            <option value="bouteille">Bouteille</option>
-          </select>
+            maxlength="100"
+            placeholder="Ex. : Riz, tomates, farine..."
+            class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none placeholder:text-mut/70 focus:border-pri focus:ring-2 focus:ring-pri/20"
+          />
         </div>
 
-        <div>
-          <label for="fournisseur" class="mb-2 block text-sm font-medium text-gray-700">
-            Fournisseur
-          </label>
-          <select
-            id="fournisseur"
-            v-model="formulaire.fournisseurId"
-            :disabled="chargementFournisseurs"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 disabled:opacity-60"
-          >
-            <option value="">Aucun fournisseur</option>
-            <option
-              v-for="fournisseur in fournisseurs"
-              :key="fournisseur.id"
-              :value="fournisseur.id"
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label for="unite" class="mb-2 block text-sm font-medium text-ink">
+              Unité de mesure *
+            </label>
+            <select
+              id="unite"
+              v-model="formulaire.unite"
+              required
+              class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
             >
-              {{ fournisseur.nom }}
-            </option>
-          </select>
+              <option value="kg">Kilogramme (kg)</option>
+              <option value="g">Gramme (g)</option>
+              <option value="L">Litre (L)</option>
+              <option value="mL">Millilitre (mL)</option>
+              <option value="pièce">Pièce</option>
+              <option value="sachet">Sachet</option>
+              <option value="paquet">Paquet</option>
+              <option value="bouteille">Bouteille</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="fournisseur" class="mb-2 block text-sm font-medium text-ink">
+              Fournisseur
+            </label>
+            <select
+              id="fournisseur"
+              v-model="formulaire.fournisseurId"
+              class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+            >
+              <option value="">Aucun fournisseur</option>
+              <option
+                v-for="fournisseur in fournisseurs"
+                :key="fournisseur.id"
+                :value="String(fournisseur.id)"
+              >
+                {{ fournisseur.nom }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label for="stock" class="mb-2 block text-sm font-medium text-ink">
+              Stock initial *
+            </label>
+            <input
+              id="stock"
+              v-model.number="formulaire.stock"
+              type="number"
+              min="0"
+              step="any"
+              required
+              class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+            />
+          </div>
+
+          <div>
+            <label for="seuil" class="mb-2 block text-sm font-medium text-ink">
+              Seuil d’alerte *
+            </label>
+            <input
+              id="seuil"
+              v-model.number="formulaire.seuilAlerte"
+              type="number"
+              min="0"
+              step="any"
+              required
+              class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+            />
+            <p class="mt-1 text-xs text-mut">
+              Une alerte apparaît lorsque le stock atteint ce seuil.
+            </p>
+          </div>
         </div>
 
         <div>
-          <label for="stock" class="mb-2 block text-sm font-medium text-gray-700">
-            Stock initial *
-          </label>
-          <input
-            id="stock"
-            v-model.number="formulaire.stock"
-            type="number"
-            min="0"
-            step="any"
-            required
-            class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-            :aria-invalid="Boolean(erreurs.stock)"
-            aria-describedby="erreur-stock"
-          />
-          <p v-if="erreurs.stock" id="erreur-stock" class="mt-1 text-sm text-red-600">
-            {{ erreurs.stock }}
-          </p>
-        </div>
-
-        <div>
-          <label for="seuil" class="mb-2 block text-sm font-medium text-gray-700">
-            Seuil d’alerte *
-          </label>
-          <input
-            id="seuil"
-            v-model.number="formulaire.seuilAlerte"
-            type="number"
-            min="0"
-            step="any"
-            required
-            class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-            :aria-invalid="Boolean(erreurs.seuilAlerte)"
-            aria-describedby="erreur-seuil"
-          />
-          <p v-if="erreurs.seuilAlerte" id="erreur-seuil" class="mt-1 text-sm text-red-600">
-            {{ erreurs.seuilAlerte }}
-          </p>
-        </div>
-
-        <div class="sm:col-span-2">
-          <label for="prix" class="mb-2 block text-sm font-medium text-gray-700">
-            Prix unitaire ($) *
+          <label for="prix" class="mb-2 block text-sm font-medium text-ink">
+            Prix unitaire *
           </label>
           <input
             id="prix"
@@ -224,36 +260,39 @@ async function enregistrerIngredient() {
             min="0"
             step="any"
             required
-            class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-            :aria-invalid="Boolean(erreurs.prixUnitaire)"
-            aria-describedby="erreur-prix"
+            class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
           />
-          <p v-if="erreurs.prixUnitaire" id="erreur-prix" class="mt-1 text-sm text-red-600">
-            {{ erreurs.prixUnitaire }}
+          <p class="mt-1 text-xs text-mut">
+            Devise selon la convention utilisée dans votre projet.
           </p>
         </div>
-      </div>
 
-      <p class="text-xs text-gray-500">
-        Les champs marqués d’un astérisque (*) sont obligatoires.
-      </p>
-
-      <div class="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
-        <NuxtLink
-          to="/stock"
-          class="rounded-lg border border-gray-300 px-5 py-3 text-center font-medium text-gray-700 hover:bg-gray-50"
+        <div
+          v-if="erreurFormulaire"
+          class="rounded-xl border border-err/30 bg-err/5 px-4 py-3 text-sm text-err"
+          role="alert"
         >
-          Annuler
-        </NuxtLink>
+          {{ erreurFormulaire }}
+        </div>
 
-        <button
-          type="submit"
-          :disabled="chargement"
-          class="rounded-lg bg-orange-600 px-5 py-3 font-semibold text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {{ chargement ? 'Enregistrement...' : 'Enregistrer l’ingrédient' }}
-        </button>
-      </div>
-    </form>
+        <div class="flex flex-col-reverse justify-end gap-3 border-t border-line pt-5 sm:flex-row">
+          <NuxtLink
+            to="/stock"
+            class="rounded-xl border border-line bg-card px-5 py-3 text-center font-semibold text-ink transition-colors hover:border-pri hover:text-pri"
+          >
+            Annuler
+          </NuxtLink>
+
+          <button
+            type="submit"
+            :disabled="enregistrement || !formulaireValide"
+            class="rounded-xl bg-degrade px-5 py-3 font-semibold text-on-pri transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{ enregistrement ? 'Enregistrement...' : 'Créer l’ingrédient' }}
+          </button>
+        </div>
+      </form>
+    </section>
   </main>
 </template>
+```
