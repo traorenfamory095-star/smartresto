@@ -11,8 +11,13 @@ const {
   resteAPayer,
 } = useFactures()
 
-
 const factureId = Number(route.params.id)
+
+const montantPaiement = ref('')
+const modePaiement = ref('especes')
+
+const enregistrementEnCours = ref(false)
+const erreurPaiement = ref('')
 
 const {
   data,
@@ -34,55 +39,87 @@ const {
   }
 )
 
-const facture = computed(() => data.value?.facture ?? null)
+const facture = computed(() => {
+  return data.value?.facture ?? null
+})
 
-const paiements = computed(() => data.value?.paiements ?? [])
+const paiements = computed(() => {
+  return data.value?.paiements ?? []
+})
 
 const montantPaye = computed(() => {
-  return facture.value
-    ? totalPaiements(paiements.value)
-    : 0
+  if (!facture.value) {
+    return 0
+  }
+
+  return totalPaiements(paiements.value)
 })
 
 const reste = computed(() => {
-  return facture.value
-    ? resteAPayer(facture.value.total, paiements.value)
-    : 0
+  if (!facture.value) {
+    return 0
+  }
+
+  return resteAPayer(
+    facture.value.total,
+    paiements.value
+  )
 })
 
-const montantPaiement = ref('')
-const modePaiement = ref('especes')
+function libelleStatut(statut) {
+  const libelles = {
+    emise: 'Émise',
+    payee: 'Payée',
+    annulee: 'Annulée',
+  }
 
-const enregistrementEnCours = ref(false)
-const erreurPaiement = ref('')
+  return libelles[statut] ?? statut
+}
+
+function libelleModePaiement(mode) {
+  const modes = {
+    especes: 'Espèces',
+    mobile_money: 'Mobile Money',
+    carte: 'Carte',
+  }
+
+  return modes[mode] ?? mode
+}
 
 function dateLocaleIso() {
   const maintenant = new Date()
 
-  const deuxChiffres = (valeur) =>
-    String(valeur).padStart(2, '0')
+  const deuxChiffres = (valeur) => {
+    return String(valeur).padStart(2, '0')
+  }
 
-  return [
+  const date = [
     maintenant.getFullYear(),
     deuxChiffres(maintenant.getMonth() + 1),
     deuxChiffres(maintenant.getDate()),
-  ].join('-') +
-    'T' +
-    [
-      deuxChiffres(maintenant.getHours()),
-      deuxChiffres(maintenant.getMinutes()),
-      deuxChiffres(maintenant.getSeconds()),
-    ].join(':')
+  ].join('-')
+
+  const heure = [
+    deuxChiffres(maintenant.getHours()),
+    deuxChiffres(maintenant.getMinutes()),
+    deuxChiffres(maintenant.getSeconds()),
+  ].join(':')
+
+  return `${date}T${heure}`
 }
 
 async function enregistrerPaiement() {
   erreurPaiement.value = ''
 
-  const montant = Math.round(
-    Number(montantPaiement.value) * 100
-  ) / 100
+  const montant =
+    Math.round(
+      Number(montantPaiement.value) * 100
+    ) / 100
 
-  if (!Number.isFinite(montant) || montant <= 0) {
+  if (
+    !Number.isFinite(montant) ||
+    montant <= 0
+  ) {
     erreurPaiement.value =
       'Le montant doit être supérieur à 0.'
 
@@ -106,17 +143,22 @@ async function enregistrerPaiement() {
       date: dateLocaleIso(),
     })
 
-    const nouveauTotalPaye = Math.round(
-      (montantPaye.value + montant) * 100
-    ) / 100
+    const nouveauTotalPaye =
+      Math.round(
+        (montantPaye.value + montant) * 100
+      ) / 100
 
     const factureSoldee =
-      nouveauTotalPaye >= Number(facture.value.total)
+      nouveauTotalPaye >=
+      Number(facture.value.total)
 
     if (factureSoldee) {
-      await modifierFacture(facture.value.id, {
-        statut: 'payee',
-      })
+      await modifierFacture(
+        facture.value.id,
+        {
+          statut: 'payee',
+        }
+      )
 
       await marquerCommandePayee(
         facture.value.commandeId
@@ -133,26 +175,6 @@ async function enregistrerPaiement() {
   }
 }
 
-function libelleStatut(statut) {
-  const libelles = {
-    emise: 'Émise',
-    payee: 'Payée',
-    annulee: 'Annulée',
-  }
-
-  return libelles[statut] ?? statut
-}
-
-function libelleModePaiement(mode) {
-  const modes = {
-    especes: 'Espèces',
-    mobile_money: 'Mobile Money',
-    carte: 'Carte',
-  }
-
-  return modes[mode] ?? mode
-}
-
 function imprimerFacture() {
   window.print()
 }
@@ -165,11 +187,30 @@ useHead(() => ({
 </script>
 
 <template>
-  <section class="space-y-6">
-    <!-- Navigation -->
+  <section
+    class="
+      space-y-6
+      print:fixed
+      print:inset-0
+      print:z-[9999]
+      print:m-0
+      print:w-full
+      print:space-y-3
+      print:bg-white
+      print:p-6
+      print:text-black
+    "
+  >
+    <!-- Retour -->
     <NuxtLink
       to="/factures"
-      class="inline-flex font-medium text-orange-600 hover:underline print:hidden"
+      class="
+        inline-flex
+        font-medium
+        text-orange-600
+        hover:underline
+        print:hidden
+      "
     >
       ← Retour aux factures
     </NuxtLink>
@@ -185,7 +226,14 @@ useHead(() => ({
     <!-- Erreur -->
     <div
       v-else-if="error"
-      class="rounded-lg border border-red-200 bg-red-50 p-4"
+      class="
+        rounded-lg
+        border
+        border-red-200
+        bg-red-50
+        p-4
+        print:hidden
+      "
     >
       <p class="font-medium text-red-700">
         Impossible de charger cette facture.
@@ -197,7 +245,13 @@ useHead(() => ({
 
       <button
         type="button"
-        class="mt-3 rounded-lg border px-4 py-2"
+        class="
+          mt-3
+          rounded-lg
+          border
+          px-4
+          py-2
+        "
         @click="refresh"
       >
         Réessayer
@@ -206,30 +260,103 @@ useHead(() => ({
 
     <!-- Facture -->
     <template v-else-if="facture">
+      <!-- En-tête facture -->
       <div
-        class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+        class="
+          flex
+          flex-col
+          gap-4
+          sm:flex-row
+          sm:items-start
+          sm:justify-between
+          print:flex-row
+          print:items-start
+          print:justify-between
+          print:gap-2
+          print:[break-inside:avoid]
+        "
       >
         <div>
-          <p class="text-sm text-gris">
+          <p
+            class="
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
             Facture
           </p>
 
-          <h1 class="text-3xl font-bold">
+          <h1
+            class="
+              text-3xl
+              font-bold
+              print:text-2xl
+            "
+          >
             {{ facture.numero }}
           </h1>
 
-          <p class="mt-2 text-gris">
+          <p
+            class="
+              mt-2
+              text-gris
+              print:mt-1
+              print:text-sm
+              print:text-gray-600
+            "
+          >
             Commande #{{ facture.commandeId }}
+          </p>
+
+          <p
+            class="
+              mt-1
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
+            Date :
+            {{ formaterDate(facture.creeLe) }}
           </p>
         </div>
 
-        <div class="flex items-center gap-3 print:hidden">
+        <!-- Statut + bouton -->
+        <div
+          class="
+            flex
+            items-center
+            gap-3
+            print:gap-2
+          "
+        >
           <span
-            class="rounded-full px-3 py-1 text-sm font-medium"
+            class="
+              rounded-full
+              px-3
+              py-1
+              text-sm
+              font-medium
+              print:border
+              print:border-gray-300
+              print:bg-white
+              print:px-2
+              print:py-1
+              print:text-xs
+              print:text-black
+            "
             :class="{
-              'bg-green-100 text-green-700': facture.statut === 'payee',
-              'bg-orange-100 text-orange-700': facture.statut === 'emise',
-              'bg-red-100 text-red-700': facture.statut === 'annulee',
+              'bg-green-100 text-green-700':
+                facture.statut === 'payee',
+
+              'bg-orange-100 text-orange-700':
+                facture.statut === 'emise',
+
+              'bg-red-100 text-red-700':
+                facture.statut === 'annulee',
             }"
           >
             {{ libelleStatut(facture.statut) }}
@@ -237,7 +364,16 @@ useHead(() => ({
 
           <button
             type="button"
-            class="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white hover:bg-orange-600"
+            class="
+              rounded-lg
+              bg-orange-500
+              px-4
+              py-2
+              font-medium
+              text-white
+              hover:bg-orange-600
+              print:hidden
+            "
             @click="imprimerFacture"
           >
             Imprimer
@@ -245,191 +381,487 @@ useHead(() => ({
         </div>
       </div>
 
-      <!-- Informations financières -->
+      <!-- Montants facture -->
       <div
-        class="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+        class="
+          grid
+          gap-4
+          md:grid-cols-2
+          lg:grid-cols-4
+          print:grid-cols-4
+          print:gap-2
+          print:[break-inside:avoid]
+        "
       >
-        <div class="rounded-lg border border-bordure p-4">
-          <p class="text-sm text-gris">
+        <!-- Sous-total -->
+        <div
+          class="
+            rounded-lg
+            border
+            border-bordure
+            p-4
+            print:rounded-none
+            print:border-gray-300
+            print:p-2
+          "
+        >
+          <p
+            class="
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
             Sous-total
           </p>
 
-          <p class="mt-1 text-xl font-bold">
+          <p
+            class="
+              mt-1
+              text-xl
+              font-bold
+              print:text-base
+            "
+          >
             {{ formaterPrix(facture.sousTotal) }}
           </p>
         </div>
 
-        <div class="rounded-lg border border-bordure p-4">
-          <p class="text-sm text-gris">
+        <!-- Remise -->
+        <div
+          class="
+            rounded-lg
+            border
+            border-bordure
+            p-4
+            print:rounded-none
+            print:border-gray-300
+            print:p-2
+          "
+        >
+          <p
+            class="
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
             Remise
           </p>
 
-          <p class="mt-1 text-xl font-bold">
+          <p
+            class="
+              mt-1
+              text-xl
+              font-bold
+              print:text-base
+            "
+          >
             {{ formaterPrix(facture.remise) }}
           </p>
         </div>
 
-        <div class="rounded-lg border border-bordure p-4">
-          <p class="text-sm text-gris">
+        <!-- Taxe -->
+        <div
+          class="
+            rounded-lg
+            border
+            border-bordure
+            p-4
+            print:rounded-none
+            print:border-gray-300
+            print:p-2
+          "
+        >
+          <p
+            class="
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
             Taxe
           </p>
 
-          <p class="mt-1 text-xl font-bold">
+          <p
+            class="
+              mt-1
+              text-xl
+              font-bold
+              print:text-base
+            "
+          >
             {{ formaterPrix(facture.taxe) }}
           </p>
         </div>
 
-        <div class="rounded-lg border border-bordure p-4">
-          <p class="text-sm text-gris">
+        <!-- Total -->
+        <div
+          class="
+            rounded-lg
+            border
+            border-bordure
+            p-4
+            print:rounded-none
+            print:border-gray-300
+            print:p-2
+          "
+        >
+          <p
+            class="
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
             Total
           </p>
 
-          <p class="mt-1 text-xl font-bold">
+          <p
+            class="
+              mt-1
+              text-xl
+              font-bold
+              print:text-base
+            "
+          >
             {{ formaterPrix(facture.total) }}
           </p>
         </div>
       </div>
 
       <!-- Synthèse paiement -->
-      <div class="grid gap-4 md:grid-cols-3">
-        <div class="rounded-lg border border-bordure p-4">
-          <p class="text-sm text-gris">
+      <div
+        class="
+          grid
+          gap-4
+          md:grid-cols-3
+          print:grid-cols-3
+          print:gap-2
+          print:[break-inside:avoid]
+        "
+      >
+        <!-- Total facture -->
+        <div
+          class="
+            rounded-lg
+            border
+            border-bordure
+            p-4
+            print:rounded-none
+            print:border-gray-300
+            print:p-2
+          "
+        >
+          <p
+            class="
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
             Total facture
           </p>
 
-          <p class="mt-1 text-xl font-bold">
+          <p
+            class="
+              mt-1
+              text-xl
+              font-bold
+              print:text-base
+            "
+          >
             {{ formaterPrix(facture.total) }}
           </p>
         </div>
 
-        <div class="rounded-lg border border-bordure p-4">
-          <p class="text-sm text-gris">
+        <!-- Montant payé -->
+        <div
+          class="
+            rounded-lg
+            border
+            border-bordure
+            p-4
+            print:rounded-none
+            print:border-gray-300
+            print:p-2
+          "
+        >
+          <p
+            class="
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
             Montant payé
           </p>
 
-          <p class="mt-1 text-xl font-bold">
+          <p
+            class="
+              mt-1
+              text-xl
+              font-bold
+              print:text-base
+            "
+          >
             {{ formaterPrix(montantPaye) }}
           </p>
         </div>
 
-        <div class="rounded-lg border border-bordure p-4">
-          <p class="text-sm text-gris">
+        <!-- Reste -->
+        <div
+          class="
+            rounded-lg
+            border
+            border-bordure
+            p-4
+            print:rounded-none
+            print:border-gray-300
+            print:p-2
+          "
+        >
+          <p
+            class="
+              text-sm
+              text-gris
+              print:text-xs
+              print:text-gray-600
+            "
+          >
             Reste à payer
           </p>
 
-          <p class="mt-1 text-xl font-bold">
+          <p
+            class="
+              mt-1
+              text-xl
+              font-bold
+              print:text-base
+            "
+          >
             {{ formaterPrix(reste) }}
           </p>
         </div>
       </div>
 
+      <!-- Formulaire paiement -->
       <div
-        v-if="facture.statut === 'emise' && reste > 0"
-        class="rounded-lg border border-bordure p-5 print:hidden"
-        >
+        v-if="
+          facture.statut === 'emise' &&
+          reste > 0
+        "
+        class="
+          rounded-lg
+          border
+          border-bordure
+          p-5
+          print:hidden
+        "
+      >
         <h2 class="text-xl font-bold">
-            Enregistrer un paiement
+          Enregistrer un paiement
         </h2>
 
-        <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div>
+        <div
+          class="
+            mt-4
+            grid
+            gap-4
+            md:grid-cols-2
+          "
+        >
+          <!-- Montant -->
+          <div>
             <label
-                for="montant"
-                class="mb-2 block font-medium"
+              for="montant"
+              class="mb-2 block font-medium"
             >
-                Montant
+              Montant
             </label>
 
             <input
-                id="montant"
-                v-model="montantPaiement"
-                type="number"
-                min="0.01"
-                :max="reste"
-                step="0.01"
-                class="w-full rounded-lg border border-bordure px-3 py-2"
-                placeholder="0.00"
+              id="montant"
+              v-model="montantPaiement"
+              type="number"
+              min="0.01"
+              :max="reste"
+              step="0.01"
+              placeholder="0.00"
+              class="
+                w-full
+                rounded-lg
+                border
+                border-bordure
+                px-3
+                py-2
+              "
             >
-            </div>
+          </div>
 
-            <div>
+          <!-- Mode -->
+          <div>
             <label
-                for="mode"
-                class="mb-2 block font-medium"
+              for="mode"
+              class="mb-2 block font-medium"
             >
-                Mode de paiement
+              Mode de paiement
             </label>
 
             <select
-                id="mode"
-                v-model="modePaiement"
-                class="w-full rounded-lg border border-bordure px-3 py-2"
+              id="mode"
+              v-model="modePaiement"
+              class="
+                w-full
+                rounded-lg
+                border
+                border-bordure
+                px-3
+                py-2
+              "
             >
-                <option value="especes">
+              <option value="especes">
                 Espèces
-                </option>
+              </option>
 
-                <option value="mobile_money">
+              <option value="mobile_money">
                 Mobile Money
-                </option>
+              </option>
 
-                <option value="carte">
+              <option value="carte">
                 Carte
-                </option>
+              </option>
             </select>
-            </div>
+          </div>
         </div>
 
+        <!-- Erreur paiement -->
         <p
-            v-if="erreurPaiement"
-            class="mt-3 text-sm text-red-600"
+          v-if="erreurPaiement"
+          class="
+            mt-3
+            text-sm
+            text-red-600
+          "
         >
-            {{ erreurPaiement }}
+          {{ erreurPaiement }}
         </p>
 
+        <!-- Bouton paiement -->
         <button
-            type="button"
-            class="mt-4 rounded-lg bg-orange-500 px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="enregistrementEnCours"
-            @click="enregistrerPaiement"
+          type="button"
+          class="
+            mt-4
+            rounded-lg
+            bg-orange-500
+            px-4
+            py-2
+            font-medium
+            text-white
+            disabled:cursor-not-allowed
+            disabled:opacity-50
+          "
+          :disabled="enregistrementEnCours"
+          @click="enregistrerPaiement"
         >
-            {{
+          {{
             enregistrementEnCours
-                ? 'Enregistrement...'
-                : 'Enregistrer le paiement'
-            }}
+              ? 'Enregistrement...'
+              : 'Enregistrer le paiement'
+          }}
         </button>
-        </div>
+      </div>
 
       <!-- Paiements -->
-      <div>
-        <h2 class="text-xl font-bold">
+      <div
+        class="
+          print:[break-inside:avoid]
+        "
+      >
+        <h2
+          class="
+            text-xl
+            font-bold
+            print:text-base
+          "
+        >
           Paiements
         </h2>
 
+        <!-- Aucun paiement -->
         <p
           v-if="paiements.length === 0"
-          class="mt-4 text-gris"
+          class="
+            mt-4
+            text-gris
+            print:mt-2
+            print:text-sm
+            print:text-gray-600
+          "
         >
           Aucun paiement enregistré pour cette facture.
         </p>
 
+        <!-- Tableau paiements -->
         <div
           v-else
-          class="mt-4 overflow-x-auto rounded-lg border border-bordure"
+          class="
+            mt-4
+            overflow-x-auto
+            rounded-lg
+            border
+            border-bordure
+            print:mt-2
+            print:overflow-visible
+            print:rounded-none
+            print:border-gray-300
+          "
         >
           <table class="w-full">
-            <thead class="bg-gray-50">
+            <thead class="bg-gray-50 print:bg-white">
               <tr>
-                <th class="px-4 py-3 text-left">
+                <th
+                  class="
+                    px-4
+                    py-3
+                    text-left
+                    print:px-2
+                    print:py-1
+                    print:text-xs
+                  "
+                >
                   Date
                 </th>
 
-                <th class="px-4 py-3 text-left">
+                <th
+                  class="
+                    px-4
+                    py-3
+                    text-left
+                    print:px-2
+                    print:py-1
+                    print:text-xs
+                  "
+                >
                   Mode
                 </th>
 
-                <th class="px-4 py-3 text-left">
+                <th
+                  class="
+                    px-4
+                    py-3
+                    text-left
+                    print:px-2
+                    print:py-1
+                    print:text-xs
+                  "
+                >
                   Montant
                 </th>
               </tr>
@@ -439,23 +871,77 @@ useHead(() => ({
               <tr
                 v-for="paiement in paiements"
                 :key="paiement.id"
-                class="border-t border-bordure"
+                class="
+                  border-t
+                  border-bordure
+                  print:border-gray-300
+                "
               >
-                <td class="px-4 py-3">
+                <td
+                  class="
+                    px-4
+                    py-3
+                    print:px-2
+                    print:py-1
+                    print:text-xs
+                  "
+                >
                   {{ formaterDate(paiement.date) }}
                 </td>
 
-                <td class="px-4 py-3">
-                  {{ libelleModePaiement(paiement.mode) }}
+                <td
+                  class="
+                    px-4
+                    py-3
+                    print:px-2
+                    print:py-1
+                    print:text-xs
+                  "
+                >
+                  {{
+                    libelleModePaiement(
+                      paiement.mode
+                    )
+                  }}
                 </td>
 
-                <td class="px-4 py-3 font-medium">
-                  {{ formaterPrix(paiement.montant) }}
+                <td
+                  class="
+                    px-4
+                    py-3
+                    font-medium
+                    print:px-2
+                    print:py-1
+                    print:text-xs
+                  "
+                >
+                  {{
+                    formaterPrix(
+                      paiement.montant
+                    )
+                  }}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+      </div>
+
+      <!-- Bas de facture uniquement à l'impression -->
+      <div
+        class="
+          hidden
+          border-t
+          border-gray-300
+          pt-3
+          text-center
+          text-xs
+          text-gray-500
+          print:block
+          print:[break-inside:avoid]
+        "
+      >
+        SmartResto — Facture {{ facture.numero }}
       </div>
     </template>
   </section>
