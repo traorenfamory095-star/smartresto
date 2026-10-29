@@ -10,7 +10,7 @@ export function useTables(){
         return await creer('/tables', donnees)
     }
     async function modifierTable(id, donnees) {
-        return await creer(`/tables/${id}`, donnees)
+        return await modifier(`/tables/${id}`, donnees)
     }
     async function supprimerTable(id) {
         return await supprimer(`/tables/${id}`)
