@@ -1,231 +1,298 @@
-// composables/useRapports.js
-function useRapports() {
-  const { $api } = useNuxtApp()
+import { ref, computed } from 'vue'
 
-  const periode = ref('7jours')
+// Import direct des données locales du dossier db/
+import commandesData from '../../db/commandes.json'
+import facturesData from '../../db/factures.json'
+import lignesCommandeData from '../../db/lignesCommande.json'
+import platsData from '../../db/plats.json'
+import categoriesData from '../../db/categories.json'
+import employesData from '../../db/employes.json'
+import paiementsData from '../../db/paiements.json'
+
+export function useRapports() {
+  const periode = ref('30jours') // Par défaut 30 jours pour voir du contenu immédiatement
   const dateDebut = ref('')
   const dateFin = ref('')
+
   const chargement = ref(false)
   const erreur = ref(null)
 
   const commandes = ref([])
+  const factures = ref([])
   const lignesCommande = ref([])
   const plats = ref([])
   const categories = ref([])
   const employes = ref([])
-  const factures = ref([])
   const paiements = ref([])
 
-  const chargerDonnees = async () => {
+  // Charger les données directement sans API externe
+  const chargerDonnees = () => {
     chargement.value = true
     erreur.value = null
     try {
-      const safeFetch = async (url) => {
-        try {
-          return await $api(url)
-        } catch (e) {
-          console.warn(`Impossible de charger l'endpoint ${url}:`, e)
-          return []
-        }
-      }
-
-      const [resCmd, resLignes, resPlats, resCat, resEmp, resFac, resPai] = await Promise.all([
-        safeFetch('/commandes?statut=payee'),
-        safeFetch('/lignesCommande'),
-        safeFetch('/plats'),
-        safeFetch('/categories'),
-        safeFetch('/employes'),
-        safeFetch('/factures'),
-        safeFetch('/paiements')
-      ])
-
-      commandes.value = Array.isArray(resCmd) ? resCmd : []
-      lignesCommande.value = Array.isArray(resLignes) ? resLignes : []
-      plats.value = Array.isArray(resPlats) ? resPlats : []
-      categories.value = Array.isArray(resCat) ? resCat : []
-      employes.value = Array.isArray(resEmp) ? resEmp : []
-      factures.value = Array.isArray(resFac) ? resFac : []
-      paiements.value = Array.isArray(resPai) ? resPai : []
+      commandes.value = Array.isArray(commandesData) ? commandesData : []
+      factures.value = Array.isArray(facturesData) ? facturesData : []
+      lignesCommande.value = Array.isArray(lignesCommandeData) ? lignesCommandeData : []
+      plats.value = Array.isArray(platsData) ? platsData : []
+      categories.value = Array.isArray(categoriesData) ? categoriesData : []
+      employes.value = Array.isArray(employesData) ? employesData : []
+      paiements.value = Array.isArray(paiementsData) ? paiementsData : []
     } catch (err) {
-      erreur.value = "Erreur lors du chargement des données de rapports."
+      erreur.value = "Erreur lors du chargement des données des rapports."
       console.error(err)
     } finally {
       chargement.value = false
     }
   }
 
-  const datesActuelles = computed(() => {
-    const maintenant = new Date()
-    let debut = new Date()
-    let fin = new Date()
+  // Helper pour formater les dates en YYYY-MM-DD
+  const formaterDateISO = (dateStr) => {
+    if (!dateStr) return ''
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return ''
+    return d.toISOString().split('T')[0]
+  }
 
-    if (periode.value === 'aujourdhui') {
-      debut = new Date(maintenant)
-      fin = new Date(maintenant)
-    } else if (periode.value === '7jours') {
-      debut.setDate(maintenant.getDate() - 7)
-    } else if (periode.value === '30jours') {
-      debut.setDate(maintenant.getDate() - 30)
-    } else if (periode.value === 'personnalise' && dateDebut.value && dateFin.value) {
-      debut = new Date(dateDebut.value)
-      fin = new Date(dateFin.value)
-    }
-    return { debut, fin }
-  })
-
-  const libellePeriode = computed(() => {
-    const options = { day: '2-digit', month: 'short', year: 'numeric' }
-    const { debut, fin } = datesActuelles.value
-    const dStr = debut.toLocaleDateString('fr-FR', options)
-    const fStr = fin.toLocaleDateString('fr-FR', options)
-    return `${dStr} → ${fStr}`
-  })
-
+  // Filtrage des commandes payées selon la période sélectionnée
   const commandesFiltrees = computed(() => {
-    const { debut, fin } = datesActuelles.value
-    fin.setHours(23, 59, 59)
-
+    const aujourdhui = new Date()
+    
     return commandes.value.filter(cmd => {
-      const dateCmd = new Date(cmd.creeLe || cmd.date || Date.now())
+      // Règle métier : Seules les commandes payées ou validées comptent (exclut annulées)
+      const statutPaye = cmd.statut === 'payee' || cmd.statut === 'terminee' || cmd.statut === 'validee'
+      if (!statutPaye) return false
+
+      const dateCmdStr = cmd.creeLe || cmd.date || cmd.createdAt
+      if (!dateCmdStr) return false
+      
+      const dateCmd = new Date(dateCmdStr)
+      const dateCmdISO = formaterDateISO(dateCmdStr)
+
       if (periode.value === 'aujourdhui') {
-        return dateCmd.toDateString() === debut.toDateString()
+        return dateCmdISO === formaterDateISO(aujourdhui)
       }
-      return dateCmd >= debut && dateCmd <= fin
+
+      if (periode.value === '7jours') {
+        const ilYa7Jours = new Date()
+        ilYa7Jours.setDate(aujourdhui.getDate() - 7)
+        return dateCmd >= ilYa7Jours
+      }
+
+      if (periode.value === '30jours') {
+        const ilYa30Jours = new Date()
+        ilYa30Jours.setDate(aujourdhui.getDate() - 30)
+        return dateCmd >= ilYa30Jours
+      }
+
+      if (periode.value === 'personnalise') {
+        if (!dateDebut.value || !dateFin.value) return true
+        return dateCmdISO >= dateDebut.value && dateCmdISO <= dateFin.value
+      }
+
+      return true
     })
   })
 
+  // KPIs Financiers
   const chiffreAffairesTotal = computed(() => {
     return commandesFiltrees.value.reduce((acc, cmd) => {
-      const fac = factures.value.find(f => f.commandeId === cmd.id)
-      return acc + (fac ? Number(fac.total) : Number(cmd.total || 0))
+      const montant = Number(cmd.total || cmd.montant || 0)
+      return acc + (isNaN(montant) ? 0 : montant)
     }, 0)
   })
 
   const nombreCommandes = computed(() => commandesFiltrees.value.length)
 
-  const nombreCouvertsTotal = computed(() => {
-    return commandesFiltrees.value.reduce((acc, cmd) => acc + (Number(cmd.nbCouverts || cmd.couverts) || 1), 0)
-  })
-
   const ticketMoyen = computed(() => {
     if (nombreCommandes.value === 0) return 0
-    return chiffreAffairesTotal.value / nombreCommandes.value
+    const tm = chiffreAffairesTotal.value / nombreCommandes.value
+    return isNaN(tm) ? 0 : tm
   })
 
+  const nombreCouvertsTotal = computed(() => {
+    return commandesFiltrees.value.reduce((acc, cmd) => {
+      const nb = Number(cmd.nombreCouverts || cmd.nbPersonnes || cmd.couverts || 1)
+      return acc + (isNaN(nb) ? 0 : nb)
+    }, 0)
+  })
+
+  // Groupement du Chiffre d'affaires par jour (Barres)
   const caParJour = computed(() => {
-    const mapJours = {}
+    const groupes = {}
+    
     commandesFiltrees.value.forEach(cmd => {
-      const d = new Date(cmd.creeLe || cmd.date || Date.now())
-      const jourStr = d.toISOString().split('T')[0]
-      const libelle = d.toLocaleDateString('fr-FR', { weekday: 'short' })
-      const fac = factures.value.find(f => f.commandeId === cmd.id)
-      const montant = fac ? Number(fac.total) : Number(cmd.total || 0)
-      if (!mapJours[jourStr]) mapJours[jourStr] = { libelle, total: 0 }
-      mapJours[jourStr].total += montant
+      const dateStr = cmd.creeLe || cmd.date || cmd.createdAt
+      const key = formaterDateISO(dateStr)
+      if (!key) return
+
+      const montant = Number(cmd.total || cmd.montant || 0)
+      groupes[key] = (groupes[key] || 0) + (isNaN(montant) ? 0 : montant)
     })
-    return Object.keys(mapJours).sort().map(date => ({ date, ...mapJours[date] }))
+
+    return Object.keys(groupes).sort().map(dateIso => {
+      const d = new Date(dateIso)
+      const jours = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
+      return {
+        date: dateIso,
+        libelle: jours[d.getDay()] || dateIso,
+        total: groupes[dateIso]
+      }
+    })
   })
 
+  // Top 5 des Plats vendus
   const topPlats = computed(() => {
-    const idsFiltres = new Set(commandesFiltrees.value.map(c => c.id))
-    const mapPlats = {}
+    const idsCommandesValides = new Set(commandesFiltrees.value.map(c => c.id))
+    const statsPlats = {}
+
     lignesCommande.value.forEach(ligne => {
-      if (idsFiltres.has(ligne.commandeId)) {
-        if (!mapPlats[ligne.platId]) {
-          mapPlats[ligne.platId] = { qte: 0, revenu: 0 }
+      if (idsCommandesValides.has(ligne.commandeId)) {
+        const platId = ligne.platId
+        const qte = Number(ligne.quantite || 1)
+        const prix = Number(ligne.prixUnitaire || ligne.prix || 0)
+
+        if (!statsPlats[platId]) {
+          statsPlats[platId] = { quantite: 0, revenu: 0 }
         }
-        mapPlats[ligne.platId].qte += Number(ligne.quantite || 1)
-        mapPlats[ligne.platId].revenu += Number(ligne.quantite || 1) * Number(ligne.prixUnitaire || ligne.prix || 0)
+        statsPlats[platId].quantite += qte
+        statsPlats[platId].revenu += qte * prix
       }
     })
-    return Object.keys(mapPlats).map(platId => {
-      const plat = plats.value.find(p => p.id == platId)
-      return {
-        nom: plat ? plat.nom : 'Plat inconnu',
-        quantite: mapPlats[platId].qte,
-        revenu: mapPlats[platId].revenu
-      }
-    }).sort((a, b) => b.revenu - a.revenu).slice(0, 5)
+
+    return Object.keys(statsPlats)
+      .map(platId => {
+        const platInfo = plats.value.find(p => String(p.id) === String(platId))
+        return {
+          id: platId,
+          nom: platInfo ? platInfo.nom : `Plat #${platId}`,
+          quantite: statsPlats[platId].quantite,
+          revenu: statsPlats[platId].revenu
+        }
+      })
+      .sort((a, b) => b.quantite - a.quantite)
+      .slice(0, 5)
   })
 
+  // Ventes par catégorie
   const ventesParCategorie = computed(() => {
-    const idsFiltres = new Set(commandesFiltrees.value.map(c => c.id))
-    const mapCat = {}
-    let totalGlobal = 0
-    lignesCommande.value.forEach(l => {
-      if (idsFiltres.has(l.commandeId)) {
-        const p = plats.value.find(x => x.id == l.platId)
-        if (p) {
-          const cat = categories.value.find(c => c.id == p.categorieId)
-          const nomCat = cat ? cat.nom : 'Autres'
-          const montant = Number(l.quantite || 1) * Number(l.prixUnitaire || l.prix || 0)
-          if (!mapCat[nomCat]) mapCat[nomCat] = 0
-          mapCat[nomCat] += montant
-          totalGlobal += montant
-        }
-      }
-    })
-    return Object.keys(mapCat).map(nom => ({
-      nom,
-      total: mapCat[nom],
-      pourcentage: totalGlobal > 0 ? Math.round((mapCat[nom] / totalGlobal) * 100) : 0
-    })).sort((a, b) => b.total - a.total)
-  })
+    const idsCommandesValides = new Set(commandesFiltrees.value.map(c => c.id))
+    const totauxCat = {}
 
-  const topServeurs = computed(() => {
-    const mapEmp = {}
-    commandesFiltrees.value.forEach(c => {
-      const empId = c.employeId || c.serveurId
-      const fac = factures.value.find(f => f.commandeId === c.id)
-      const montant = fac ? Number(fac.total) : Number(c.total || 0)
-      if (empId) {
-        if (!mapEmp[empId]) mapEmp[empId] = { nb: 0, ca: 0 }
-        mapEmp[empId].nb += 1
-        mapEmp[empId].ca += montant
+    lignesCommande.value.forEach(ligne => {
+      if (idsCommandesValides.has(ligne.commandeId)) {
+        const platInfo = plats.value.find(p => String(p.id) === String(ligne.platId))
+        const catId = platInfo ? platInfo.categorieId : 'autres'
+        const qte = Number(ligne.quantite || 1)
+        const prix = Number(ligne.prixUnitaire || ligne.prix || 0)
+
+        totauxCat[catId] = (totauxCat[catId] || 0) + (qte * prix)
       }
     })
-    return Object.keys(mapEmp).map(id => {
-      const e = employes.value.find(x => x.id == id)
-      const nomComplet = e ? `${e.prenom || ''} ${e.nom || ''}`.trim() : 'Serveur'
-      const initiales = nomComplet.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'SV'
+
+    const totalGlobal = chiffreAffairesTotal.value || 1
+
+    return categories.value.map(cat => {
+      const total = totauxCat[cat.id] || 0
       return {
-        nom: nomComplet,
-        initiales,
-        nbCommandes: mapEmp[id].nb,
-        ca: mapEmp[id].ca
-      }
-    }).sort((a, b) => b.ca - a.ca).slice(0, 3)
-  })
-
-  const ventesParPaiement = computed(() => {
-    const idsFiltres = new Set(commandesFiltrees.value.map(c => c.id))
-    const idsFacFiltrees = new Set(factures.value.filter(f => idsFiltres.has(f.commandeId)).map(f => f.id))
-    const modes = { especes: 0, mobile_money: 0, carte: 0 }
-    paiements.value.forEach(p => {
-      if (idsFacFiltrees.has(p.factureId)) {
-        if (modes[p.mode] !== undefined) {
-          modes[p.mode] += Number(p.montant || 0)
-        }
+        nom: cat.nom,
+        total,
+        pourcentage: Math.min(100, Math.round((total / totalGlobal) * 100))
       }
     })
-    return modes
   })
 
-  const exporterCSV = () => {
-    let csvContent = "data:text/csv;charset=utf-8,ID Commande,Date,Couverts,Total (USD)\n"
+  // Ventes par serveur
+  const topServeurs = computed(() => {
+    const statsServeurs = {}
+
     commandesFiltrees.value.forEach(cmd => {
-      const fac = factures.value.find(f => f.commandeId === cmd.id)
-      const total = fac ? fac.total : (cmd.total || 0)
-      csvContent += `${cmd.id},${cmd.creeLe || cmd.date || ''},${cmd.nbCouverts || 1},${total}\n`
+      const empId = cmd.employeId || cmd.serveurId
+      if (!empId) return
+
+      const montant = Number(cmd.total || cmd.montant || 0)
+      if (!statsServeurs[empId]) {
+        statsServeurs[empId] = { nbCommandes: 0, ca: 0 }
+      }
+      statsServeurs[empId].nbCommandes += 1
+      statsServeurs[empId].ca += isNaN(montant) ? 0 : montant
     })
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", `rapport_ventes_${periode.value}.csv`)
+
+    return Object.keys(statsServeurs)
+      .map(empId => {
+        const emp = employes.value.find(e => String(e.id) === String(empId))
+        const nomComplet = emp ? `${emp.prenom || ''} ${emp.nom || ''}`.trim() : `Serveur #${empId}`
+        const initiales = emp ? `${(emp.prenom || 'S')[0]}${(emp.nom || '')[0] || ''}`.toUpperCase() : 'S'
+
+        return {
+          id: empId,
+          nom: nomComplet,
+          initiales,
+          nbCommandes: statsServeurs[empId].nbCommandes,
+          ca: statsServeurs[empId].ca
+        }
+      })
+      .sort((a, b) => b.ca - a.ca)
+  })
+
+  // Répartition par mode de paiement
+  const ventesParPaiement = computed(() => {
+    const res = { especes: 0, mobile_money: 0, carte: 0 }
+    const idsCommandesValides = new Set(commandesFiltrees.value.map(c => c.id))
+
+    if (paiements.value.length > 0) {
+      paiements.value.forEach(p => {
+        if (idsCommandesValides.has(p.commandeId)) {
+          const mode = (p.mode || p.methode || 'especes').toLowerCase()
+          const montant = Number(p.montant || 0)
+          if (res[mode] !== undefined) {
+            res[mode] += montant
+          } else {
+            res.especes += montant
+          }
+        }
+      })
+    } else {
+      commandesFiltrees.value.forEach(cmd => {
+        const mode = (cmd.modePaiement || 'especes').toLowerCase()
+        const montant = Number(cmd.total || 0)
+        if (res[mode] !== undefined) {
+          res[mode] += montant
+        } else {
+          res.especes += montant
+        }
+      })
+    }
+
+    return res
+  })
+
+  // Export CSV sans dépendance externe
+  const exporterCSV = () => {
+    let csv = 'ID Commande;Date;Statut;Nombre Couverts;Total ($)\n'
+
+    commandesFiltrees.value.forEach(cmd => {
+      const dateStr = cmd.creeLe || cmd.date || ''
+      const total = cmd.total || 0
+      const couverts = cmd.nombreCouverts || cmd.nbPersonnes || 1
+      csv += `${cmd.id};"${dateStr}";"${cmd.statut}";${couverts};${total}\n`
+    })
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `rapport_ventes_${periode.value}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
   }
+
+  const libellePeriode = computed(() => {
+    if (periode.value === 'aujourdhui') return "Aujourd'hui"
+    if (periode.value === '7jours') return '7 derniers jours'
+    if (periode.value === '30jours') return '30 derniers jours'
+    return 'Période personnalisée'
+  })
 
   return {
     periode,
@@ -235,7 +302,6 @@ function useRapports() {
     chargement,
     erreur,
     chargerDonnees,
-    commandesFiltrees,
     chiffreAffairesTotal,
     nombreCommandes,
     nombreCouvertsTotal,
@@ -248,5 +314,3 @@ function useRapports() {
     exporterCSV
   }
 }
-
-export { useRapports }
