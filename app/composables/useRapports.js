@@ -1,16 +1,7 @@
 import { ref, computed } from 'vue'
 
-// Import direct des données locales du dossier db/
-import commandesData from '../../db/commandes.json'
-import facturesData from '../../db/factures.json'
-import lignesCommandeData from '../../db/lignesCommande.json'
-import platsData from '../../db/plats.json'
-import categoriesData from '../../db/categories.json'
-import employesData from '../../db/employes.json'
-import paiementsData from '../../db/paiements.json'
-
 export function useRapports() {
-  const periode = ref('30jours') // Par défaut 30 jours pour voir du contenu immédiatement
+  const periode = ref('30jours')
   const dateDebut = ref('')
   const dateFin = ref('')
 
@@ -25,20 +16,31 @@ export function useRapports() {
   const employes = ref([])
   const paiements = ref([])
 
-  // Charger les données directement sans API externe
-  const chargerDonnees = () => {
+  // Charger les données depuis les endpoints API du backend
+  const chargerDonnees = async () => {
     chargement.value = true
     erreur.value = null
     try {
-      commandes.value = Array.isArray(commandesData) ? commandesData : []
-      factures.value = Array.isArray(facturesData) ? facturesData : []
-      lignesCommande.value = Array.isArray(lignesCommandeData) ? lignesCommandeData : []
-      plats.value = Array.isArray(platsData) ? platsData : []
-      categories.value = Array.isArray(categoriesData) ? categoriesData : []
-      employes.value = Array.isArray(employesData) ? employesData : []
-      paiements.value = Array.isArray(paiementsData) ? paiementsData : []
+      const [resCmd, resFac, resLignes, resPlats, resCat, resEmp, resPaiements] = await Promise.all([
+        $fetch('/api/commandes').catch(() => []),
+        $fetch('/api/factures').catch(() => []),
+        $fetch('/api/lignes-commande').catch(() => []),
+        $fetch('/api/plats').catch(() => []),
+        $fetch('/api/categories').catch(() => []),
+        $fetch('/api/employes').catch(() => []),
+        $fetch('/api/paiements').catch(() => [])
+      ])
+
+      commandes.value = Array.isArray(resCmd) ? resCmd : (resCmd.data || [])
+      factures.value = Array.isArray(resFac) ? resFac : (resFac.data || [])
+      lignesCommande.value = Array.isArray(resLignes) ? resLignes : (resLignes.data || [])
+      plats.value = Array.isArray(resPlats) ? resPlats : (resPlats.data || [])
+      categories.value = Array.isArray(resCat) ? resCat : (resCat.data || [])
+      employes.value = Array.isArray(resEmp) ? resEmp : (resEmp.data || [])
+      paiements.value = Array.isArray(resPaiements) ? resPaiements : (resPaiements.data || [])
+
     } catch (err) {
-      erreur.value = "Erreur lors du chargement des données des rapports."
+      erreur.value = "Erreur lors de la récupération des rapports via l'API."
       console.error(err)
     } finally {
       chargement.value = false
@@ -53,13 +55,12 @@ export function useRapports() {
     return d.toISOString().split('T')[0]
   }
 
-  // Filtrage des commandes payées selon la période sélectionnée
+  // Filtrage des commandes selon la période sélectionnée
   const commandesFiltrees = computed(() => {
     const aujourdhui = new Date()
     
     return commandes.value.filter(cmd => {
-      // Règle métier : Seules les commandes payées ou validées comptent (exclut annulées)
-      const statutPaye = cmd.statut === 'payee' || cmd.statut === 'terminee' || cmd.statut === 'validee'
+      const statutPaye = cmd.statut === 'payee' || cmd.statut === 'terminee' || cmd.statut === 'validee' || cmd.statut === 'confirmee'
       if (!statutPaye) return false
 
       const dateCmdStr = cmd.creeLe || cmd.date || cmd.createdAt
@@ -116,7 +117,7 @@ export function useRapports() {
     }, 0)
   })
 
-  // Groupement du Chiffre d'affaires par jour (Barres)
+  // Groupement du Chiffre d'affaires par jour
   const caParJour = computed(() => {
     const groupes = {}
     
@@ -266,7 +267,42 @@ export function useRapports() {
     return res
   })
 
-  // Export CSV sans dépendance externe
+  // Formateur de date en français
+  const formaterDateCourte = (dateObj) => {
+    return dateObj.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).replace('.', '')
+  }
+
+  // Plage de dates dynamique pour l'affichage dans l'en-tête
+  const libellePeriode = computed(() => {
+    const aujourdhui = new Date()
+    let debut = new Date()
+
+    if (periode.value === 'aujourdhui') {
+      return formaterDateCourte(aujourdhui)
+    }
+
+    if (periode.value === '7jours') {
+      debut.setDate(aujourdhui.getDate() - 7)
+      return `${formaterDateCourte(debut)} → ${formaterDateCourte(aujourdhui)}`
+    }
+
+    if (periode.value === '30jours') {
+      debut.setDate(aujourdhui.getDate() - 30)
+      return `${formaterDateCourte(debut)} → ${formaterDateCourte(aujourdhui)}`
+    }
+
+    if (periode.value === 'personnalise' && dateDebut.value && dateFin.value) {
+      return `${formaterDateCourte(new Date(dateDebut.value))} → ${formaterDateCourte(new Date(dateFin.value))}`
+    }
+
+    return "Sélectionnez une période"
+  })
+
+  // Export CSV
   const exporterCSV = () => {
     let csv = 'ID Commande;Date;Statut;Nombre Couverts;Total ($)\n'
 
@@ -287,12 +323,8 @@ export function useRapports() {
     document.body.removeChild(link)
   }
 
-  const libellePeriode = computed(() => {
-    if (periode.value === 'aujourdhui') return "Aujourd'hui"
-    if (periode.value === '7jours') return '7 derniers jours'
-    if (periode.value === '30jours') return '30 derniers jours'
-    return 'Période personnalisée'
-  })
+  // Charger automatiquement au montage
+  chargerDonnees()
 
   return {
     periode,
