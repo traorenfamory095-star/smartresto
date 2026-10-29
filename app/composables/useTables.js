@@ -26,7 +26,7 @@ export function useTables(){
         return await lire('/reservations')
     }
     async function creerReservation(donnees) {
-        return await creer('/reservationns', donnees)
+        return await creer('/reservations', donnees)
     }
     async function modifierReservation(id, donnees) {
         return await modifier(`/reservations/${id}`, donnees)
@@ -34,7 +34,7 @@ export function useTables(){
 
     // Annulation logique : on conserve la réservation
     async function annulerReservation(id) {
-        return await modifier(`/reservation/${id}`, {statut: 'annulee',})
+        return await modifier(`/reservations/${id}`, {statut: 'annulee',})
     }
     return{
         recupererTables,
