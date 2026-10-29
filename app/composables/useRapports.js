@@ -54,7 +54,6 @@ function useRapports() {
     }
   }
 
-  // Calcul des dates de début et fin selon la période sélectionnée
   const datesActuelles = computed(() => {
     const maintenant = new Date()
     let debut = new Date()
@@ -74,7 +73,6 @@ function useRapports() {
     return { debut, fin }
   })
 
-  // Libellé formaté pour l'affichage (ex: "01 oct. 2026 → 21 oct. 2026")
   const libellePeriode = computed(() => {
     const options = { day: '2-digit', month: 'short', year: 'numeric' }
     const { debut, fin } = datesActuelles.value
