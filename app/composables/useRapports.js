@@ -20,23 +20,33 @@ function useRapports() {
     chargement.value = true
     erreur.value = null
     try {
+      // Sécurisation individuelle de chaque appel API pour éviter un blocage global en cas d'erreur sur une route
+      const safeFetch = async (url) => {
+        try {
+          return await $api(url)
+        } catch (e) {
+          console.warn(`Impossible de charger l'endpoint ${url}:`, e)
+          return []
+        }
+      }
+
       const [resCmd, resLignes, resPlats, resCat, resEmp, resFac, resPai] = await Promise.all([
-        $api('/commandes?statut=payee'),
-        $api('/lignesCommande'),
-        $api('/plats'),
-        $api('/categories'),
-        $api('/employes'),
-        $api('/factures'),
-        $api('/paiements')
+        safeFetch('/commandes?statut=payee'),
+        safeFetch('/lignesCommande'),
+        safeFetch('/plats'),
+        safeFetch('/categories'),
+        safeFetch('/employes'),
+        safeFetch('/factures'),
+        safeFetch('/paiements')
       ])
 
-      commandes.value = resCmd
-      lignesCommande.value = resLignes
-      plats.value = resPlats
-      categories.value = resCat
-      employes.value = resEmp
-      factures.value = resFac
-      paiements.value = resPai
+      commandes.value = Array.isArray(resCmd) ? resCmd : []
+      lignesCommande.value = Array.isArray(resLignes) ? resLignes : []
+      plats.value = Array.isArray(resPlats) ? resPlats : []
+      categories.value = Array.isArray(resCat) ? resCat : []
+      employes.value = Array.isArray(resEmp) ? resEmp : []
+      factures.value = Array.isArray(resFac) ? resFac : []
+      paiements.value = Array.isArray(resPai) ? resPai : []
     } catch (err) {
       erreur.value = "Erreur lors du chargement des données de rapports."
       console.error(err)
