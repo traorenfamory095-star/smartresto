@@ -53,6 +53,23 @@ function calculerEtatTable(table){
       (table) => table.zone === zoneSelectionnee.value
     )
   })
+
+  // RAFRAICHISSEMENT PERIODIQUE
+
+  let intervalle
+  onMounted(() => {
+    intervalle = setInterval(async () => {
+      await Promise.all([
+        refreshNuxtData('plan-salle-commandes'),
+        refreshNuxtData('plan-salle-reservations')
+      ])
+    }, 3000)
+  })
+
+  onBeforeMount(() => {
+    clearInterval(intervalle)
+  })
+
 </script>
 
 <template>
@@ -104,5 +121,12 @@ function calculerEtatTable(table){
       </article>
       <p v-if="!pending && !error && tablesFiltrees.length === 0" class="mt-6 text-gray-500"> Aucune table enregistrée.</p>
     </section>
+
+    <NuxtLink
+      to="/tables/gestion"
+      class="inline-flex rounded-lg bg-accent mt-4 border px-4 py-2 font-medium text-white"
+    >
+      Gérer les tables
+    </NuxtLink>
   </main>
 </template>
