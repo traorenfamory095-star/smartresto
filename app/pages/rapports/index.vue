@@ -230,52 +230,52 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Ventes par serveur -->
-        <div class="bg-zinc-900/90 border border-zinc-800/80 p-6 rounded-2xl shadow-xl">
-          <h2 class="text-lg font-semibold text-zinc-200 mb-6">Ventes par serveur</h2>
-          <div class="space-y-4">
+        <!-- Ventes par serveur avec défilement vertical -->
+        <div class="bg-zinc-900/90 border border-zinc-800/80 p-6 rounded-2xl shadow-xl flex flex-col h-[380px]">
+          <h2 class="text-lg font-semibold text-zinc-200 mb-4 shrink-0">Ventes par serveur</h2>
+          <div class="space-y-3 overflow-y-auto pr-1 custom-scrollbar flex-1">
             <div v-for="(serv, index) in topServeurs" :key="index" class="flex items-center justify-between py-2.5 border-b border-zinc-800/50 last:border-none">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold text-xs border border-orange-500/20">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold text-xs border border-orange-500/20 shrink-0">
                   {{ serv.initiales }}
                 </div>
-                <div>
-                  <p class="text-sm font-medium text-zinc-200">{{ serv.nom }}</p>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-zinc-200 truncate">{{ serv.nom }}</p>
                   <p class="text-xs text-zinc-400">{{ serv.nbCommandes }} commandes</p>
                 </div>
               </div>
-              <span class="text-sm font-bold text-zinc-100">${{ Number(serv.ca || 0).toLocaleString() }}</span>
+              <span class="text-sm font-bold text-zinc-100 shrink-0 ml-2">${{ Number(serv.ca || 0).toLocaleString() }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Répartition par mode de paiement (Graphique en anneau / Donut parfaitement ajusté en colonne) -->
-        <div class="bg-zinc-900/90 border border-zinc-800/80 p-6 rounded-2xl flex flex-col justify-between shadow-xl">
-          <h2 class="text-lg font-semibold text-zinc-200 mb-4">Répartition par mode de paiement</h2>
+        <!-- Répartition par mode de paiement (Anneau / Donut centré) -->
+        <div class="bg-zinc-900/90 border border-zinc-800/80 p-6 rounded-2xl flex flex-col justify-between shadow-xl h-[380px]">
+          <h2 class="text-lg font-semibold text-zinc-200 mb-2">Répartition par mode de paiement</h2>
           
-          <div class="flex flex-col items-center justify-center gap-6 my-auto">
+          <div class="flex flex-col items-center justify-center gap-4 my-auto">
             <!-- Anneau graphique centré -->
-            <div class="relative w-32 h-32 rounded-full flex items-center justify-center shrink-0 shadow-inner"
+            <div class="relative w-28 h-28 rounded-full flex items-center justify-center shrink-0 shadow-inner"
                  :style="{ background: conicGradientStyle }">
-              <div class="absolute bg-zinc-900 rounded-full flex flex-col items-center justify-center text-center shadow-inner" style="width: 82px; height: 82px;">
-                <span class="text-[10px] text-zinc-400 font-medium">Total encaissé</span>
-                <span class="text-xs font-extrabold text-zinc-100 tracking-tight">${{ chiffreAffairesTotal.toLocaleString() }}</span>
+              <div class="absolute bg-zinc-900 rounded-full flex flex-col items-center justify-center text-center shadow-inner" style="width: 72px; height: 72px;">
+                <span class="text-[9px] text-zinc-400 font-medium">Total</span>
+                <span class="text-[11px] font-extrabold text-zinc-100 tracking-tight">${{ chiffreAffairesTotal.toLocaleString() }}</span>
               </div>
             </div>
 
             <!-- Légende claire en blocs espacés -->
             <div class="space-y-2 w-full">
-              <div v-for="(montant, mode) in ventesParPaiement" :key="mode" class="flex items-center justify-between text-xs bg-zinc-950/40 px-3 py-2 rounded-xl border border-zinc-800/50">
+              <div v-for="(montant, mode) in ventesParPaiement" :key="mode" class="flex items-center justify-between text-xs bg-zinc-950/40 px-3 py-1.5 rounded-xl border border-zinc-800/50">
                 <div class="flex items-center gap-2">
                   <div :class="[
-                    'w-3 h-3 rounded-full shrink-0',
+                    'w-2.5 h-2.5 rounded-full shrink-0',
                     mode === 'especes' ? 'bg-orange-500' : mode === 'mobile_money' ? 'bg-amber-500' : 'bg-zinc-500'
                   ]"></div>
                   <span class="text-zinc-200 font-medium capitalize">{{ mode.replace('_', ' ') }}</span>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                   <span class="font-bold text-zinc-100">${{ Number(montant || 0).toLocaleString() }}</span>
-                  <span class="text-zinc-400 font-semibold w-8 text-right">
+                  <span class="text-zinc-400 font-semibold w-7 text-right">
                     {{ Math.round((montant / (chiffreAffairesTotal || 1)) * 100) }}%
                   </span>
                 </div>
@@ -283,7 +283,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-zinc-800/80 flex justify-between items-center text-xs text-zinc-400">
+          <div class="mt-3 pt-3 border-t border-zinc-800/80 flex justify-between items-center text-xs text-zinc-400 shrink-0">
             <span>Total encaissé</span>
             <span class="text-sm font-bold text-orange-500">${{ chiffreAffairesTotal.toLocaleString() }}</span>
           </div>
