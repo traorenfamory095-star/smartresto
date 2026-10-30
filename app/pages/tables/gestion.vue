@@ -229,7 +229,7 @@ useHead({
                         <button
                             type="submit"
                             :disabled="enregistrement"
-                            class="rounded-xl bg-degrade px-5 py-3 text-sm font-semibold text-on-pri shadow-md transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                            class="rounded-xl bg-degrade px-5 py-3 text-sm font-semibold shadow-md transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {{ enregistrement ? 'Enregistrement...' : tableEnModification ? 'Modifier la table' : 'Enregistrer la table' }}
                         </button>
