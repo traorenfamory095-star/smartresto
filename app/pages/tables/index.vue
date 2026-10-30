@@ -92,7 +92,7 @@ const tablesFiltrees = computed(() => {
   }
 
   return tablesActives.value.filter(
-    (table) => table.zone === zoneSelectionnee.value
+    (table) => table.zone?.toLowerCase() === zoneSelectionnee.value
   )
 })
 

@@ -298,6 +298,15 @@
       "creeLe": "2026-10-21T12:55:00",
       "nbCouverts": 2,
       "note": "Allergie aux arachides"
+    },
+    {
+      "tableId": 1,
+      "serveurId": 1,
+      "statut": "annulee",
+      "creeLe": "2026-10-30T13:32:01",
+      "nbCouverts": 2,
+      "note": "",
+      "id": 24
     }
   ],
   "employes": [
@@ -1372,6 +1381,42 @@
       "prixUnitaire": 8,
       "statutCuisine": "en_attente",
       "remarque": ""
+    },
+    {
+      "commandeId": 24,
+      "platId": 1,
+      "quantite": 1,
+      "prixUnitaire": 3.5,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 71
+    },
+    {
+      "commandeId": 24,
+      "platId": 2,
+      "quantite": 1,
+      "prixUnitaire": 4,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 72
+    },
+    {
+      "commandeId": 24,
+      "platId": 3,
+      "quantite": 1,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 73
+    },
+    {
+      "commandeId": 24,
+      "platId": 6,
+      "quantite": 1,
+      "prixUnitaire": 10,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 74
     }
   ],
   "mouvementsStock": [
@@ -1930,7 +1975,7 @@
       "date": "2026-11-02",
       "heure": "10:26",
       "tableId": 10,
-      "statut": "confirmee",
+      "statut": "annulee",
       "note": "",
       "id": 15
     },
@@ -1941,7 +1986,7 @@
       "date": "2026-11-01",
       "heure": "14:45",
       "tableId": 1,
-      "statut": "confirmee",
+      "statut": "annulee",
       "note": "",
       "id": 16
     }
@@ -2027,7 +2072,7 @@
     {
       "numero": 12,
       "capacite": 2,
-      "zone": "Intérieur",
+      "zone": "Terrasse",
       "actif": true,
       "id": 12
     }
