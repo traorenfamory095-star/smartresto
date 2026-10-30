@@ -1989,6 +1989,17 @@
       "statut": "annulee",
       "note": "",
       "id": 16
+    },
+    {
+      "nomClient": "Patrick Mbuku",
+      "telephone": "+243 987456789",
+      "nbPersonnes": 2,
+      "date": "2026-11-08",
+      "heure": "15:00",
+      "tableId": 2,
+      "statut": "annulee",
+      "note": "",
+      "id": 17
     }
   ],
   "tables": [
@@ -2075,6 +2086,13 @@
       "zone": "Terrasse",
       "actif": true,
       "id": 12
+    },
+    {
+      "numero": 13,
+      "capacite": 8,
+      "zone": "Bar / Comptoir",
+      "actif": true,
+      "id": 13
     }
   ]
 }
