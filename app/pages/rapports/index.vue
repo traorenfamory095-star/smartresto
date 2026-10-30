@@ -1,4 +1,5 @@
 <script setup>
+import { computed, onMounted } from 'vue'
 import { useRapports } from '@/composables/useRapports'
 
 useHead({
@@ -25,11 +26,29 @@ const {
   exporterCSV
 } = useRapports()
 
+// Calcul sécurisé du maximum réel pour échelonner dynamiquement la hauteur des barres du graphique
 const maxCaJour = computed(() => {
   if (!caParJour.value || caParJour.value.length === 0) return 1
   const valeurs = caParJour.value.map(j => Number(j.total) || 0)
   const max = Math.max(...valeurs)
   return max > 0 ? max : 1
+})
+
+// Génération dynamique du dégradé circulaire pour le graphique en anneau (Donut)
+const conicGradientStyle = computed(() => {
+  const total = chiffreAffairesTotal.value || 1
+  const esp = Number(ventesParPaiement.value.especes || 0)
+  const mob = Number(ventesParPaiement.value.mobile_money || 0)
+  const cart = Number(ventesParPaiement.value.carte || 0)
+
+  const pEsp = (esp / total) * 100
+  const pMob = pEsp + (mob / total) * 100
+
+  return `conic-gradient(
+    #f97316 0% ${pEsp}%, 
+    #f59e0b ${pEsp}% ${pMob}%, 
+    #71717a ${pMob}% 100%
+  )`
 })
 
 onMounted(() => {
@@ -195,6 +214,7 @@ onMounted(() => {
 
       <!-- Sections Inférieures -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Ventes par catégorie -->
         <div class="bg-zinc-900/90 border border-zinc-800/80 p-6 rounded-2xl shadow-xl">
           <h2 class="text-lg font-semibold text-zinc-200 mb-6">Ventes par catégorie</h2>
           <div class="space-y-5">
@@ -210,6 +230,7 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- Ventes par serveur -->
         <div class="bg-zinc-900/90 border border-zinc-800/80 p-6 rounded-2xl shadow-xl">
           <h2 class="text-lg font-semibold text-zinc-200 mb-6">Ventes par serveur</h2>
           <div class="space-y-4">
@@ -228,21 +249,41 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- Répartition par mode de paiement (Graphique en anneau / Donut parfaitement ajusté en colonne) -->
         <div class="bg-zinc-900/90 border border-zinc-800/80 p-6 rounded-2xl flex flex-col justify-between shadow-xl">
           <h2 class="text-lg font-semibold text-zinc-200 mb-4">Répartition par mode de paiement</h2>
-          <div class="space-y-4 my-auto py-2">
-            <div v-for="(montant, mode) in ventesParPaiement" :key="mode" class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div :class="[
-                  'w-3 h-3 rounded-full',
-                  mode === 'especes' ? 'bg-orange-500' : mode === 'mobile_money' ? 'bg-amber-500' : 'bg-zinc-500'
-                ]"></div>
-                <span class="text-sm text-zinc-300 capitalize">{{ mode.replace('_', ' ') }}</span>
+          
+          <div class="flex flex-col items-center justify-center gap-6 my-auto">
+            <!-- Anneau graphique centré -->
+            <div class="relative w-32 h-32 rounded-full flex items-center justify-center shrink-0 shadow-inner"
+                 :style="{ background: conicGradientStyle }">
+              <div class="absolute bg-zinc-900 rounded-full flex flex-col items-center justify-center text-center shadow-inner" style="width: 82px; height: 82px;">
+                <span class="text-[10px] text-zinc-400 font-medium">Total encaissé</span>
+                <span class="text-xs font-extrabold text-zinc-100 tracking-tight">${{ chiffreAffairesTotal.toLocaleString() }}</span>
               </div>
-              <span class="text-sm font-bold text-zinc-100">${{ Number(montant || 0).toLocaleString() }}</span>
+            </div>
+
+            <!-- Légende claire en blocs espacés -->
+            <div class="space-y-2 w-full">
+              <div v-for="(montant, mode) in ventesParPaiement" :key="mode" class="flex items-center justify-between text-xs bg-zinc-950/40 px-3 py-2 rounded-xl border border-zinc-800/50">
+                <div class="flex items-center gap-2">
+                  <div :class="[
+                    'w-3 h-3 rounded-full shrink-0',
+                    mode === 'especes' ? 'bg-orange-500' : mode === 'mobile_money' ? 'bg-amber-500' : 'bg-zinc-500'
+                  ]"></div>
+                  <span class="text-zinc-200 font-medium capitalize">{{ mode.replace('_', ' ') }}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="font-bold text-zinc-100">${{ Number(montant || 0).toLocaleString() }}</span>
+                  <span class="text-zinc-400 font-semibold w-8 text-right">
+                    {{ Math.round((montant / (chiffreAffairesTotal || 1)) * 100) }}%
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="mt-6 pt-4 border-t border-zinc-800 flex justify-between items-center text-xs text-zinc-400">
+
+          <div class="mt-4 pt-3 border-t border-zinc-800/80 flex justify-between items-center text-xs text-zinc-400">
             <span>Total encaissé</span>
             <span class="text-sm font-bold text-orange-500">${{ chiffreAffairesTotal.toLocaleString() }}</span>
           </div>
