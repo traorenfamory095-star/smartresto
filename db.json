@@ -1799,7 +1799,7 @@
       "nbPersonnes": 6,
       "date": "2026-10-23",
       "heure": "12:30",
-      "statut": "confirmee",
+      "statut": "annulee",
       "note": "Déjeuner d'affaires"
     },
     {
@@ -1810,7 +1810,7 @@
       "nbPersonnes": 2,
       "date": "2026-10-21",
       "heure": "20:30",
-      "statut": "confirmee",
+      "statut": "annulee",
       "note": ""
     },
     {
@@ -1922,6 +1922,28 @@
       "statut": "annulee",
       "note": "Dejeuner d'affaire",
       "id": 14
+    },
+    {
+      "nomClient": "Famille Mbungu",
+      "telephone": "+243988746532",
+      "nbPersonnes": 5,
+      "date": "2026-11-02",
+      "heure": "10:26",
+      "tableId": 10,
+      "statut": "confirmee",
+      "note": "",
+      "id": 15
+    },
+    {
+      "nomClient": "Aline Mwamba",
+      "telephone": "+243 897767345",
+      "nbPersonnes": 2,
+      "date": "2026-11-01",
+      "heure": "14:45",
+      "tableId": 1,
+      "statut": "confirmee",
+      "note": "",
+      "id": 16
     }
   ],
   "tables": [

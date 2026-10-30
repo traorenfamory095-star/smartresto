@@ -53,13 +53,16 @@ function calculerEtatTable(table) {
         return false
       }
 
-      const dateReservation = new Date(
+      const debutReservation = new Date(
         `${reservation.date}T${reservation.heure}`
+      )
+      const finReservation = new Date(
+        debutReservation.getTime() + 120 * 60 * 1000
       )
 
       return (
-        dateReservation >= maintenant &&
-        dateReservation <= limite
+        debutReservation < limite &&
+        finReservation > maintenant
       )
     }
   )

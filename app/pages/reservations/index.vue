@@ -4,7 +4,8 @@ const {
   recupererReservations,
   annulerReservation,
   recupererTables,
-  creerReservation
+  creerReservation,
+  modifierReservation,
 } = useTables()
 
 useHead({ title: 'Réservations | SmartResto' })
@@ -27,6 +28,9 @@ const messageSucces = ref('')
 const formulaireOuvert = ref(false)
 const enregistrement = ref(false)
 const erreurFormulaire = ref('')
+
+const reservationEnModification = ref(null)
+
 
 const { data: tables } = await useAsyncData(
   'tables-pour-reservations',
@@ -61,6 +65,17 @@ function formaterDate(date) {
     year: 'numeric',
   })
 }
+
+function formaterNumeroTable(numero) {
+  const valeur = String(numero)
+
+  if (valeur.toUpperCase().startsWith('T')) {
+    return `T${valeur.slice(1).padStart(2, '0')}`
+  }
+
+  return `T${valeur.padStart(2, '0')}`
+}
+
 
 function libelleStatut(statut) {
   const statuts = {
@@ -98,6 +113,25 @@ function afficherMessageSucces(message) {
   minuterieMessage = setTimeout(() => {
     messageSucces.value = ''
   }, 3000)
+}
+
+// ----------------------------------
+// MODIFICATION
+// ----------------------------------
+function ouvrirModalModification(reservation){
+  reservationEnModification.value = reservation
+
+  Object.assign(formulaire, {
+    nomClient: reservation.nomClient,
+    telephone: reservation.telephone,
+    nbPersonnes: reservation.nbPersonnes,
+    date: reservation.date,
+    heure: reservation.heure,
+    tableId: reservation.tableId,
+    note: reservation.note || '',
+  })
+
+  formulaireOuvert.value = true
 }
 
 // ----------------------------------
@@ -157,6 +191,14 @@ function verifierDisponibilite(tableId, date, heure) {
   if (debutNouvelle < maintenant) return false
 
   return !reservations.value.some((reservation) => {
+    if(
+      reservationEnModification.value &&
+      Number(reservation.id) == 
+      Number(reservationEnModification.value.id)
+    ){
+      return false
+    }
+
     if (
       reservation.statut === 'annulee' ||
       reservation.statut === 'terminee'
@@ -193,6 +235,8 @@ function verifierDisponibilite(tableId, date, heure) {
 function fermerModal() {
   formulaireOuvert.value = false
   erreurFormulaire.value = ''
+  reservationEnModification.value = null
+  reinitialiserFormulaire()
 }
 
 function reinitialiserFormulaire() {
@@ -240,31 +284,50 @@ async function enregistrerReservation() {
 
   enregistrement.value = true
 
-  try {
-    await creerReservation({
-      nomClient: formulaire.nomClient.trim(),
-      telephone: formulaire.telephone.trim(),
-      nbPersonnes: Number(formulaire.nbPersonnes),
-      date: formulaire.date,
-      heure: formulaire.heure,
-      tableId: Number(formulaire.tableId),
-      statut: 'confirmee',
-      note: formulaire.note.trim(),
-    })
-
-    await refresh()
-
-    reinitialiserFormulaire()
-    fermerModal()
-
-    afficherMessageSucces('Réservation créée avec succès.')
-  } catch (erreur) {
-    erreurFormulaire.value =
-      "Impossible de créer la réservation. Vérifie l'API."
-  } finally {
-    enregistrement.value = false
+  const donneesReservation = {
+    nomClient: formulaire.nomClient.trim(),
+    telephone: formulaire.telephone.trim(),
+    nbPersonnes: Number(formulaire.nbPersonnes),
+    date: formulaire.date,
+    heure: formulaire.heure,
+    tableId: Number(formulaire.tableId),
+    statut: 'confirmee',
+    note: formulaire.note.trim(),
   }
+  try {
+    if(reservationEnModification.value){
+      await modifierReservation(
+        reservationEnModification.value.id,
+        donneesReservation
+      )
+      await refresh()
+
+      reinitialiserFormulaire()
+      reservationEnModification.value = null
+      fermerModal()
+  
+      afficherMessageSucces('Réservation modidiée avec succès.')
+
+    } else{
+      await creerReservation({
+        ...donneesReservation, statut: 'confirmee'
+      })
+      await refresh()
+  
+      reinitialiserFormulaire()
+      fermerModal()
+  
+      afficherMessageSucces('Réservation créée avec succès.')
+    }
+  }catch(erreur){
+    erreurFormulaire.value = reservationEnModification.value
+    ? "Impossible de modifier la réservation. Vérifie l'API."
+    : "Impossible de créer la réservation. Vérifie l'API."
+}finally{
+  enregistrement.value = false
 }
+}
+
 </script>
 
 <template>
@@ -435,7 +498,9 @@ async function enregistrerReservation() {
               <td class="px-5 py-5 text-sm text-ink">
                 <span class="rounded-lg bg-soft px-3 py-1.5">
                   {{
-                    tables.find(t => Number(t.id) === Number(reservation.tableId))?.numero ?? '—'
+                    formaterNumeroTable(
+                      tables.find(t => Number(t.id) === Number(reservation.tableId))?.numero ?? '—'
+                    )
                   }}
                 </span>
               </td>
@@ -450,7 +515,15 @@ async function enregistrerReservation() {
                 </span>
               </td>
 
-              <td class="px-5 py-5">
+              <td class="px-5 py-5 flex">
+                <button 
+                v-if="reservation.statut !== 'annulee' && reservation.statut !== 'terminee'"
+                type="button"
+                class="rounded-lg px-3 py-2 text-xs font-semibold text-pri transition hover:bg-pri/10"
+                @click="ouvrirModalModification(reservation)"
+                >
+                  Modifier
+                </button>
                 <button
                   v-if="reservation.statut !== 'annulee' && reservation.statut !== 'terminee'"
                   type="button"
@@ -474,6 +547,7 @@ async function enregistrerReservation() {
                 >
                   Terminée
                 </span>
+
               </td>
             </tr>
           </tbody>
