@@ -298,6 +298,24 @@
       "creeLe": "2026-10-21T12:55:00",
       "nbCouverts": 2,
       "note": "Allergie aux arachides"
+    },
+    {
+      "tableId": 10,
+      "serveurId": 1,
+      "statut": "en_attente",
+      "creeLe": "2026-10-29T22:37:05",
+      "nbCouverts": 2,
+      "note": "",
+      "id": 24
+    },
+    {
+      "tableId": 1,
+      "serveurId": 1,
+      "statut": "en_attente",
+      "creeLe": "2026-10-29T23:10:31",
+      "nbCouverts": 2,
+      "note": "",
+      "id": 25
     }
   ],
   "employes": [
@@ -1372,6 +1390,60 @@
       "prixUnitaire": 8,
       "statutCuisine": "en_attente",
       "remarque": ""
+    },
+    {
+      "commandeId": 24,
+      "platId": 2,
+      "quantite": 1,
+      "prixUnitaire": 4,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 71
+    },
+    {
+      "commandeId": 24,
+      "platId": 3,
+      "quantite": 1,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 72
+    },
+    {
+      "commandeId": 24,
+      "platId": 1,
+      "quantite": 1,
+      "prixUnitaire": 3.5,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 73
+    },
+    {
+      "commandeId": 25,
+      "platId": 2,
+      "quantite": 1,
+      "prixUnitaire": 4,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 74
+    },
+    {
+      "commandeId": 25,
+      "platId": 3,
+      "quantite": 1,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 75
+    },
+    {
+      "commandeId": 25,
+      "platId": 1,
+      "quantite": 1,
+      "prixUnitaire": 3.5,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 76
     }
   ],
   "mouvementsStock": [

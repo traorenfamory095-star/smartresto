@@ -86,9 +86,80 @@ export function assemblerDetail({ commande, lignes = [], plats = [], table = nul
   return { ...commande, table, serveur, lignes: lignesDetaillees, total: calculerTotal(lignes) }
 }
 
+// Date et heure LOCALES au format des données ("2026-10-21T12:05:00"), sans fuseau.
+export function maintenantLocal(date = new Date()) {
+  const deux = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${deux(date.getMonth() + 1)}-${deux(date.getDate())}T${deux(date.getHours())}:${deux(date.getMinutes())}:${deux(date.getSeconds())}`
+}
+
+// Crée une commande ET ses lignes, ou rien du tout.
+//
+// Le piège : l'API n'a pas de transaction. Il faut une requête pour la commande, puis une par ligne.
+// Si l'une des lignes échoue, on supprime les lignes déjà créées puis la commande, pour ne laisser
+// aucune commande incomplète (« orpheline ») que la cuisine verrait sans savoir quoi préparer.
+//
+// `api` = { lire, creer, supprimer } (celles de useApi) : on les injecte pour tester sans réseau.
+export async function creerCommandeAvecLignes(api, { tableId, serveurId, nbCouverts, note = '', lignes }) {
+  if (!lignes?.length) throw new Error('Ajoutez au moins un plat.')
+
+  // 1. On relit l'état réel de la table : un collègue a pu ouvrir une commande entre-temps.
+  const existantes = await api.lire('/commandes', { tableId })
+  if (existantes.some(estOuverte)) throw new Error('Cette table a déjà une commande en cours.')
+
+  let commande = null
+  const lignesCreees = []
+  try {
+    // 2. La commande d'abord (on a besoin de son id pour les lignes).
+    commande = await api.creer('/commandes', {
+      tableId: Number(tableId),
+      serveurId,
+      statut: 'en_attente',
+      creeLe: maintenantLocal(),
+      nbCouverts: Number(nbCouverts),
+      note,
+    })
+
+    // 3. Les lignes en parallèle. allSettled attend TOUTES les réponses : même si l'une échoue,
+    //    on sait exactement lesquelles ont été créées, donc lesquelles défaire.
+    const resultats = await Promise.allSettled(
+      lignes.map((l) =>
+        api.creer('/lignesCommande', {
+          commandeId: commande.id,
+          platId: l.platId,
+          quantite: l.quantite,
+          prixUnitaire: l.prixUnitaire,
+          statutCuisine: 'en_attente',
+          remarque: l.remarque ?? '',
+        }),
+      ),
+    )
+    for (const r of resultats) if (r.status === 'fulfilled') lignesCreees.push(r.value)
+    const echec = resultats.find((r) => r.status === 'rejected')
+    if (echec) throw echec.reason
+
+    return { ...commande, lignes: lignesCreees }
+  } catch (cause) {
+    if (!commande) throw cause // rien n'a été créé : rien à défaire
+
+    // 4. Retour arrière : les lignes d'abord, la commande ensuite.
+    const aSupprimer = [...lignesCreees.map((l) => `/lignesCommande/${l.id}`), `/commandes/${commande.id}`]
+    const nettoyage = await Promise.allSettled(aSupprimer.map((chemin) => api.supprimer(chemin)))
+    const incomplet = nettoyage.some((r) => r.status === 'rejected')
+
+    const erreur = new Error(
+      incomplet
+        ? `La commande a échoué et le nettoyage est incomplet : vérifiez la commande n°${commande.id} dans la liste.`
+        : "La commande n'a pas pu être enregistrée. Rien n'a été créé, vous pouvez réessayer.",
+    )
+    erreur.cause = cause
+    erreur.nettoyageIncomplet = incomplet
+    throw erreur
+  }
+}
+
 // Composable : chargements et actions du module. À appeler au niveau du setup.
 export function useCommandes() {
-  const { lire, modifier } = useApi()
+  const { lire, creer, modifier, supprimer } = useApi()
 
   // Liste : 4 requêtes en parallèle, quel que soit le nombre de commandes.
   async function chargerListe() {
@@ -124,9 +195,13 @@ export function useCommandes() {
     return modifier(`/commandes/${id}`, { statut: nouveauStatut })
   }
 
+  // Crée la commande et ses lignes, ou rien (voir creerCommandeAvecLignes).
+  const creerCommande = (donnees) => creerCommandeAvecLignes({ lire, creer, supprimer }, donnees)
+
   return {
     chargerListe,
     chargerDetail,
+    creerCommande,
     marquerServie: (id) => changerStatut(id, 'servie'),
     annuler: (id) => changerStatut(id, 'annulee'),
   }
