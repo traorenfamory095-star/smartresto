@@ -33,6 +33,7 @@ const STATUTS_FILTRE = ['en_attente', 'en_preparation', 'prete', 'servie', 'paye
         <span aria-hidden="true">+</span> Nouvelle commande
       </UiBouton>
     </header>
+        <CommandesDemandesEnLigne @traitee="refresh" />
 
     <form class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" role="search" @submit.prevent>
       <UiChamp v-model="filtres.recherche" label="Recherche" type="search" placeholder="N°, table, serveur, note" />
