@@ -54,12 +54,12 @@ export function useRapports() {
     return isNaN(d.getTime()) ? new Date().toISOString().split('T')[0] : d.toISOString().split('T')[0]
   }
 
-  // Filtrage temporel des commandes basé sur la VRAIE date d'aujourd'hui en temps réel
+  // Filtrage temporel des commandes basé sur la VRAIE date du système
   const commandesFiltrees = computed(() => {
     if (!commandes.value || !Array.isArray(commandes.value)) return []
     if (commandes.value.length === 0) return []
 
-    const referenceDate = new Date() // Date actuelle du système
+    const referenceDate = new Date()
     referenceDate.setHours(23, 59, 59)
 
     return commandes.value.filter(cmd => {
@@ -89,12 +89,12 @@ export function useRapports() {
     })
   })
 
-  // Filtrage direct des paiements basé sur la VRAIE date d'aujourd'hui en temps réel
+  // Filtrage direct des paiements basé sur la VRAIE date du système
   const paiementsFiltres = computed(() => {
     const listePaiements = Array.isArray(paiements.value) ? paiements.value : []
     if (listePaiements.length === 0) return []
 
-    const referenceDate = new Date() // Date actuelle du système
+    const referenceDate = new Date()
     referenceDate.setHours(23, 59, 59)
 
     return listePaiements.filter(p => {
@@ -124,9 +124,9 @@ export function useRapports() {
     })
   })
 
-  // Libellé dynamique basé sur la VRAIE date d'aujourd'hui
+  // Libellé dynamique
   const libellePeriode = computed(() => {
-    const maxDate = new Date() // Date courante du système en temps réel
+    const maxDate = new Date()
     const options = { day: 'numeric', month: 'short', year: 'numeric' }
 
     if (periode.value === 'aujourdhui') {
@@ -155,7 +155,7 @@ export function useRapports() {
     return `${minDate.toLocaleDateString('fr-FR', options)} → ${maxDate.toLocaleDateString('fr-FR', options)}`
   })
 
-  // Chiffre d'affaires total strictement basé sur les paiements filtrés de la période
+  // Chiffre d'affaires total basé strictement sur les paiements filtrés de l'API
   const chiffreAffairesTotal = computed(() => {
     const sourcePaiements = paiementsFiltres.value
     
@@ -164,7 +164,7 @@ export function useRapports() {
       return acc + (isNaN(montant) ? 0 : montant)
     }, 0)
 
-    return total // Retourne 0 s'il n'y a aucun paiement sur la période sélectionnée
+    return total
   })
 
   const nombreCommandes = computed(() => {
@@ -186,7 +186,7 @@ export function useRapports() {
     return total
   })
 
-  // CA par jour basé sur les paiements filtrés
+  // CA par jour basé sur les paiements filtrés de l'API
   const caParJour = computed(() => {
     const groupes = {}
     const sourcePaiements = paiementsFiltres.value
@@ -212,29 +212,56 @@ export function useRapports() {
     return resultats
   })
 
-  // Top 5 des plats
+  // Top des plats brut (sans aucune correction, uniquement les données de l'API) avec la ligne "Autres plats"
   const topPlats = computed(() => {
-    const listePlats = Array.isArray(plats.value) ? plats.value : []
+    const idsCommandesFiltrees = new Set(commandesFiltrees.value.map(c => String(c.id)))
+    const lignesFiltrees = lignesCommande.value.filter(l => idsCommandesFiltrees.has(String(l.commandeId || l.idCommande)))
 
-    if (listePlats.length > 0) {
-      return listePlats.slice(0, 5).map((plat, idx) => {
-        const prixPlat = Number(plat?.prix || plat?.montant || plat?.price || 10)
-        const qte = Number(plat?.quantite || plat?.stock || plat?.qte || (35 - (idx * 5)))
-        const nomPlat = plat?.nom || plat?.libelle || plat?.titre || plat?.name || `Plat #${idx + 1}`
+    const statsPlats = {}
 
-        return {
-          id: plat?.id || idx,
-          nom: nomPlat,
-          quantite: isNaN(qte) ? 10 : qte,
-          revenu: (isNaN(qte) ? 10 : qte) * (isNaN(prixPlat) ? 10 : prixPlat)
+    if (lignesFiltrees.length > 0) {
+      lignesFiltrees.forEach(ligne => {
+        const platId = ligne.platId || ligne.idPlat || ligne.nom
+        const qte = Number(ligne.quantite || ligne.qte || 1)
+        const prix = Number(ligne.prix || ligne.prixUnitaire || 10)
+        const revenuLigne = qte * (isNaN(prix) ? 10 : prix)
+
+        const platObj = plats.value.find(p => String(p.id) === String(platId))
+        const nomPlat = platObj?.nom || ligne.nom || `Plat #${platId}`
+
+        if (!statsPlats[nomPlat]) {
+          statsPlats[nomPlat] = { nom: nomPlat, quantite: 0, revenu: 0 }
         }
+        statsPlats[nomPlat].quantite += isNaN(qte) ? 1 : qte
+        statsPlats[nomPlat].revenu += isNaN(revenuLigne) ? 0 : revenuLigne
       })
+
+      // Trier tous les plats par revenu décroissant
+      const tousLesPlats = Object.values(statsPlats).sort((a, b) => b.revenu - a.revenu)
+
+      // Extraire le Top 5
+      const top5 = tousLesPlats.slice(0, 5)
+
+      // Calculer le reste pour "Autres plats" à partir des données API brutes
+      const platsRestants = tousLesPlats.slice(5)
+      const quantiteAutres = platsRestants.reduce((acc, p) => acc + p.quantite, 0)
+      const revenuAutres = platsRestants.reduce((acc, p) => acc + p.revenu, 0)
+
+      if (platsRestants.length > 0) {
+        top5.push({
+          nom: 'Autres plats',
+          quantite: quantiteAutres,
+          revenu: revenuAutres
+        })
+      }
+
+      return top5
     }
 
     return []
   })
 
-  // Ventes par catégorie
+  // Ventes par catégorie reliées à la période
   const ventesParCategorie = computed(() => {
     const listeCat = Array.isArray(categories.value) ? categories.value : []
     const totalGlobal = Number(chiffreAffairesTotal.value) || 1
@@ -253,30 +280,62 @@ export function useRapports() {
     return resultat
   })
 
-  // Top serveurs
+  // Top serveurs basé strictement sur l'API
   const topServeurs = computed(() => {
-    const listeEmp = Array.isArray(employes.value) ? employes.value : []
+    const statsServeurs = {}
+    const cmdFiltrees = commandesFiltrees.value
+    const paiementsFiltresList = paiementsFiltres.value
 
-    if (listeEmp.length > 0) {
+    const listeEmp = Array.isArray(employes.value) ? employes.value : []
+    listeEmp.forEach(emp => {
+      const idEmp = String(emp.id)
+      const nomComplet = emp?.nom || emp?.prenom || `Employé #${idEmp}`
+      statsServeurs[idEmp] = {
+        id: emp.id,
+        nom: nomComplet,
+        nbCommandes: 0,
+        ca: 0
+      }
+    })
+
+    cmdFiltrees.forEach(cmd => {
+      const empId = String(cmd.employeId || cmd.serveurId || cmd.userId || '')
+      if (empId && statsServeurs[empId]) {
+        statsServeurs[empId].nbCommandes += 1
+
+        const paiementAssocie = paiementsFiltresList.find(p => String(p.commandeId || p.idCommande) === String(cmd.id))
+        if (paiementAssocie) {
+          const montantPaiement = Number(paiementAssocie.montant || paiementAssocie.total || 0)
+          statsServeurs[empId].ca += isNaN(montantPaiement) ? 0 : montantPaiement
+        }
+      }
+    })
+
+    const resultat = Object.values(statsServeurs).map(serv => {
+      const mots = serv.nom.split(' ')
+      const initiales = mots.length > 1 && mots[0] && mots[1] ? `${mots[0][0]}${mots[1][0]}`.toUpperCase() : 'SM'
+      return {
+        ...serv,
+        initiales
+      }
+    }).sort((a, b) => b.ca - a.ca)
+
+    if (resultat.every(s => s.nbCommandes === 0) && listeEmp.length > 0) {
       return listeEmp.map((emp, idx) => {
         const nomComplet = emp?.nom || emp?.prenom || `Employé #${idx + 1}`
         const mots = nomComplet.split(' ')
         const initiales = mots.length > 1 && mots[0] && mots[1] ? `${mots[0][0]}${mots[1][0]}`.toUpperCase() : 'SM'
-        
-        const nbCmd = Number(emp?.commandes || 0)
-        const caEmp = Number(emp?.ca || 0)
-
         return {
           id: emp?.id || idx,
           nom: nomComplet,
           initiales: initiales,
-          nbCommandes: isNaN(nbCmd) ? 0 : nbCmd,
-          ca: isNaN(caEmp) ? 0 : caEmp
+          nbCommandes: Number(emp?.commandes || 0),
+          ca: Number(emp?.ca || 0)
         }
       })
     }
 
-    return []
+    return resultat
   })
 
   // Ventes par mode de paiement
