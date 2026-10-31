@@ -39,7 +39,7 @@ export function useRapports() {
       employes.value = Array.isArray(resEmp) ? resEmp : (resEmp?.data || [])
       paiements.value = Array.isArray(resPaiements) ? resPaiements : (resPaiements?.data || [])
 
-      console.log("Données chargées - Commandes:", commandes.value.length, "| Plats:", plats.value.length)
+      console.log("Données chargées - Commandes:", commandes.value.length, "| Paiements:", paiements.value.length)
     } catch (err) {
       erreur.value = "Erreur lors de la récupération des rapports via l'API."
       console.error(err)
@@ -49,35 +49,133 @@ export function useRapports() {
   }
 
   const formaterDateISO = (dateStr) => {
-    if (!dateStr) return '2026-10-30'
+    if (!dateStr) return new Date().toISOString().split('T')[0]
     const d = new Date(dateStr)
-    return isNaN(d.getTime()) ? '2026-10-30' : d.toISOString().split('T')[0]
+    return isNaN(d.getTime()) ? new Date().toISOString().split('T')[0] : d.toISOString().split('T')[0]
   }
 
+  // Filtrage temporel des commandes basé sur la VRAIE date d'aujourd'hui en temps réel
   const commandesFiltrees = computed(() => {
     if (!commandes.value || !Array.isArray(commandes.value)) return []
-    return commandes.value
+    if (commandes.value.length === 0) return []
+
+    const referenceDate = new Date() // Date actuelle du système
+    referenceDate.setHours(23, 59, 59)
+
+    return commandes.value.filter(cmd => {
+      const dateStr = cmd?.creeLe || cmd?.date || cmd?.createdAt
+      if (!dateStr) return true
+
+      const dateCmd = new Date(dateStr)
+      if (isNaN(dateCmd.getTime())) return true
+
+      const diffTemps = referenceDate - dateCmd
+      const diffJours = diffTemps / (1000 * 60 * 60 * 24)
+
+      if (periode.value === 'aujourdhui') {
+        return dateCmd.toDateString() === referenceDate.toDateString()
+      } else if (periode.value === '7jours') {
+        return diffJours >= 0 && diffJours <= 7
+      } else if (periode.value === '30jours') {
+        return diffJours >= 0 && diffJours <= 30
+      } else if (periode.value === 'personnalise' && dateDebut.value && dateFin.value) {
+        const dDebut = new Date(dateDebut.value)
+        const dFin = new Date(dateFin.value)
+        dFin.setHours(23, 59, 59)
+        return dateCmd >= dDebut && dateCmd <= dFin
+      }
+
+      return true
+    })
   })
 
-  // KPIs Financiers anti-NaN
+  // Filtrage direct des paiements basé sur la VRAIE date d'aujourd'hui en temps réel
+  const paiementsFiltres = computed(() => {
+    const listePaiements = Array.isArray(paiements.value) ? paiements.value : []
+    if (listePaiements.length === 0) return []
+
+    const referenceDate = new Date() // Date actuelle du système
+    referenceDate.setHours(23, 59, 59)
+
+    return listePaiements.filter(p => {
+      const dateStr = p?.date || p?.creeLe
+      if (!dateStr) return true
+
+      const datePaiement = new Date(dateStr)
+      if (isNaN(datePaiement.getTime())) return true
+
+      const diffTemps = referenceDate - datePaiement
+      const diffJours = diffTemps / (1000 * 60 * 60 * 24)
+
+      if (periode.value === 'aujourdhui') {
+        return datePaiement.toDateString() === referenceDate.toDateString()
+      } else if (periode.value === '7jours') {
+        return diffJours >= 0 && diffJours <= 7
+      } else if (periode.value === '30jours') {
+        return diffJours >= 0 && diffJours <= 30
+      } else if (periode.value === 'personnalise' && dateDebut.value && dateFin.value) {
+        const dDebut = new Date(dateDebut.value)
+        const dFin = new Date(dateFin.value)
+        dFin.setHours(23, 59, 59)
+        return datePaiement >= dDebut && datePaiement <= dFin
+      }
+
+      return true
+    })
+  })
+
+  // Libellé dynamique basé sur la VRAIE date d'aujourd'hui
+  const libellePeriode = computed(() => {
+    const maxDate = new Date() // Date courante du système en temps réel
+    const options = { day: 'numeric', month: 'short', year: 'numeric' }
+
+    if (periode.value === 'aujourdhui') {
+      const dateStr = maxDate.toLocaleDateString('fr-FR', options)
+      return `Aujourd'hui (${dateStr})`
+    } 
+    
+    if (periode.value === '7jours') {
+      const minDate = new Date(maxDate)
+      minDate.setDate(minDate.getDate() - 7)
+      return `${minDate.toLocaleDateString('fr-FR', options)} → ${maxDate.toLocaleDateString('fr-FR', options)}`
+    } 
+    
+    if (periode.value === '30jours') {
+      const minDate = new Date(maxDate)
+      minDate.setDate(minDate.getDate() - 30)
+      return `${minDate.toLocaleDateString('fr-FR', options)} → ${maxDate.toLocaleDateString('fr-FR', options)}`
+    } 
+    
+    if (periode.value === 'personnalise' && dateDebut.value && dateFin.value) {
+      return `${dateDebut.value} → ${dateFin.value}`
+    }
+
+    const minDate = new Date(maxDate)
+    minDate.setDate(minDate.getDate() - 30)
+    return `${minDate.toLocaleDateString('fr-FR', options)} → ${maxDate.toLocaleDateString('fr-FR', options)}`
+  })
+
+  // Chiffre d'affaires total strictement basé sur les paiements filtrés de la période
   const chiffreAffairesTotal = computed(() => {
-    const total = commandesFiltrees.value.reduce((acc, cmd) => {
-      const montant = Number(cmd?.total || cmd?.montant || 0)
+    const sourcePaiements = paiementsFiltres.value
+    
+    const total = sourcePaiements.reduce((acc, p) => {
+      const montant = Number(p?.montant || p?.total || 0)
       return acc + (isNaN(montant) ? 0 : montant)
     }, 0)
-    return total > 0 ? total : 24860
+
+    return total // Retourne 0 s'il n'y a aucun paiement sur la période sélectionnée
   })
 
   const nombreCommandes = computed(() => {
-    const len = commandesFiltrees.value.length
-    return len > 0 ? len : 942
+    return commandesFiltrees.value.length
   })
 
   const ticketMoyen = computed(() => {
     const nb = nombreCommandes.value
-    if (nb === 0) return 26.40
+    if (nb === 0) return 0
     const tm = chiffreAffairesTotal.value / nb
-    return isNaN(tm) ? 26.40 : tm
+    return isNaN(tm) ? 0 : tm
   })
 
   const nombreCouvertsTotal = computed(() => {
@@ -85,17 +183,19 @@ export function useRapports() {
       const nb = Number(cmd?.nombreCouverts || cmd?.nbPersonnes || 2)
       return acc + (isNaN(nb) ? 2 : nb)
     }, 0)
-    return total > 0 ? total : 1628
+    return total
   })
 
-  // CA par jour anti-NaN
+  // CA par jour basé sur les paiements filtrés
   const caParJour = computed(() => {
     const groupes = {}
-    commandesFiltrees.value.forEach(cmd => {
-      const dateStr = cmd?.creeLe || cmd?.date || cmd?.createdAt || '2026-10-30'
+    const sourcePaiements = paiementsFiltres.value
+
+    sourcePaiements.forEach(p => {
+      const dateStr = p?.date || p?.creeLe || new Date().toISOString()
       const key = formaterDateISO(dateStr)
-      const montant = Number(cmd?.total || cmd?.montant || 150)
-      groupes[key] = (groupes[key] || 0) + (isNaN(montant) ? 150 : montant)
+      const montant = Number(p?.montant || p?.total || 0)
+      groupes[key] = (groupes[key] || 0) + (isNaN(montant) ? 0 : montant)
     })
 
     const resultats = Object.keys(groupes).sort().map(dateIso => {
@@ -109,80 +209,51 @@ export function useRapports() {
       }
     })
 
-    if (resultats.length === 0) {
-      return [
-        { date: '2026-10-24', libelle: 'Ven', total: 3200 },
-        { date: '2026-10-25', libelle: 'Sam', total: 4800 },
-        { date: '2026-10-26', libelle: 'Dim', total: 2900 },
-        { date: '2026-10-27', libelle: 'Lun', total: 4100 },
-        { date: '2026-10-28', libelle: 'Mar', total: 3800 },
-        { date: '2026-10-29', libelle: 'Mer', total: 5400 },
-        { date: '2026-10-30', libelle: 'Jeu', total: 4600 }
-      ]
-    }
-
     return resultats
   })
 
-  // Top 5 des plats : Affichage immédiat et garanti pour s'assurer que la carte ne reste pas vide
+  // Top 5 des plats
   const topPlats = computed(() => {
     const listePlats = Array.isArray(plats.value) ? plats.value : []
 
     if (listePlats.length > 0) {
-      const resultat = []
-      for (let i = 0; i < 5; i++) {
-        const plat = listePlats[i % listePlats.length]
-        const prixPlat = Number(plat?.prix || 10)
-        const qte = 40 - (i * 5)
+      return listePlats.slice(0, 5).map((plat, idx) => {
+        const prixPlat = Number(plat?.prix || plat?.montant || plat?.price || 10)
+        const qte = Number(plat?.quantite || plat?.stock || plat?.qte || (35 - (idx * 5)))
+        const nomPlat = plat?.nom || plat?.libelle || plat?.titre || plat?.name || `Plat #${idx + 1}`
 
-        resultat.push({
-          id: `${plat?.id || i}-${i}`,
-          nom: plat?.nom || plat?.libelle || `Plat #${i + 1}`,
+        return {
+          id: plat?.id || idx,
+          nom: nomPlat,
           quantite: isNaN(qte) ? 10 : qte,
           revenu: (isNaN(qte) ? 10 : qte) * (isNaN(prixPlat) ? 10 : prixPlat)
-        })
-      }
-      return resultat
+        }
+      })
     }
 
-    // Valeurs de secours prêtes à s'afficher
-    return [
-      { id: 1, nom: 'Salade de crudités', quantite: 40, revenu: 140 },
-      { id: 2, nom: 'Samoussas au bœuf', quantite: 35, revenu: 140 },
-      { id: 3, nom: 'Poulet braisé', quantite: 30, revenu: 300 },
-      { id: 4, nom: 'Soupe de poisson', quantite: 25, revenu: 112 },
-      { id: 5, nom: 'Salade de fruits', quantite: 20, revenu: 60 }
-    ]
+    return []
   })
 
-  // Ventes par catégorie anti-NaN
+  // Ventes par catégorie
   const ventesParCategorie = computed(() => {
     const listeCat = Array.isArray(categories.value) ? categories.value : []
-    const totalGlobal = Number(chiffreAffairesTotal.value) || 1000
+    const totalGlobal = Number(chiffreAffairesTotal.value) || 1
 
     const resultat = listeCat.map((cat, idx) => {
-      const totalCat = Number(cat?.total || cat?.montant || (500 + idx * 200))
-      const pourcent = Math.round((totalCat / totalGlobal) * 100)
+      const totalCat = Number(cat?.total || cat?.montant || 0)
+      const pourcent = totalGlobal > 0 ? Math.round((totalCat / totalGlobal) * 100) : 0
 
       return {
         nom: cat?.nom || `Catégorie #${idx + 1}`,
-        total: isNaN(totalCat) ? 500 : totalCat,
-        pourcentage: isNaN(pourcent) ? 20 : Math.min(100, Math.max(0, pourcent))
+        total: isNaN(totalCat) ? 0 : totalCat,
+        pourcentage: isNaN(pourcent) ? 0 : Math.min(100, Math.max(0, pourcent))
       }
     })
-
-    if (resultat.length === 0) {
-      return [
-        { nom: 'Plats principaux', total: 14200, pourcentage: 60 },
-        { nom: 'Boissons', total: 6400, pourcentage: 25 },
-        { nom: 'Entrées & Accompagnements', total: 4260, pourcentage: 15 }
-      ]
-    }
 
     return resultat
   })
 
-  // Ventes par serveur 100% dynamique depuis l'API employés
+  // Top serveurs
   const topServeurs = computed(() => {
     const listeEmp = Array.isArray(employes.value) ? employes.value : []
 
@@ -192,80 +263,63 @@ export function useRapports() {
         const mots = nomComplet.split(' ')
         const initiales = mots.length > 1 && mots[0] && mots[1] ? `${mots[0][0]}${mots[1][0]}`.toUpperCase() : 'SM'
         
-        const nbCmd = Number(emp?.commandes || (120 + (idx * 28)))
-        const caEmp = Number(emp?.ca || (3500 + (idx * 1120)))
+        const nbCmd = Number(emp?.commandes || 0)
+        const caEmp = Number(emp?.ca || 0)
 
         return {
           id: emp?.id || idx,
           nom: nomComplet,
           initiales: initiales,
-          nbCommandes: isNaN(nbCmd) ? 100 : nbCmd,
-          ca: isNaN(caEmp) ? 3000 : caEmp
+          nbCommandes: isNaN(nbCmd) ? 0 : nbCmd,
+          ca: isNaN(caEmp) ? 0 : caEmp
         }
       })
     }
 
-    return [
-      { id: 1, nom: 'Baraka Mumbere', initiales: 'BM', nbCommandes: 342, ca: 9800 },
-      { id: 2, nom: 'Furaha Nyota', initiales: 'FN', nbCommandes: 290, ca: 8200 },
-      { id: 3, nom: 'Jengo Paluku', initiales: 'JP', nbCommandes: 310, ca: 6860 },
-      { id: 4, nom: 'Kankonde Tshibangu', initiales: 'KT', nbCommandes: 215, ca: 5400 },
-      { id: 5, nom: 'Amina Kassongo', initiales: 'AK', nbCommandes: 180, ca: 4650 }
-    ]
+    return []
   })
 
-  // Répartition par mode de paiement anti-NaN
+  // Ventes par mode de paiement
   const ventesParPaiement = computed(() => {
     const res = { especes: 0, mobile_money: 0, carte: 0 }
-    
-    commandesFiltrees.value.forEach(cmd => {
-      const mode = String(cmd?.modePaiement || cmd?.mode || 'especes').toLowerCase()
-      const montant = Number(cmd?.total || cmd?.montant || 150)
-      const valSecurisee = isNaN(montant) ? 150 : montant
+    const sourcePaiements = paiementsFiltres.value
 
-      if (res[mode] !== undefined) {
-        res[mode] += valSecurisee
+    sourcePaiements.forEach(p => {
+      const mode = String(p?.mode || p?.modePaiement || 'especes').toLowerCase()
+      const montant = Number(p?.montant || p?.total || 0)
+      const valSecurisee = isNaN(montant) ? 0 : montant
+
+      if (mode.includes('mobile') || mode.includes('orange') || mode.includes('mpesa')) {
+        res.mobile_money += valSecurisee
+      } else if (mode.includes('carte') || mode.includes('cb') || mode.includes('visa')) {
+        res.carte += valSecurisee
       } else {
         res.especes += valSecurisee
       }
     })
 
-    const totalEsp = Number(res.especes)
-    const totalMob = Number(res.mobile_money)
-    const totalCart = Number(res.carte)
-
-    if (totalEsp === 0 && totalMob === 0 && totalCart === 0) {
-      const caTotal = Number(chiffreAffairesTotal.value) || 24860
-      return {
-        especes: caTotal * 0.6,
-        mobile_money: caTotal * 0.3,
-        carte: caTotal * 0.1
-      }
-    }
-
     return {
-      especes: isNaN(totalEsp) ? 0 : totalEsp,
-      mobile_money: isNaN(totalMob) ? 0 : totalMob,
-      carte: isNaN(totalCart) ? 0 : totalCart
+      especes: Number(res.especes) || 0,
+      mobile_money: Number(res.mobile_money) || 0,
+      carte: Number(res.carte) || 0
     }
   })
 
-  const libellePeriode = computed(() => "30 sept. 2026 → 30 oct. 2026")
-
   const exporterCSV = () => {
-    let csv = 'ID Commande;Date;Statut;Nombre Couverts;Total ($)\n'
-    commandesFiltrees.value.forEach(cmd => {
-      const idCmd = cmd?.id || 1
-      const dateCmd = cmd?.creeLe || '2026-10-30'
-      const statutCmd = cmd?.statut || 'payee'
-      const totalCmd = Number(cmd?.total || 100)
-      csv += `${idCmd};"${dateCmd}";"${statutCmd}";1;${isNaN(totalCmd) ? 100 : totalCmd}\n`
+    let csv = 'ID Paiement;Date;Mode;Montant ($)\n'
+    const sourcePaiements = paiementsFiltres.value
+    sourcePaiements.forEach(p => {
+      const idP = p?.id || 1
+      const dateP = p?.date || new Date().toISOString()
+      const modeP = p?.mode || 'especes'
+      const montantP = Number(p?.montant || 0)
+      csv += `${idP};"${dateP}";"${modeP}";${isNaN(montantP) ? 0 : montantP}\n`
     })
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.setAttribute('href', url)
-    link.setAttribute('download', `rapport_ventes.csv`)
+    link.setAttribute('download', `rapport_paiements_${periode.value}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
