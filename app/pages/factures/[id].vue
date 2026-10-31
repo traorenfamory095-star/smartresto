@@ -1074,7 +1074,14 @@ useHead(() => ({
           "
         >
           <table class="w-full">
-            <thead class="bg-gray-50 print:bg-white">
+            <thead
+              class="
+                bg-soft
+                text-ink
+                print:bg-white
+                print:text-black
+              "
+            >
               <tr>
                 <th
                   class="

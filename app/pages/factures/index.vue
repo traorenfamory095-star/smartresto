@@ -177,7 +177,7 @@ function classeStatut(statut) {
       class="overflow-x-auto rounded-lg border border-bordure"
     >
       <table class="w-full">
-        <thead class="bg-gray-50">
+        <thead class="bg-soft text-ink">
           <tr>
             <th class="px-4 py-3 text-left">
               Numéro
