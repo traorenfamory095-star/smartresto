@@ -59,15 +59,27 @@ function classeStatut(statut) {
 
 <template>
   <section class="space-y-6">
-    <!-- En-tête -->
-    <div>
-      <h1 class="text-3xl font-bold">
-        Factures
-      </h1>
 
-      <p class="mt-2 text-gris">
-        Consultez et recherchez les factures du restaurant.
-      </p>
+    <!-- En-tête -->
+    <div
+      class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        <h1 class="text-3xl font-bold">
+          Factures
+        </h1>
+
+        <p class="mt-2 text-gris">
+          Consultez et recherchez les factures du restaurant.
+        </p>
+      </div>
+
+      <NuxtLink
+        to="/factures/nouvelle"
+        class="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-2 font-semibold text-white transition hover:bg-orange-700"
+      >
+        + Nouvelle facture
+      </NuxtLink>
     </div>
 
     <!-- Filtres -->
