@@ -24,6 +24,7 @@ export const STATUTS = {
   approvisionnement: {
     commande: { libelle: 'Commandé', ton: 'accent' },
     recue: { libelle: 'Reçu', ton: 'succes' },
+    a_verifier: { libelle: 'À vérifier', ton: 'erreur' },
   },
   reservation: {
     confirmee: { libelle: 'Confirmée', ton: 'succes' },

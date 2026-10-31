@@ -2,7 +2,7 @@
 useHead({
   htmlAttrs: { lang: 'fr' },
   titleTemplate: (titre) => (titre ? `${titre} · SmartResto` : 'SmartResto'),
-})
+}) 
 </script>
 
 <template>
