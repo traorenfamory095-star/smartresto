@@ -119,11 +119,16 @@ export function useFactures() {
     return lire(`/factures/${id}`)
   }
 
+   function obtenirCommande(id) {
+    return lire(`/commandes/${id}`)
+  }
+  
   function listerPaiements(factureId) {
     return lire('/paiements', {
       factureId,
     })
   }
+ 
 
   function listerCommandes(parametres = {}) {
     return lire('/commandes', parametres)
@@ -146,6 +151,12 @@ export function useFactures() {
     )
   }
 
+  function annulerFacture(id) {
+  return modifierFacture(id, {
+    statut: 'annulee',
+  })
+}
+
   function creerPaiement(donnees) {
     return creer('/paiements', donnees)
   }
@@ -162,12 +173,14 @@ export function useFactures() {
   return {
     listerFactures,
     obtenirFacture,
+    obtenirCommande,
     listerPaiements,
     listerCommandes,
     listerLignesCommande,
 
     creerFacture,
     modifierFacture,
+    annulerFacture,
     creerPaiement,
     marquerCommandePayee,
 

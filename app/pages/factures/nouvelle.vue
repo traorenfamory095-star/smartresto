@@ -155,9 +155,33 @@ async function genererFacture() {
   enregistrement.value = true
 
   try {
+    // 1. Relire les factures pour avoir les données les plus récentes
+    const facturesActuelles =
+      await listerFactures()
+
+    // 2. Vérifier si cette commande possède déjà une facture
+    const commandeDejaFacturee =
+      facturesActuelles.some(
+        (facture) =>
+          Number(facture.commandeId) ===
+          Number(commandeId.value)
+      )
+
+    if (commandeDejaFacturee) {
+      erreur.value =
+        'Cette commande possède déjà une facture.'
+
+      return
+    }
+
+    // 3. Générer le numéro à partir des factures fraîches
+    const nouveauNumero =
+      genererNumeroFacture(facturesActuelles)
+
+    // 4. Créer la facture
     const facture = await creerFacture({
       commandeId: Number(commandeId.value),
-      numero: numeroFacture.value,
+      numero: nouveauNumero,
       sousTotal: montants.value.sousTotal,
       remise: montants.value.remise,
       taxe: montants.value.taxe,
@@ -166,9 +190,12 @@ async function genererFacture() {
       creeLe: dateLocaleIso(),
     })
 
+    // 5. Aller vers la facture créée
     await router.push(`/factures/${facture.id}`)
   } catch (e) {
-    erreur.value = e.message
+    erreur.value =
+      e.message ||
+      'Impossible de générer la facture.'
   } finally {
     enregistrement.value = false
   }

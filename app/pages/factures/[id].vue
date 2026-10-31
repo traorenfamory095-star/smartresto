@@ -3,9 +3,11 @@ const route = useRoute()
 
 const {
   obtenirFacture,
+  obtenirCommande,
   listerPaiements,
   creerPaiement,
   modifierFacture,
+  annulerFacture,
   marquerCommandePayee,
   totalPaiements,
   resteAPayer,
@@ -13,38 +15,103 @@ const {
 
 const factureId = Number(route.params.id)
 
-const montantPaiement = ref('')
-const modePaiement = ref('especes')
 
-const enregistrementEnCours = ref(false)
-const erreurPaiement = ref('')
+// ======================================================
+// ANNULATION
+// ======================================================
+
+const annulationEnCours = ref(false)
+const erreurAnnulation = ref('')
+
+async function confirmerAnnulation() {
+  erreurAnnulation.value = ''
+
+  if (!facture.value) {
+    return
+  }
+
+  if (facture.value.statut !== 'payee') {
+    erreurAnnulation.value =
+      'Seule une facture payée peut être annulée ici.'
+
+    return
+  }
+
+  const confirmation = window.confirm(
+    `Voulez-vous vraiment annuler la facture ${facture.value.numero} ?`
+  )
+
+  if (!confirmation) {
+    return
+  }
+
+  annulationEnCours.value = true
+
+  try {
+    await annulerFacture(facture.value.id)
+
+    await refresh()
+  } catch (e) {
+    erreurAnnulation.value =
+      e.message ||
+      'Impossible d’annuler la facture.'
+  } finally {
+    annulationEnCours.value = false
+  }
+}
+
+
+// ======================================================
+// DONNÉES FACTURE + PAIEMENTS + COMMANDE
+// ======================================================
 
 const {
-  data,
+  data: donnees,
   pending,
   error,
   refresh,
 } = await useAsyncData(
   `facture-${factureId}`,
   async () => {
-    const [facture, paiements] = await Promise.all([
-      obtenirFacture(factureId),
-      listerPaiements(factureId),
-    ])
+    const facture =
+      await obtenirFacture(factureId)
+
+    const [paiements, commande] =
+      await Promise.all([
+        listerPaiements(factureId),
+        obtenirCommande(facture.commandeId),
+      ])
 
     return {
       facture,
       paiements,
+      commande,
     }
+  },
+  {
+    default: () => ({
+      facture: null,
+      paiements: [],
+      commande: null,
+    }),
   }
 )
 
+
+// ======================================================
+// DONNÉES CALCULÉES
+// ======================================================
+
 const facture = computed(() => {
-  return data.value?.facture ?? null
+  return donnees.value?.facture ?? null
 })
 
 const paiements = computed(() => {
-  return data.value?.paiements ?? []
+  return donnees.value?.paiements ?? []
+})
+
+const commande = computed(() => {
+  return donnees.value?.commande ?? null
 })
 
 const montantPaye = computed(() => {
@@ -66,25 +133,77 @@ const reste = computed(() => {
   )
 })
 
-function libelleStatut(statut) {
-  const libelles = {
-    emise: 'Émise',
-    payee: 'Payée',
-    annulee: 'Annulée',
+
+// ======================================================
+// CLÔTURE FACTURE + COMMANDE
+// ======================================================
+
+const clotureEnCours = ref(false)
+const erreurCloture = ref('')
+
+async function synchroniserCloture() {
+  erreurCloture.value = ''
+
+  if (!facture.value) {
+    return false
   }
 
-  return libelles[statut] ?? statut
-}
-
-function libelleModePaiement(mode) {
-  const modes = {
-    especes: 'Espèces',
-    mobile_money: 'Mobile Money',
-    carte: 'Carte',
+  if (reste.value > 0) {
+    return false
   }
 
-  return modes[mode] ?? mode
+  clotureEnCours.value = true
+
+  try {
+    // Mettre la facture à payee seulement si nécessaire.
+    if (facture.value.statut !== 'payee') {
+      await modifierFacture(
+        facture.value.id,
+        {
+          statut: 'payee',
+        }
+      )
+    }
+
+    // Mettre la commande à payee seulement si nécessaire.
+    if (
+      commande.value &&
+      commande.value.statut !== 'payee'
+    ) {
+      await marquerCommandePayee(
+        facture.value.commandeId
+      )
+    }
+
+    return true
+  } catch (e) {
+    erreurCloture.value =
+      e.message ||
+      'La clôture de la facture n’a pas pu être terminée.'
+
+    return false
+  } finally {
+    // On relit toujours l'état réel du serveur.
+    try {
+      await refresh()
+    } catch {
+      // On conserve l'erreur principale.
+    }
+
+    clotureEnCours.value = false
+  }
 }
+
+
+// ======================================================
+// PAIEMENT
+// ======================================================
+
+const montantPaiement = ref('')
+const modePaiement = ref('especes')
+
+const enregistrementEnCours = ref(false)
+const erreurPaiement = ref('')
 
 function dateLocaleIso() {
   const maintenant = new Date()
@@ -110,6 +229,7 @@ function dateLocaleIso() {
 
 async function enregistrerPaiement() {
   erreurPaiement.value = ''
+  erreurCloture.value = ''
 
   const montant =
     Math.round(
@@ -136,6 +256,7 @@ async function enregistrerPaiement() {
   enregistrementEnCours.value = true
 
   try {
+    // 1. Enregistrer le paiement.
     await creerPaiement({
       factureId: facture.value.id,
       montant,
@@ -143,36 +264,55 @@ async function enregistrerPaiement() {
       date: dateLocaleIso(),
     })
 
-    const nouveauTotalPaye =
-      Math.round(
-        (montantPaye.value + montant) * 100
-      ) / 100
-
-    const factureSoldee =
-      nouveauTotalPaye >=
-      Number(facture.value.total)
-
-    if (factureSoldee) {
-      await modifierFacture(
-        facture.value.id,
-        {
-          statut: 'payee',
-        }
-      )
-
-      await marquerCommandePayee(
-        facture.value.commandeId
-      )
-    }
-
+    // Le paiement a réellement été créé.
     montantPaiement.value = ''
 
+    // 2. Relire l'état réel depuis l'API.
     await refresh()
+
+    // 3. Si le paiement solde la facture,
+    // synchroniser facture + commande.
+    if (reste.value <= 0) {
+      const clotureReussie =
+        await synchroniserCloture()
+
+      if (!clotureReussie) {
+        erreurPaiement.value =
+          'Le paiement a bien été enregistré, mais la clôture n’a pas pu être terminée. N’ajoutez pas un nouveau paiement.'
+      }
+    }
   } catch (erreur) {
-    erreurPaiement.value = erreur.message
+    erreurPaiement.value =
+      erreur.message ||
+      'Impossible d’enregistrer le paiement.'
   } finally {
     enregistrementEnCours.value = false
   }
+}
+
+
+// ======================================================
+// AFFICHAGE
+// ======================================================
+
+function libelleStatut(statut) {
+  const libelles = {
+    emise: 'Émise',
+    payee: 'Payée',
+    annulee: 'Annulée',
+  }
+
+  return libelles[statut] ?? statut
+}
+
+function libelleModePaiement(mode) {
+  const modes = {
+    especes: 'Espèces',
+    mobile_money: 'Mobile Money',
+    carte: 'Carte',
+  }
+
+  return modes[mode] ?? mode
 }
 
 function imprimerFacture() {
@@ -324,10 +464,11 @@ useHead(() => ({
           </p>
         </div>
 
-        <!-- Statut + bouton -->
+        <!-- Statut + actions -->
         <div
           class="
             flex
+            flex-wrap
             items-center
             gap-3
             print:gap-2
@@ -378,8 +519,100 @@ useHead(() => ({
           >
             Imprimer
           </button>
+
+          <button
+            v-if="facture.statut === 'payee'"
+            type="button"
+            :disabled="annulationEnCours"
+            class="
+              rounded-lg
+              border
+              border-red-600
+              px-4
+              py-2
+              font-medium
+              text-red-600
+              transition
+              hover:bg-red-50
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              print:hidden
+            "
+            @click="confirmerAnnulation"
+          >
+            {{
+              annulationEnCours
+                ? 'Annulation...'
+                : 'Annuler la facture'
+            }}
+          </button>
+
+          <button
+            v-if="
+              facture &&
+              reste <= 0 &&
+              (
+                facture.statut !== 'payee' ||
+                commande?.statut !== 'payee'
+              )
+            "
+            type="button"
+            :disabled="clotureEnCours"
+            class="
+              rounded-lg
+              border
+              border-orange-600
+              px-4
+              py-2
+              font-medium
+              text-orange-600
+              transition
+              hover:bg-orange-50
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              print:hidden
+            "
+            @click="synchroniserCloture"
+          >
+            {{
+              clotureEnCours
+                ? 'Synchronisation...'
+                : 'Réessayer la clôture'
+            }}
+          </button>
+
+          <p
+            v-if="erreurCloture"
+            class="text-sm text-red-600 print:hidden"
+          >
+            {{ erreurCloture }}
+          </p>
         </div>
       </div>
+
+      <!-- Erreur annulation -->
+      <p
+        v-if="erreurAnnulation"
+        class="
+          text-sm
+          text-red-600
+          print:hidden
+        "
+      >
+        {{ erreurAnnulation }}
+      </p>
+
+      <!-- Erreur clôture -->
+      <p
+        v-if="erreurCloture"
+        class="
+          text-sm
+          text-red-600
+          print:hidden
+        "
+      >
+        {{ erreurCloture }}
+      </p>
 
       <!-- Montants facture -->
       <div
@@ -714,6 +947,7 @@ useHead(() => ({
               Mode de paiement
             </label>
 
+       
             <select
               id="mode"
               v-model="modePaiement"
@@ -721,20 +955,36 @@ useHead(() => ({
                 w-full
                 rounded-lg
                 border
-                border-bordure
+                border-line
+                bg-card
                 px-3
                 py-2
+                text-ink
+                outline-none
+                transition
+                focus:border-pri
+                focus:ring-2
+                focus:ring-pri/30
               "
             >
-              <option value="especes">
+              <option
+                value="especes"
+                class="bg-card text-ink"
+              >
                 Espèces
               </option>
 
-              <option value="mobile_money">
+              <option
+                value="mobile_money"
+                class="bg-card text-ink"
+              >
                 Mobile Money
               </option>
 
-              <option value="carte">
+              <option
+                value="carte"
+                class="bg-card text-ink"
+              >
                 Carte
               </option>
             </select>
