@@ -1777,7 +1777,7 @@
       "nbPersonnes": 7,
       "date": "2026-10-22",
       "heure": "19:30",
-      "statut": "annulee",
+      "statut": "confirmee",
       "note": "Anniversaire"
     },
     {
@@ -1788,7 +1788,7 @@
       "nbPersonnes": 4,
       "date": "2026-10-22",
       "heure": "20:00",
-      "statut": "annulee",
+      "statut": "confirmee",
       "note": ""
     },
     {
@@ -1799,7 +1799,7 @@
       "nbPersonnes": 6,
       "date": "2026-10-23",
       "heure": "12:30",
-      "statut": "annulee",
+      "statut": "confirmee",
       "note": "Déjeuner d'affaires"
     },
     {
@@ -1810,7 +1810,7 @@
       "nbPersonnes": 2,
       "date": "2026-10-21",
       "heure": "20:30",
-      "statut": "annulee",
+      "statut": "confirmee",
       "note": ""
     },
     {
@@ -1823,127 +1823,6 @@
       "heure": "19:00",
       "statut": "annulee",
       "note": "A annulé par téléphone"
-    },
-    {
-      "nomClient": "Théophile Lumbala",
-      "telephone": "0898989890",
-      "nbPersonnes": 4,
-      "date": "2026-10-31",
-      "heure": "13:07",
-      "tableId": 3,
-      "statut": "annulee",
-      "note": "",
-      "id": 6
-    },
-    {
-      "nomClient": "Théophile Lumbala",
-      "telephone": "090909090",
-      "nbPersonnes": 3,
-      "date": "2026-10-31",
-      "heure": "13:47",
-      "tableId": 4,
-      "statut": "annulee",
-      "note": "",
-      "id": 7
-    },
-    {
-      "nomClient": "Jean Paul",
-      "telephone": "090690900",
-      "nbPersonnes": 2,
-      "date": "2026-10-31",
-      "heure": "13:30",
-      "tableId": 1,
-      "statut": "annulee",
-      "note": "",
-      "id": 8
-    },
-    {
-      "nomClient": "Théophile Lumbala",
-      "telephone": "09847759384",
-      "nbPersonnes": 5,
-      "date": "2026-10-31",
-      "heure": "13:12",
-      "tableId": 8,
-      "statut": "annulee",
-      "note": "",
-      "id": 9
-    },
-    {
-      "nomClient": "Theo",
-      "telephone": "09846374834",
-      "nbPersonnes": 2,
-      "date": "2026-10-31",
-      "heure": "13:14",
-      "tableId": 4,
-      "statut": "annulee",
-      "note": "",
-      "id": 10
-    },
-    {
-      "nomClient": "David",
-      "telephone": "2384785764",
-      "nbPersonnes": 1,
-      "date": "2026-11-02",
-      "heure": "12:00",
-      "tableId": 1,
-      "statut": "annulee",
-      "note": "",
-      "id": 11
-    },
-    {
-      "nomClient": "Paul",
-      "telephone": "+243899384759",
-      "nbPersonnes": 1,
-      "date": "2026-11-02",
-      "heure": "12:04",
-      "tableId": 2,
-      "statut": "annulee",
-      "note": "",
-      "id": 12
-    },
-    {
-      "nomClient": "Paul",
-      "telephone": "+243 89398403",
-      "nbPersonnes": 2,
-      "date": "2026-11-02",
-      "heure": "11:30",
-      "tableId": 1,
-      "statut": "annulee",
-      "note": "",
-      "id": 13
-    },
-    {
-      "nomClient": "Andres",
-      "telephone": "+24390039847",
-      "nbPersonnes": 2,
-      "date": "2026-11-08",
-      "heure": "15:35",
-      "tableId": 5,
-      "statut": "annulee",
-      "note": "Dejeuner d'affaire",
-      "id": 14
-    },
-    {
-      "nomClient": "Famille Mbungu",
-      "telephone": "+243988746532",
-      "nbPersonnes": 5,
-      "date": "2026-11-02",
-      "heure": "10:26",
-      "tableId": 10,
-      "statut": "confirmee",
-      "note": "",
-      "id": 15
-    },
-    {
-      "nomClient": "Aline Mwamba",
-      "telephone": "+243 897767345",
-      "nbPersonnes": 2,
-      "date": "2026-11-01",
-      "heure": "14:45",
-      "tableId": 1,
-      "statut": "confirmee",
-      "note": "",
-      "id": 16
     }
   ],
   "tables": [
@@ -2016,20 +1895,6 @@
       "capacite": 8,
       "zone": "vip",
       "actif": true
-    },
-    {
-      "numero": 11,
-      "capacite": 4,
-      "zone": "Terrasse",
-      "actif": true,
-      "id": 11
-    },
-    {
-      "numero": 12,
-      "capacite": 2,
-      "zone": "Intérieur",
-      "actif": true,
-      "id": 12
     }
   ]
 }
