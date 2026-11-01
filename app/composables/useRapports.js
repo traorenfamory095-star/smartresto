@@ -261,32 +261,54 @@ export function useRapports() {
     return []
   })
 
-  // Ventes par catégorie reliées à la période
+// Ventes par catégorie calculées dynamiquement à partir des lignes de commande et des plats
   const ventesParCategorie = computed(() => {
     const listeCat = Array.isArray(categories.value) ? categories.value : []
-    const totalGlobal = Number(chiffreAffairesTotal.value) || 1
+    const idsCommandesFiltrees = new Set(commandesFiltrees.value.map(c => String(c.id)))
+    const lignesFiltrees = lignesCommande.value.filter(l => idsCommandesFiltrees.has(String(l.commandeId || l.idCommande)))
 
-    const resultat = listeCat.map((cat, idx) => {
-      const totalCat = Number(cat?.total || cat?.montant || 0)
-      const pourcent = totalGlobal > 0 ? Math.round((totalCat / totalGlobal) * 100) : 0
-
-      return {
-        nom: cat?.nom || `Catégorie #${idx + 1}`,
-        total: isNaN(totalCat) ? 0 : totalCat,
-        pourcentage: isNaN(pourcent) ? 0 : Math.min(100, Math.max(0, pourcent))
+    const statsCategories = {}
+    listeCat.forEach(cat => {
+      statsCategories[String(cat.id)] = {
+        nom: cat.nom,
+        total: 0
       }
     })
 
-    return resultat
+    lignesFiltrees.forEach(ligne => {
+      const platId = ligne.platId || ligne.idPlat
+      const qte = Number(ligne.quantite || ligne.qte || 1)
+      const prix = Number(ligne.prix || ligne.prixUnitaire || 10)
+      const revenuLigne = qte * (isNaN(prix) ? 10 : prix)
+
+      const platObj = plats.value.find(p => String(p.id) === String(platId))
+      if (platObj) {
+        const catId = String(platObj.categorieId || platObj.categoryId || '')
+        if (statsCategories[catId]) {
+          statsCategories[catId].total += isNaN(revenuLigne) ? 0 : revenuLigne
+        }
+      }
+    })
+
+    const totalGlobal = Number(chiffreAffairesTotal.value) || 1
+
+    return Object.values(statsCategories).map(cat => {
+      const pourcent = totalGlobal > 0 ? Math.round((cat.total / totalGlobal) * 100) : 0
+      return {
+        nom: cat.nom,
+        total: Math.round(cat.total * 100) / 100,
+        pourcentage: Math.min(100, Math.max(0, pourcent))
+      }
+    })
   })
 
-  // Top serveurs basé strictement sur l'API
+ // Top serveurs basé strictement sur l'API (commandes et employés)
   const topServeurs = computed(() => {
     const statsServeurs = {}
     const cmdFiltrees = commandesFiltrees.value
-    const paiementsFiltresList = paiementsFiltres.value
-
     const listeEmp = Array.isArray(employes.value) ? employes.value : []
+
+    // 1. Initialiser chaque employé
     listeEmp.forEach(emp => {
       const idEmp = String(emp.id)
       const nomComplet = emp?.nom || emp?.prenom || `Employé #${idEmp}`
@@ -298,42 +320,37 @@ export function useRapports() {
       }
     })
 
+    // 2. Parcourir les commandes filtrées pour compter et sommer le CA via les lignes de commande
     cmdFiltrees.forEach(cmd => {
-      const empId = String(cmd.employeId || cmd.serveurId || cmd.userId || '')
+      const empId = String(cmd.serveurId || cmd.employeId || '')
       if (empId && statsServeurs[empId]) {
         statsServeurs[empId].nbCommandes += 1
 
-        const paiementAssocie = paiementsFiltresList.find(p => String(p.commandeId || p.idCommande) === String(cmd.id))
-        if (paiementAssocie) {
-          const montantPaiement = Number(paiementAssocie.montant || paiementAssocie.total || 0)
-          statsServeurs[empId].ca += isNaN(montantPaiement) ? 0 : montantPaiement
-        }
+        // Calculer le montant de cette commande à partir des lignes de commande associées
+        const lignesDeCetteCmd = lignesCommande.value.filter(
+          l => String(l.commandeId || l.idCommande) === String(cmd.id)
+        )
+
+        const totalCmd = lignesDeCetteCmd.reduce((acc, ligne) => {
+          const qte = Number(ligne.quantite || ligne.qte || 1)
+          const prix = Number(ligne.prix || ligne.prixUnitaire || 10)
+          return acc + (qte * (isNaN(prix) ? 10 : prix))
+        }, 0)
+
+        statsServeurs[empId].ca += totalCmd
       }
     })
 
+    // 3. Formater le résultat final trié par chiffre d'affaires décroissant
     const resultat = Object.values(statsServeurs).map(serv => {
       const mots = serv.nom.split(' ')
       const initiales = mots.length > 1 && mots[0] && mots[1] ? `${mots[0][0]}${mots[1][0]}`.toUpperCase() : 'SM'
       return {
         ...serv,
+        ca: Math.round(serv.ca * 100) / 100,
         initiales
       }
     }).sort((a, b) => b.ca - a.ca)
-
-    if (resultat.every(s => s.nbCommandes === 0) && listeEmp.length > 0) {
-      return listeEmp.map((emp, idx) => {
-        const nomComplet = emp?.nom || emp?.prenom || `Employé #${idx + 1}`
-        const mots = nomComplet.split(' ')
-        const initiales = mots.length > 1 && mots[0] && mots[1] ? `${mots[0][0]}${mots[1][0]}`.toUpperCase() : 'SM'
-        return {
-          id: emp?.id || idx,
-          nom: nomComplet,
-          initiales: initiales,
-          nbCommandes: Number(emp?.commandes || 0),
-          ca: Number(emp?.ca || 0)
-        }
-      })
-    }
 
     return resultat
   })
