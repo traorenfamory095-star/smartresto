@@ -171,14 +171,26 @@ async function enregisterReservation() {
           Bienvenue chez SmartResto
         </div>
 
-        <h1 class="text-3xl font-bold tracking-tight text-head sm:text-5xl">
-          Réservez votre table
-        </h1>
+      <div class="mt-4 flex items-start justify-between gap-6">
+        <div>
+          <h1 class="text-3xl text-left font-bold tracking-tight text-head sm:text-5xl">
+            Réservez votre table
+          </h1>
 
-        <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-mut sm:text-base">
-          Préparez votre prochaine expérience culinaire.
-          Choisissez votre créneau et profitez d'un moment agréable chez nous.
-        </p>
+          <p class="ml-0 text-left mt-4 max-w-xl text-sm leading-7 text-mut sm:text-base">
+            Préparez votre prochaine expérience culinaire.
+            Choisissez votre créneau et profitez d'un moment agréable chez nous.
+          </p>
+        </div>
+
+        <NuxtLink
+          to="/"
+          class="inline-flex items-center justify-center gap-2 rounded-xl font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50 border border-accent text-accent hover:bg-accent/10 min-h-12 px-6 text-base"
+        >
+          <span>←</span>
+          Retour à l’accueil
+        </NuxtLink>
+      </div>
       </header>
 
       <!-- CONTENU PRINCIPAL -->
@@ -466,10 +478,12 @@ async function enregisterReservation() {
             <!-- SUCCÈS -->
             <div
               v-if="succes"
-              class="rounded-xl border border-ok/20 bg-ok/10 p-4 text-sm font-medium text-ok"
+              class="rounded-xl flex items-center justify-between border border-ok/20 bg-ok/10 p-4 text-sm font-medium text-ok"
               role="status"
             >
-              ✓ {{ succes }}
+              <p class="font-medium">
+                {{ succes }}
+              </p>
             </div>
 
             <!-- BOUTON -->
