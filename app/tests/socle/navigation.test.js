@@ -1,71 +1,64 @@
 import { describe, it, expect } from 'vitest'
-import { MENU_ADMIN, MENU_PUBLIC, ROUTES_PUBLIQUES, estRoutePublique, trouverLien } from '../../utils/navigation.js'
+import {
+  choisirLayout, lienActif, titreDeRoute, initiales, libelleRole,
+} from '../../app/utils/navigation.js'
 
-describe('MENU_ADMIN', () => {
-  it('contient 14 liens sans doublon', () => {
-    const chemins = MENU_ADMIN.map((lien) => lien.chemin)
-    expect(chemins).toHaveLength(14)
-    expect(new Set(chemins).size).toBe(14)
+describe('choisirLayout', () => {
+  it('pages publiques', () => {
+    expect(choisirLayout('/carte')).toBe('public')
+    expect(choisirLayout('/carte/')).toBe('public')
+    expect(choisirLayout('/contact')).toBe('public')
   })
-
-  it('donne à chaque lien un libellé, une icône et une description', () => {
-    for (const lien of MENU_ADMIN) {
-      expect(lien.libelle).toBeTruthy()
-      expect(lien.icone).toBeTruthy()
-      expect(lien.description).toBeTruthy()
-    }
+  it('connexion sans habillage', () => {
+    expect(choisirLayout('/connexion')).toBe('vierge')
+    expect(choisirLayout('/connexion?espace=administration')).toBe('vierge')
   })
-
-  it('ne contient aucune page publique, sauf la carte', () => {
-    const publiquesDansAdmin = MENU_ADMIN.filter((lien) => ROUTES_PUBLIQUES.includes(lien.chemin))
-    expect(publiquesDansAdmin.map((lien) => lien.chemin)).toEqual(['/carte'])
+  it('pages du personnel', () => {
+    expect(choisirLayout('/')).toBe('default')
+    expect(choisirLayout('/plats/nouveau')).toBe('default')
   })
-})
-
-describe('MENU_PUBLIC', () => {
-  it('ne pointe que vers des pages publiques', () => {
-    for (const lien of MENU_PUBLIC) {
-      expect(ROUTES_PUBLIQUES).toContain(lien.chemin)
-    }
+  it('pas de faux positif sur un préfixe proche', () => {
+    expect(choisirLayout('/carte-speciale')).toBe('default')
   })
 })
 
-describe('estRoutePublique', () => {
-  it('reconnaît les pages publiques', () => {
-    expect(estRoutePublique('/')).toBe(true)
-    expect(estRoutePublique('/carte')).toBe(true)
-    expect(estRoutePublique('/connexion')).toBe(true)
+describe('lienActif', () => {
+  it('route exacte et sous-route', () => {
+    expect(lienActif('/plats', '/plats')).toBe(true)
+    expect(lienActif('/plats/12', '/plats')).toBe(true)
   })
-
-  it('ignore la barre finale et la requête', () => {
-    expect(estRoutePublique('/carte/')).toBe(true)
-    expect(estRoutePublique('/connexion?espace=administration')).toBe(true)
+  it("'/' n'est actif que sur '/'", () => {
+    expect(lienActif('/', '/')).toBe(true)
+    expect(lienActif('/plats', '/')).toBe(false)
   })
-
-  it('refuse les pages d’administration, sous-pages comprises', () => {
-    expect(estRoutePublique('/plats')).toBe(false)
-    expect(estRoutePublique('/carte/secret')).toBe(false)
-    expect(estRoutePublique('/rapports')).toBe(false)
+  it('pas de faux positif', () => {
+    expect(lienActif('/plats-speciaux', '/plats')).toBe(false)
   })
 })
 
-describe('trouverLien', () => {
-  it('trouve le lien d’une page principale', () => {
-    expect(trouverLien('/plats')?.libelle).toBe('Plats')
+describe('titreDeRoute', () => {
+  it('route connue et sous-route', () => {
+    expect(titreDeRoute('/categories')[0]).toBe('Catégories')
+    expect(titreDeRoute('/stock/mouvements')[0]).toBe('Stock')
   })
-
-  it('rattache les sous-pages à leur module', () => {
-    expect(trouverLien('/plats/nouveau')?.chemin).toBe('/plats')
-    expect(trouverLien('/commandes/12')?.chemin).toBe('/commandes')
-    expect(trouverLien('/stock/mouvements')?.chemin).toBe('/stock')
+  it('route inconnue : titre par défaut', () => {
+    expect(titreDeRoute('/inconnue')[0]).toBe('Tableau de bord')
   })
+})
 
-  it('ne confond pas deux modules au début identique', () => {
-    expect(trouverLien('/tables')?.chemin).toBe('/tables')
-    expect(trouverLien('/reservations')?.chemin).toBe('/reservations')
+describe('initiales', () => {
+  it('un ou plusieurs mots, ou vide', () => {
+    expect(initiales('Neema Bahati')).toBe('NB')
+    expect(initiales('Administrateur')).toBe('A')
+    expect(initiales('')).toBe('?')
+    expect(initiales(undefined)).toBe('?')
   })
+})
 
-  it('renvoie undefined pour une page inconnue', () => {
-    expect(trouverLien('/inconnue')).toBeUndefined()
+describe('libelleRole', () => {
+  it('rôles connus, absent et inconnu', () => {
+    expect(libelleRole('gerant')).toBe('Gérant')
+    expect(libelleRole(undefined)).toBe('Invité')
+    expect(libelleRole('stagiaire')).toBe('stagiaire')
   })
 })
