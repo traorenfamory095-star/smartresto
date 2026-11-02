@@ -298,43 +298,9 @@
       "creeLe": "2026-10-21T12:55:00",
       "nbCouverts": 2,
       "note": "Allergie aux arachides"
-    },
-    {
-      "tableId": 1,
-      "serveurId": 1,
-      "statut": "en_attente",
-      "creeLe": "2026-10-30T18:56:23",
-      "nbCouverts": 1,
-      "note": "En ligne : moriss (610720531)",
-      "id": 24
     }
   ],
-  "demandes": [
-    {
-      "nomClient": "moriss",
-      "telephone": "610720531",
-      "nbCouverts": 1,
-      "note": "",
-      "creeLe": "2026-10-30T18:53:52",
-      "statut": "traitee",
-      "lignes": [
-        {
-          "platId": 1,
-          "quantite": 2,
-          "prixUnitaire": 3.5,
-          "remarque": ""
-        },
-        {
-          "platId": 2,
-          "quantite": 1,
-          "prixUnitaire": 4,
-          "remarque": "bbb"
-        }
-      ],
-      "id": 1,
-      "commandeId": 24
-    }
-  ],
+  "demandes": [],
   "employes": [
     {
       "id": 1,
@@ -1407,24 +1373,6 @@
       "prixUnitaire": 8,
       "statutCuisine": "en_attente",
       "remarque": ""
-    },
-    {
-      "commandeId": 24,
-      "platId": 1,
-      "quantite": 2,
-      "prixUnitaire": 3.5,
-      "statutCuisine": "en_attente",
-      "remarque": "",
-      "id": 71
-    },
-    {
-      "commandeId": 24,
-      "platId": 2,
-      "quantite": 1,
-      "prixUnitaire": 4,
-      "statutCuisine": "en_attente",
-      "remarque": "bbb",
-      "id": 72
     }
   ],
   "mouvementsStock": [
