@@ -2000,6 +2000,94 @@
       "statut": "annulee",
       "note": "",
       "id": 17
+    },
+    {
+      "nomClient": "Théophile Lumbala",
+      "telephone": "+243890996329",
+      "nbPersonnes": 6,
+      "date": "2026-11-03",
+      "heure": "10:35",
+      "tableId": 8,
+      "statut": "annulee",
+      "note": "Le test de la réservation côté client",
+      "id": 18
+    },
+    {
+      "nomClient": "Jean",
+      "telephone": "0899898987",
+      "nbPersonnes": 6,
+      "date": "2026-11-03",
+      "heure": "10:35",
+      "tableId": 9,
+      "statut": "confirmee",
+      "note": "Deuxième réservation pour verifier les conflits",
+      "id": 19
+    },
+    {
+      "nomClient": "Gaby",
+      "telephone": "09876540",
+      "nbPersonnes": 6,
+      "date": "2026-11-03",
+      "heure": "21:44",
+      "tableId": 10,
+      "statut": "confirmee",
+      "note": "",
+      "id": 20
+    },
+    {
+      "nomClient": "Carl",
+      "telephone": "089924568",
+      "nbPersonnes": 6,
+      "date": "2026-11-03",
+      "heure": "20:58",
+      "tableId": 8,
+      "statut": "confirmee",
+      "note": "",
+      "id": 21
+    },
+    {
+      "nomClient": "Olivier Mbala",
+      "telephone": "089939495",
+      "nbPersonnes": 4,
+      "date": "2026-11-03",
+      "heure": "10:00",
+      "tableId": 3,
+      "statut": "confirmee",
+      "note": "",
+      "id": 22
+    },
+    {
+      "nomClient": "Andres",
+      "telephone": "09845622",
+      "nbPersonnes": 2,
+      "date": "2026-11-02",
+      "heure": "09:00",
+      "tableId": 2,
+      "statut": "annulee",
+      "note": "",
+      "id": 23
+    },
+    {
+      "nomClient": "Jacques",
+      "telephone": "+2439854875",
+      "nbPersonnes": 2,
+      "date": "2026-11-02",
+      "heure": "18:30",
+      "tableId": 1,
+      "statut": "annulee",
+      "note": "Test chevauchement",
+      "id": 24
+    },
+    {
+      "nomClient": "Paul Kanda",
+      "telephone": "+24398707069",
+      "nbPersonnes": 2,
+      "date": "2026-11-02",
+      "heure": "09:00",
+      "tableId": 1,
+      "statut": "annulee",
+      "note": "",
+      "id": 25
     }
   ],
   "tables": [
