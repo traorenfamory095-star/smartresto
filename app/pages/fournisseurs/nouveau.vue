@@ -1,72 +1,65 @@
 <script setup>
-const api = useApi()
+const { creer } = useFournisseurs()
 const router = useRouter()
-const { creerAppro } = useFournisseurs()
 const { succes, erreur } = useNotifier()
-const fournisseurs = ref([])
-const ingredients = ref([])
-const form = reactive({ fournisseurId: null, lignes: [] })
-const chargement = ref(true)
-
-onMounted(async () => {
-  try { [fournisseurs.value, ingredients.value] = await Promise.all([api.lire('/fournisseurs'), api.lire('/ingredients')]) }
-  catch (e) { erreur(e.message) }
-  finally { chargement.value = false }
-})
-
-const ingredientsDispo = computed(() =>
-  form.fournisseurId ? ingredients.value.filter(i => i.fournisseurId === form.fournisseurId) : []
-)
-const total = computed(() => calculerTotalAppro(form.lignes))
-
-function ajouterLigne() {
-  form.lignes.push({ ingredientId: null, quantite: 1, prixUnitaire: 0 })
-}
-function retirerLigne(idx) { form.lignes.splice(idx, 1) }
+const form = reactive({ nom: '', categorie: '', contact: '', telephone: '', email: '', adresse: '' })
 
 async function soumettre() {
-  try {
-    if (!form.fournisseurId) throw new Error('Choisissez un fournisseur.')
-    if (form.lignes.length === 0) throw new Error('Ajoutez au moins une ligne.')
-    await creerAppro({
-      fournisseurId: form.fournisseurId,
-      dateCommande: new Date().toISOString().slice(0, 10),
-      dateReception: null,
-      statut: 'commande',
-      lignes: form.lignes.map(l => ({ ...l, quantite: Number(l.quantite), prixUnitaire: Number(l.prixUnitaire) }))
-    })
-    succes('Approvisionnement créé'); router.push('/approvisionnements')
-  } catch (e) { erreur(e.message) }
+  try { await creer({ ...form }); succes('Fournisseur créé'); router.push('/fournisseurs') }
+  catch (e) { erreur(e.message) }
 }
 </script>
 
 <template>
-  <section class="max-w-2xl">
-    <h1 class="text-2xl font-bold mb-4">Nouvel approvisionnement</h1>
-    <p v-if="chargement">Chargement…</p>
-    <template v-else>
-      <label class="flex flex-col gap-1 mb-4"><span>Fournisseur</span>
-        <select v-model="form.fournisseurId" class="px-3 py-2 border rounded">
-          <option :value="null">—</option>
-          <option v-for="f in fournisseurs" :key="f.id" :value="f.id">{{ f.nom }}</option>
-        </select>
-      </label>
+  <main class="mx-auto max-w-3xl space-y-6">
+    <header>
+      <NuxtLink to="/fournisseurs" class="text-sm font-semibold text-orange-700 transition hover:text-orange-800">
+        <span aria-hidden="true">←</span> Retour aux fournisseurs
+      </NuxtLink>
+      <p class="mt-5 text-sm font-semibold uppercase tracking-wide text-orange-600">Gestion des achats</p>
+      <h1 class="mt-1 text-3xl font-bold text-gray-900">Ajouter un fournisseur</h1>
+      <p class="mt-2 text-sm text-gray-500">Enregistrez les coordonnées de votre partenaire pour préparer vos commandes.</p>
+    </header>
 
-      <div v-for="(l, i) in form.lignes" :key="i" class="grid sm:grid-cols-4 gap-2 mb-2">
-        <select v-model="l.ingredientId" class="px-3 py-2 border rounded">
-          <option :value="null">Ingrédient</option>
-          <option v-for="ing in ingredientsDispo" :key="ing.id" :value="ing.id">{{ ing.nom }}</option>
-        </select>
-        <input v-model.number="l.quantite" type="number" min="1" class="px-3 py-2 border rounded" />
-        <input v-model.number="l.prixUnitaire" type="number" step="0.01" min="0" class="px-3 py-2 border rounded" />
-        <button class="text-red-600 text-sm" @click="retirerLigne(i)">Retirer</button>
+    <form class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-8" @submit.prevent="soumettre">
+      <div class="mb-6 border-b border-gray-100 pb-5">
+        <h2 class="font-semibold text-gray-900">Informations du fournisseur</h2>
+        <p class="mt-1 text-sm text-gray-500">Les champs marqués d’un astérisque sont obligatoires.</p>
       </div>
-
-      <button class="text-sm underline mb-4" @click="ajouterLigne">+ Ajouter une ligne</button>
-      <p class="font-bold mb-4">Total : {{ formaterPrix(total) }}</p>
-      <button class="px-4 py-2 rounded bg-slate-900 text-white" @click="soumettre">Créer l'approvisionnement</button>
-    </template>
-  </section>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <label class="block sm:col-span-2">
+          <span class="mb-1.5 block text-sm font-medium text-gray-700">Nom <span class="text-orange-600">*</span></span>
+          <input v-model="form.nom" required autocomplete="organization" placeholder="Ex. : Maraîchers de Virunga" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200" />
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-sm font-medium text-gray-700">Catégorie <span class="text-orange-600">*</span></span>
+          <input v-model="form.categorie" required placeholder="Ex. : Fruits et légumes" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200" />
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-sm font-medium text-gray-700">Personne à contacter</span>
+          <input v-model="form.contact" autocomplete="name" placeholder="Nom du contact" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200" />
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-sm font-medium text-gray-700">Téléphone</span>
+          <input v-model="form.telephone" type="tel" autocomplete="tel" placeholder="+243 ..." class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200" />
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-sm font-medium text-gray-700">Adresse e-mail</span>
+          <input v-model="form.email" type="email" autocomplete="email" placeholder="contact@exemple.com" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200" />
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="mb-1.5 block text-sm font-medium text-gray-700">Adresse</span>
+          <input v-model="form.adresse" autocomplete="street-address" placeholder="Adresse du fournisseur" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200" />
+        </label>
+      </div>
+      <div class="mt-8 flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
+        <NuxtLink to="/fournisseurs" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">
+          Annuler
+        </NuxtLink>
+        <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-orange-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+          Enregistrer le fournisseur
+        </button>
+      </div>
+    </form>
+  </main>
 </template>
-
-//page d'approvisionnement pour créer un nouvel approvisionnement, avec sélection du fournisseur et des ingrédients, calcul du total et soumission du formulaire.//

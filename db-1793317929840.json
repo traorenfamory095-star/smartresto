@@ -1,0 +1,1900 @@
+{
+  "approvisionnements": [
+    {
+      "id": 1,
+      "fournisseurId": 4,
+      "dateCommande": "2026-10-10",
+      "dateReception": "2026-10-12",
+      "statut": "recue",
+      "lignes": [
+        {
+          "ingredientId": 13,
+          "quantite": 144,
+          "prixUnitaire": 1.8
+        },
+        {
+          "ingredientId": 14,
+          "quantite": 60,
+          "prixUnitaire": 0.7
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "fournisseurId": 1,
+      "dateCommande": "2026-10-19",
+      "dateReception": null,
+      "statut": "commande",
+      "lignes": [
+        {
+          "ingredientId": 7,
+          "quantite": 15,
+          "prixUnitaire": 6.5
+        },
+        {
+          "ingredientId": 6,
+          "quantite": 10,
+          "prixUnitaire": 9
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "fournisseurId": 2,
+      "dateCommande": "2026-10-20",
+      "dateReception": null,
+      "statut": "commande",
+      "lignes": [
+        {
+          "ingredientId": 4,
+          "quantite": 12,
+          "prixUnitaire": 8
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "nom": "Entrées",
+      "ordre": 1,
+      "description": "Pour commencer le repas"
+    },
+    {
+      "id": 2,
+      "nom": "Grillades",
+      "ordre": 2,
+      "description": "Viandes cuites au feu de bois"
+    },
+    {
+      "id": 3,
+      "nom": "Plats traditionnels",
+      "ordre": 3,
+      "description": "La cuisine de la région des Grands Lacs"
+    },
+    {
+      "id": 4,
+      "nom": "Poissons du lac",
+      "ordre": 4,
+      "description": "Pêche du jour du lac Kivu"
+    },
+    {
+      "id": 5,
+      "nom": "Boissons",
+      "ordre": 5,
+      "description": "Bières, sodas, jus et boissons chaudes"
+    },
+    {
+      "id": 6,
+      "nom": "Desserts",
+      "ordre": 6,
+      "description": "Pour finir en douceur"
+    }
+  ],
+  "commandes": [
+    {
+      "id": 1,
+      "tableId": 6,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-12T12:40:00",
+      "nbCouverts": 3,
+      "note": ""
+    },
+    {
+      "id": 2,
+      "tableId": 9,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-12T19:35:00",
+      "nbCouverts": 1,
+      "note": ""
+    },
+    {
+      "id": 3,
+      "tableId": 7,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-13T12:40:00",
+      "nbCouverts": 4,
+      "note": ""
+    },
+    {
+      "id": 4,
+      "tableId": 4,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-13T19:35:00",
+      "nbCouverts": 4,
+      "note": ""
+    },
+    {
+      "id": 5,
+      "tableId": 2,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-14T12:40:00",
+      "nbCouverts": 2,
+      "note": ""
+    },
+    {
+      "id": 6,
+      "tableId": 8,
+      "serveurId": 4,
+      "statut": "payee",
+      "creeLe": "2026-10-14T19:35:00",
+      "nbCouverts": 2,
+      "note": ""
+    },
+    {
+      "id": 7,
+      "tableId": 8,
+      "serveurId": 4,
+      "statut": "payee",
+      "creeLe": "2026-10-15T12:40:00",
+      "nbCouverts": 3,
+      "note": ""
+    },
+    {
+      "id": 8,
+      "tableId": 1,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-15T19:35:00",
+      "nbCouverts": 4,
+      "note": ""
+    },
+    {
+      "id": 9,
+      "tableId": 2,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-16T12:40:00",
+      "nbCouverts": 2,
+      "note": ""
+    },
+    {
+      "id": 10,
+      "tableId": 5,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-16T19:35:00",
+      "nbCouverts": 2,
+      "note": ""
+    },
+    {
+      "id": 11,
+      "tableId": 7,
+      "serveurId": 4,
+      "statut": "payee",
+      "creeLe": "2026-10-17T12:40:00",
+      "nbCouverts": 3,
+      "note": ""
+    },
+    {
+      "id": 12,
+      "tableId": 10,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-17T19:35:00",
+      "nbCouverts": 2,
+      "note": ""
+    },
+    {
+      "id": 13,
+      "tableId": 9,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-18T12:40:00",
+      "nbCouverts": 3,
+      "note": ""
+    },
+    {
+      "id": 14,
+      "tableId": 2,
+      "serveurId": 4,
+      "statut": "payee",
+      "creeLe": "2026-10-18T19:35:00",
+      "nbCouverts": 4,
+      "note": ""
+    },
+    {
+      "id": 15,
+      "tableId": 6,
+      "serveurId": 3,
+      "statut": "payee",
+      "creeLe": "2026-10-19T12:40:00",
+      "nbCouverts": 1,
+      "note": ""
+    },
+    {
+      "id": 16,
+      "tableId": 8,
+      "serveurId": 4,
+      "statut": "payee",
+      "creeLe": "2026-10-19T19:35:00",
+      "nbCouverts": 3,
+      "note": ""
+    },
+    {
+      "id": 17,
+      "tableId": 4,
+      "serveurId": 4,
+      "statut": "payee",
+      "creeLe": "2026-10-20T12:40:00",
+      "nbCouverts": 2,
+      "note": ""
+    },
+    {
+      "id": 18,
+      "tableId": 9,
+      "serveurId": 4,
+      "statut": "payee",
+      "creeLe": "2026-10-20T19:35:00",
+      "nbCouverts": 2,
+      "note": ""
+    },
+    {
+      "id": 19,
+      "tableId": 6,
+      "serveurId": 3,
+      "statut": "annulee",
+      "creeLe": "2026-10-18T20:10:00",
+      "nbCouverts": 2,
+      "note": "Client parti avant d'être servi"
+    },
+    {
+      "id": 20,
+      "tableId": 3,
+      "serveurId": 4,
+      "statut": "servie",
+      "creeLe": "2026-10-21T12:05:00",
+      "nbCouverts": 1,
+      "note": "Addition demandée"
+    },
+    {
+      "id": 21,
+      "tableId": 7,
+      "serveurId": 3,
+      "statut": "prete",
+      "creeLe": "2026-10-21T12:30:00",
+      "nbCouverts": 3,
+      "note": ""
+    },
+    {
+      "id": 22,
+      "tableId": 5,
+      "serveurId": 3,
+      "statut": "en_preparation",
+      "creeLe": "2026-10-21T12:42:00",
+      "nbCouverts": 3,
+      "note": ""
+    },
+    {
+      "id": 23,
+      "tableId": 9,
+      "serveurId": 4,
+      "statut": "en_attente",
+      "creeLe": "2026-10-21T12:55:00",
+      "nbCouverts": 2,
+      "note": "Allergie aux arachides"
+    }
+  ],
+  "employes": [
+    {
+      "id": 1,
+      "nom": "Administrateur",
+      "email": "admin@smartresto.cd",
+      "motDePasse": "1234",
+      "role": "admin",
+      "actif": true,
+      "creeLe": "2026-10-01"
+    },
+    {
+      "id": 2,
+      "nom": "Neema Bahati",
+      "email": "neema@smartresto.cd",
+      "motDePasse": "1234",
+      "role": "gerant",
+      "actif": true,
+      "creeLe": "2026-10-01"
+    },
+    {
+      "id": 3,
+      "nom": "Amani Kasereka",
+      "email": "amani@smartresto.cd",
+      "motDePasse": "1234",
+      "role": "serveur",
+      "actif": true,
+      "creeLe": "2026-10-02"
+    },
+    {
+      "id": 4,
+      "nom": "Zawadi Mukeni",
+      "email": "zawadi@smartresto.cd",
+      "motDePasse": "1234",
+      "role": "serveur",
+      "actif": true,
+      "creeLe": "2026-10-02"
+    },
+    {
+      "id": 5,
+      "nom": "Baraka Mumbere",
+      "email": "baraka@smartresto.cd",
+      "motDePasse": "1234",
+      "role": "cuisinier",
+      "actif": true,
+      "creeLe": "2026-10-02"
+    },
+    {
+      "id": 6,
+      "nom": "Furaha Nyota",
+      "email": "furaha@smartresto.cd",
+      "motDePasse": "1234",
+      "role": "caissier",
+      "actif": true,
+      "creeLe": "2026-10-03"
+    },
+    {
+      "id": 7,
+      "nom": "Jengo Paluku",
+      "email": "jengo@smartresto.cd",
+      "motDePasse": "1234",
+      "role": "serveur",
+      "actif": false,
+      "creeLe": "2026-10-03"
+    }
+  ],
+  "factures": [
+    {
+      "id": 1,
+      "commandeId": 1,
+      "numero": "F-2026-0001",
+      "sousTotal": 8.5,
+      "remise": 0,
+      "taxe": 1.36,
+      "total": 9.86,
+      "statut": "payee",
+      "creeLe": "2026-10-12T13:55:00"
+    },
+    {
+      "id": 2,
+      "commandeId": 2,
+      "numero": "F-2026-0002",
+      "sousTotal": 4.5,
+      "remise": 0,
+      "taxe": 0.72,
+      "total": 5.22,
+      "statut": "payee",
+      "creeLe": "2026-10-12T20:50:00"
+    },
+    {
+      "id": 3,
+      "commandeId": 3,
+      "numero": "F-2026-0003",
+      "sousTotal": 17,
+      "remise": 0,
+      "taxe": 2.72,
+      "total": 19.72,
+      "statut": "payee",
+      "creeLe": "2026-10-13T13:55:00"
+    },
+    {
+      "id": 4,
+      "commandeId": 4,
+      "numero": "F-2026-0004",
+      "sousTotal": 33,
+      "remise": 0,
+      "taxe": 5.28,
+      "total": 38.28,
+      "statut": "payee",
+      "creeLe": "2026-10-13T20:50:00"
+    },
+    {
+      "id": 5,
+      "commandeId": 5,
+      "numero": "F-2026-0005",
+      "sousTotal": 13,
+      "remise": 0,
+      "taxe": 2.08,
+      "total": 15.08,
+      "statut": "payee",
+      "creeLe": "2026-10-14T13:55:00"
+    },
+    {
+      "id": 6,
+      "commandeId": 6,
+      "numero": "F-2026-0006",
+      "sousTotal": 26,
+      "remise": 0,
+      "taxe": 4.16,
+      "total": 30.16,
+      "statut": "payee",
+      "creeLe": "2026-10-14T20:50:00"
+    },
+    {
+      "id": 7,
+      "commandeId": 7,
+      "numero": "F-2026-0007",
+      "sousTotal": 15,
+      "remise": 1.5,
+      "taxe": 2.16,
+      "total": 15.66,
+      "statut": "payee",
+      "creeLe": "2026-10-15T13:55:00"
+    },
+    {
+      "id": 8,
+      "commandeId": 8,
+      "numero": "F-2026-0008",
+      "sousTotal": 25,
+      "remise": 0,
+      "taxe": 4,
+      "total": 29,
+      "statut": "payee",
+      "creeLe": "2026-10-15T20:50:00"
+    },
+    {
+      "id": 9,
+      "commandeId": 9,
+      "numero": "F-2026-0009",
+      "sousTotal": 24.5,
+      "remise": 0,
+      "taxe": 3.92,
+      "total": 28.42,
+      "statut": "payee",
+      "creeLe": "2026-10-16T13:55:00"
+    },
+    {
+      "id": 10,
+      "commandeId": 10,
+      "numero": "F-2026-0010",
+      "sousTotal": 31.5,
+      "remise": 0,
+      "taxe": 5.04,
+      "total": 36.54,
+      "statut": "payee",
+      "creeLe": "2026-10-16T20:50:00"
+    },
+    {
+      "id": 11,
+      "commandeId": 11,
+      "numero": "F-2026-0011",
+      "sousTotal": 27,
+      "remise": 0,
+      "taxe": 4.32,
+      "total": 31.32,
+      "statut": "payee",
+      "creeLe": "2026-10-17T13:55:00"
+    },
+    {
+      "id": 12,
+      "commandeId": 12,
+      "numero": "F-2026-0012",
+      "sousTotal": 24.5,
+      "remise": 0,
+      "taxe": 3.92,
+      "total": 28.42,
+      "statut": "payee",
+      "creeLe": "2026-10-17T20:50:00"
+    },
+    {
+      "id": 13,
+      "commandeId": 13,
+      "numero": "F-2026-0013",
+      "sousTotal": 17.5,
+      "remise": 0,
+      "taxe": 2.8,
+      "total": 20.3,
+      "statut": "payee",
+      "creeLe": "2026-10-18T13:55:00"
+    },
+    {
+      "id": 14,
+      "commandeId": 14,
+      "numero": "F-2026-0014",
+      "sousTotal": 26,
+      "remise": 0,
+      "taxe": 4.16,
+      "total": 30.16,
+      "statut": "payee",
+      "creeLe": "2026-10-18T20:50:00"
+    },
+    {
+      "id": 15,
+      "commandeId": 15,
+      "numero": "F-2026-0015",
+      "sousTotal": 18.5,
+      "remise": 0,
+      "taxe": 2.96,
+      "total": 21.46,
+      "statut": "payee",
+      "creeLe": "2026-10-19T13:55:00"
+    },
+    {
+      "id": 16,
+      "commandeId": 16,
+      "numero": "F-2026-0016",
+      "sousTotal": 50,
+      "remise": 0,
+      "taxe": 8,
+      "total": 58,
+      "statut": "payee",
+      "creeLe": "2026-10-19T20:50:00"
+    },
+    {
+      "id": 17,
+      "commandeId": 17,
+      "numero": "F-2026-0017",
+      "sousTotal": 16,
+      "remise": 0,
+      "taxe": 2.56,
+      "total": 18.56,
+      "statut": "payee",
+      "creeLe": "2026-10-20T13:55:00"
+    },
+    {
+      "id": 18,
+      "commandeId": 18,
+      "numero": "F-2026-0018",
+      "sousTotal": 11.5,
+      "remise": 0,
+      "taxe": 1.84,
+      "total": 13.34,
+      "statut": "payee",
+      "creeLe": "2026-10-20T20:50:00"
+    },
+    {
+      "id": 19,
+      "commandeId": 20,
+      "numero": "F-2026-0019",
+      "sousTotal": 20,
+      "remise": 0,
+      "taxe": 3.2,
+      "total": 23.2,
+      "statut": "emise",
+      "creeLe": "2026-10-21T13:20:00"
+    }
+  ],
+  "fournisseurs": [
+    {
+      "id": 1,
+      "nom": "Pêcherie du Lac Kivu",
+      "categorie": "Poissons",
+      "contact": "M. Safari Mugisho",
+      "telephone": "+243 990 000 201",
+      "email": "contact@pecherie-kivu.example",
+      "adresse": "Port de Goma"
+    },
+    {
+      "id": 2,
+      "nom": "Boucherie Bwiza",
+      "categorie": "Viandes",
+      "contact": "Mme Bwiza Nshobole",
+      "telephone": "+243 990 000 202",
+      "email": "commandes@bwiza.example",
+      "adresse": "Marché central, Goma"
+    },
+    {
+      "id": 3,
+      "nom": "Maraîchers de Virunga",
+      "categorie": "Légumes et fruits",
+      "contact": "M. Désiré Kambale",
+      "telephone": "+243 990 000 203",
+      "email": "",
+      "adresse": "Route de Sake"
+    },
+    {
+      "id": 4,
+      "nom": "Distribution Boissons Kivu",
+      "categorie": "Boissons",
+      "contact": "Mme Esther Mbusa",
+      "telephone": "+243 990 000 204",
+      "email": "ventes@boissons-kivu.example",
+      "adresse": "Zone industrielle, Goma"
+    }
+  ],
+  "ingredients": [
+    {
+      "id": 1,
+      "nom": "Poulet",
+      "unite": "kg",
+      "stock": 25,
+      "seuilAlerte": 10,
+      "prixUnitaire": 5.5,
+      "fournisseurId": 2
+    },
+    {
+      "id": 2,
+      "nom": "Viande de chèvre",
+      "unite": "kg",
+      "stock": 12,
+      "seuilAlerte": 8,
+      "prixUnitaire": 7,
+      "fournisseurId": 2
+    },
+    {
+      "id": 3,
+      "nom": "Porc",
+      "unite": "kg",
+      "stock": 15,
+      "seuilAlerte": 8,
+      "prixUnitaire": 6,
+      "fournisseurId": 2
+    },
+    {
+      "id": 4,
+      "nom": "Boeuf",
+      "unite": "kg",
+      "stock": 6,
+      "seuilAlerte": 8,
+      "prixUnitaire": 8,
+      "fournisseurId": 2
+    },
+    {
+      "id": 5,
+      "nom": "Sambaza",
+      "unite": "kg",
+      "stock": 10,
+      "seuilAlerte": 5,
+      "prixUnitaire": 4,
+      "fournisseurId": 1
+    },
+    {
+      "id": 6,
+      "nom": "Capitaine",
+      "unite": "kg",
+      "stock": 8,
+      "seuilAlerte": 5,
+      "prixUnitaire": 9,
+      "fournisseurId": 1
+    },
+    {
+      "id": 7,
+      "nom": "Tilapia",
+      "unite": "kg",
+      "stock": 3,
+      "seuilAlerte": 6,
+      "prixUnitaire": 6.5,
+      "fournisseurId": 1
+    },
+    {
+      "id": 8,
+      "nom": "Farine de manioc",
+      "unite": "kg",
+      "stock": 30,
+      "seuilAlerte": 10,
+      "prixUnitaire": 1.2,
+      "fournisseurId": 3
+    },
+    {
+      "id": 9,
+      "nom": "Riz",
+      "unite": "kg",
+      "stock": 40,
+      "seuilAlerte": 15,
+      "prixUnitaire": 1.4,
+      "fournisseurId": 3
+    },
+    {
+      "id": 10,
+      "nom": "Bananes plantain",
+      "unite": "kg",
+      "stock": 20,
+      "seuilAlerte": 8,
+      "prixUnitaire": 0.9,
+      "fournisseurId": 3
+    },
+    {
+      "id": 11,
+      "nom": "Tomates",
+      "unite": "kg",
+      "stock": 9,
+      "seuilAlerte": 6,
+      "prixUnitaire": 1.5,
+      "fournisseurId": 3
+    },
+    {
+      "id": 12,
+      "nom": "Huile de cuisson",
+      "unite": "l",
+      "stock": 20,
+      "seuilAlerte": 8,
+      "prixUnitaire": 2.6,
+      "fournisseurId": 3
+    },
+    {
+      "id": 13,
+      "nom": "Primus 65cl",
+      "unite": "piece",
+      "stock": 120,
+      "seuilAlerte": 48,
+      "prixUnitaire": 1.8,
+      "fournisseurId": 4
+    },
+    {
+      "id": 14,
+      "nom": "Fanta 30cl",
+      "unite": "piece",
+      "stock": 60,
+      "seuilAlerte": 24,
+      "prixUnitaire": 0.7,
+      "fournisseurId": 4
+    }
+  ],
+  "lignesCommande": [
+    {
+      "id": 1,
+      "commandeId": 1,
+      "platId": 3,
+      "quantite": 1,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 2,
+      "commandeId": 1,
+      "platId": 19,
+      "quantite": 2,
+      "prixUnitaire": 2,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 3,
+      "commandeId": 2,
+      "platId": 15,
+      "quantite": 1,
+      "prixUnitaire": 1.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 4,
+      "commandeId": 2,
+      "platId": 20,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "prete",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 5,
+      "commandeId": 3,
+      "platId": 8,
+      "quantite": 2,
+      "prixUnitaire": 6.5,
+      "statutCuisine": "prete",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 6,
+      "commandeId": 3,
+      "platId": 2,
+      "quantite": 1,
+      "prixUnitaire": 4,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 7,
+      "commandeId": 4,
+      "platId": 10,
+      "quantite": 2,
+      "prixUnitaire": 7,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 8,
+      "commandeId": 4,
+      "platId": 15,
+      "quantite": 2,
+      "prixUnitaire": 1.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 9,
+      "commandeId": 4,
+      "platId": 5,
+      "quantite": 2,
+      "prixUnitaire": 8,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 10,
+      "commandeId": 5,
+      "platId": 19,
+      "quantite": 2,
+      "prixUnitaire": 2,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 11,
+      "commandeId": 5,
+      "platId": 3,
+      "quantite": 2,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 12,
+      "commandeId": 6,
+      "platId": 20,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 13,
+      "commandeId": 6,
+      "platId": 16,
+      "quantite": 2,
+      "prixUnitaire": 2.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 14,
+      "commandeId": 6,
+      "platId": 13,
+      "quantite": 1,
+      "prixUnitaire": 11,
+      "statutCuisine": "prete",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 15,
+      "commandeId": 6,
+      "platId": 10,
+      "quantite": 1,
+      "prixUnitaire": 7,
+      "statutCuisine": "prete",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 16,
+      "commandeId": 7,
+      "platId": 3,
+      "quantite": 1,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 17,
+      "commandeId": 7,
+      "platId": 4,
+      "quantite": 1,
+      "prixUnitaire": 9.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 18,
+      "commandeId": 7,
+      "platId": 18,
+      "quantite": 1,
+      "prixUnitaire": 1,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 19,
+      "commandeId": 8,
+      "platId": 11,
+      "quantite": 2,
+      "prixUnitaire": 6,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 20,
+      "commandeId": 8,
+      "platId": 13,
+      "quantite": 1,
+      "prixUnitaire": 11,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 21,
+      "commandeId": 8,
+      "platId": 17,
+      "quantite": 1,
+      "prixUnitaire": 2,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 22,
+      "commandeId": 9,
+      "platId": 10,
+      "quantite": 1,
+      "prixUnitaire": 7,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 23,
+      "commandeId": 9,
+      "platId": 14,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "prete",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 24,
+      "commandeId": 9,
+      "platId": 13,
+      "quantite": 1,
+      "prixUnitaire": 11,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 25,
+      "commandeId": 9,
+      "platId": 1,
+      "quantite": 1,
+      "prixUnitaire": 3.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 26,
+      "commandeId": 10,
+      "platId": 14,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 27,
+      "commandeId": 10,
+      "platId": 17,
+      "quantite": 2,
+      "prixUnitaire": 2,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 28,
+      "commandeId": 10,
+      "platId": 3,
+      "quantite": 1,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 29,
+      "commandeId": 10,
+      "platId": 6,
+      "quantite": 2,
+      "prixUnitaire": 10,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 30,
+      "commandeId": 11,
+      "platId": 5,
+      "quantite": 1,
+      "prixUnitaire": 8,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 31,
+      "commandeId": 11,
+      "platId": 3,
+      "quantite": 2,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 32,
+      "commandeId": 11,
+      "platId": 6,
+      "quantite": 1,
+      "prixUnitaire": 10,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 33,
+      "commandeId": 12,
+      "platId": 1,
+      "quantite": 2,
+      "prixUnitaire": 3.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 34,
+      "commandeId": 12,
+      "platId": 5,
+      "quantite": 2,
+      "prixUnitaire": 8,
+      "statutCuisine": "prete",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 35,
+      "commandeId": 12,
+      "platId": 15,
+      "quantite": 1,
+      "prixUnitaire": 1.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 36,
+      "commandeId": 13,
+      "platId": 14,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 37,
+      "commandeId": 13,
+      "platId": 20,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 38,
+      "commandeId": 13,
+      "platId": 19,
+      "quantite": 1,
+      "prixUnitaire": 2,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 39,
+      "commandeId": 13,
+      "platId": 4,
+      "quantite": 1,
+      "prixUnitaire": 9.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 40,
+      "commandeId": 14,
+      "platId": 4,
+      "quantite": 2,
+      "prixUnitaire": 9.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 41,
+      "commandeId": 14,
+      "platId": 1,
+      "quantite": 2,
+      "prixUnitaire": 3.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 42,
+      "commandeId": 15,
+      "platId": 14,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "prete",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 43,
+      "commandeId": 15,
+      "platId": 5,
+      "quantite": 1,
+      "prixUnitaire": 8,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 44,
+      "commandeId": 15,
+      "platId": 9,
+      "quantite": 1,
+      "prixUnitaire": 7.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 45,
+      "commandeId": 16,
+      "platId": 10,
+      "quantite": 2,
+      "prixUnitaire": 7,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 46,
+      "commandeId": 16,
+      "platId": 3,
+      "quantite": 2,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 47,
+      "commandeId": 16,
+      "platId": 5,
+      "quantite": 1,
+      "prixUnitaire": 8,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 48,
+      "commandeId": 16,
+      "platId": 4,
+      "quantite": 2,
+      "prixUnitaire": 9.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 49,
+      "commandeId": 17,
+      "platId": 18,
+      "quantite": 2,
+      "prixUnitaire": 1,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 50,
+      "commandeId": 17,
+      "platId": 10,
+      "quantite": 2,
+      "prixUnitaire": 7,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 51,
+      "commandeId": 18,
+      "platId": 8,
+      "quantite": 1,
+      "prixUnitaire": 6.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 52,
+      "commandeId": 18,
+      "platId": 19,
+      "quantite": 2,
+      "prixUnitaire": 2,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 53,
+      "commandeId": 18,
+      "platId": 18,
+      "quantite": 1,
+      "prixUnitaire": 1,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 54,
+      "commandeId": 19,
+      "platId": 13,
+      "quantite": 1,
+      "prixUnitaire": 11,
+      "statutCuisine": "en_attente",
+      "remarque": ""
+    },
+    {
+      "id": 55,
+      "commandeId": 19,
+      "platId": 1,
+      "quantite": 1,
+      "prixUnitaire": 3.5,
+      "statutCuisine": "en_attente",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 56,
+      "commandeId": 19,
+      "platId": 19,
+      "quantite": 1,
+      "prixUnitaire": 2,
+      "statutCuisine": "en_attente",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 57,
+      "commandeId": 19,
+      "platId": 9,
+      "quantite": 2,
+      "prixUnitaire": 7.5,
+      "statutCuisine": "en_attente",
+      "remarque": ""
+    },
+    {
+      "id": 58,
+      "commandeId": 20,
+      "platId": 4,
+      "quantite": 1,
+      "prixUnitaire": 9.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 59,
+      "commandeId": 20,
+      "platId": 8,
+      "quantite": 1,
+      "prixUnitaire": 6.5,
+      "statutCuisine": "prete",
+      "remarque": "Sans piment"
+    },
+    {
+      "id": 60,
+      "commandeId": 20,
+      "platId": 17,
+      "quantite": 2,
+      "prixUnitaire": 2,
+      "statutCuisine": "prete",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 61,
+      "commandeId": 21,
+      "platId": 3,
+      "quantite": 2,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 62,
+      "commandeId": 21,
+      "platId": 4,
+      "quantite": 1,
+      "prixUnitaire": 9.5,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 63,
+      "commandeId": 21,
+      "platId": 14,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "prete",
+      "remarque": ""
+    },
+    {
+      "id": 64,
+      "commandeId": 22,
+      "platId": 14,
+      "quantite": 1,
+      "prixUnitaire": 3,
+      "statutCuisine": "en_preparation",
+      "remarque": ""
+    },
+    {
+      "id": 65,
+      "commandeId": 22,
+      "platId": 3,
+      "quantite": 1,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "en_attente",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 66,
+      "commandeId": 22,
+      "platId": 6,
+      "quantite": 1,
+      "prixUnitaire": 10,
+      "statutCuisine": "en_attente",
+      "remarque": ""
+    },
+    {
+      "id": 67,
+      "commandeId": 22,
+      "platId": 18,
+      "quantite": 2,
+      "prixUnitaire": 1,
+      "statutCuisine": "en_attente",
+      "remarque": "Bien cuit"
+    },
+    {
+      "id": 68,
+      "commandeId": 23,
+      "platId": 19,
+      "quantite": 1,
+      "prixUnitaire": 2,
+      "statutCuisine": "en_attente",
+      "remarque": ""
+    },
+    {
+      "id": 69,
+      "commandeId": 23,
+      "platId": 20,
+      "quantite": 2,
+      "prixUnitaire": 3,
+      "statutCuisine": "en_attente",
+      "remarque": ""
+    },
+    {
+      "id": 70,
+      "commandeId": 23,
+      "platId": 5,
+      "quantite": 2,
+      "prixUnitaire": 8,
+      "statutCuisine": "en_attente",
+      "remarque": ""
+    }
+  ],
+  "mouvementsStock": [
+    {
+      "id": 1,
+      "ingredientId": 1,
+      "type": "entree",
+      "quantite": 30,
+      "date": "2026-10-12",
+      "motif": "Stock initial"
+    },
+    {
+      "id": 2,
+      "ingredientId": 13,
+      "type": "entree",
+      "quantite": 144,
+      "date": "2026-10-12",
+      "motif": "Stock initial"
+    },
+    {
+      "id": 3,
+      "ingredientId": 1,
+      "type": "sortie",
+      "quantite": 5,
+      "date": "2026-10-15",
+      "motif": "Consommation de la semaine"
+    },
+    {
+      "id": 4,
+      "ingredientId": 7,
+      "type": "sortie",
+      "quantite": 4,
+      "date": "2026-10-18",
+      "motif": "Consommation de la semaine"
+    },
+    {
+      "id": 5,
+      "ingredientId": 4,
+      "type": "ajustement",
+      "quantite": -2,
+      "date": "2026-10-19",
+      "motif": "Perte constatée à l'inventaire"
+    },
+    {
+      "id": 6,
+      "ingredientId": 13,
+      "type": "sortie",
+      "quantite": 24,
+      "date": "2026-10-20",
+      "motif": "Ventes du week-end"
+    }
+  ],
+  "paiements": [
+    {
+      "id": 1,
+      "factureId": 1,
+      "montant": 9.86,
+      "mode": "mobile_money",
+      "date": "2026-10-12T13:55:00"
+    },
+    {
+      "id": 2,
+      "factureId": 2,
+      "montant": 5.22,
+      "mode": "carte",
+      "date": "2026-10-12T20:50:00"
+    },
+    {
+      "id": 3,
+      "factureId": 3,
+      "montant": 19.72,
+      "mode": "mobile_money",
+      "date": "2026-10-13T13:55:00"
+    },
+    {
+      "id": 4,
+      "factureId": 4,
+      "montant": 19.14,
+      "mode": "especes",
+      "date": "2026-10-13T20:50:00"
+    },
+    {
+      "id": 5,
+      "factureId": 4,
+      "montant": 19.14,
+      "mode": "mobile_money",
+      "date": "2026-10-13T20:50:00"
+    },
+    {
+      "id": 6,
+      "factureId": 5,
+      "montant": 15.08,
+      "mode": "mobile_money",
+      "date": "2026-10-14T13:55:00"
+    },
+    {
+      "id": 7,
+      "factureId": 6,
+      "montant": 30.16,
+      "mode": "carte",
+      "date": "2026-10-14T20:50:00"
+    },
+    {
+      "id": 8,
+      "factureId": 7,
+      "montant": 15.66,
+      "mode": "mobile_money",
+      "date": "2026-10-15T13:55:00"
+    },
+    {
+      "id": 9,
+      "factureId": 8,
+      "montant": 29,
+      "mode": "especes",
+      "date": "2026-10-15T20:50:00"
+    },
+    {
+      "id": 10,
+      "factureId": 9,
+      "montant": 28.42,
+      "mode": "especes",
+      "date": "2026-10-16T13:55:00"
+    },
+    {
+      "id": 11,
+      "factureId": 10,
+      "montant": 36.54,
+      "mode": "mobile_money",
+      "date": "2026-10-16T20:50:00"
+    },
+    {
+      "id": 12,
+      "factureId": 11,
+      "montant": 15.66,
+      "mode": "especes",
+      "date": "2026-10-17T13:55:00"
+    },
+    {
+      "id": 13,
+      "factureId": 11,
+      "montant": 15.66,
+      "mode": "mobile_money",
+      "date": "2026-10-17T13:55:00"
+    },
+    {
+      "id": 14,
+      "factureId": 12,
+      "montant": 28.42,
+      "mode": "especes",
+      "date": "2026-10-17T20:50:00"
+    },
+    {
+      "id": 15,
+      "factureId": 13,
+      "montant": 20.3,
+      "mode": "especes",
+      "date": "2026-10-18T13:55:00"
+    },
+    {
+      "id": 16,
+      "factureId": 14,
+      "montant": 30.16,
+      "mode": "mobile_money",
+      "date": "2026-10-18T20:50:00"
+    },
+    {
+      "id": 17,
+      "factureId": 15,
+      "montant": 21.46,
+      "mode": "carte",
+      "date": "2026-10-19T13:55:00"
+    },
+    {
+      "id": 18,
+      "factureId": 16,
+      "montant": 58,
+      "mode": "mobile_money",
+      "date": "2026-10-19T20:50:00"
+    },
+    {
+      "id": 19,
+      "factureId": 17,
+      "montant": 18.56,
+      "mode": "especes",
+      "date": "2026-10-20T13:55:00"
+    },
+    {
+      "id": 20,
+      "factureId": 18,
+      "montant": 13.34,
+      "mode": "especes",
+      "date": "2026-10-20T20:50:00"
+    }
+  ],
+  "plats": [
+    {
+      "id": 1,
+      "categorieId": 1,
+      "nom": "Salade de crudités",
+      "description": "Tomates, concombre, oignons rouges, vinaigrette maison",
+      "prix": 3.5,
+      "tempsPreparationMin": 8,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 2,
+      "categorieId": 1,
+      "nom": "Samoussas au boeuf",
+      "description": "Quatre pièces, sauce pili-pili",
+      "prix": 4,
+      "tempsPreparationMin": 10,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 3,
+      "categorieId": 1,
+      "nom": "Soupe de poisson",
+      "description": "Bouillon de tilapia aux herbes",
+      "prix": 4.5,
+      "tempsPreparationMin": 12,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 4,
+      "categorieId": 2,
+      "nom": "Poulet braisé",
+      "description": "Demi-poulet mariné, servi avec frites ou bananes",
+      "prix": 9.5,
+      "tempsPreparationMin": 25,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 5,
+      "categorieId": 2,
+      "nom": "Brochettes de chèvre",
+      "description": "Cinq brochettes, oignons grillés",
+      "prix": 8,
+      "tempsPreparationMin": 20,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 6,
+      "categorieId": 2,
+      "nom": "Côtes de porc grillées",
+      "description": "Marinade au citron et à l'ail",
+      "prix": 10,
+      "tempsPreparationMin": 25,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 7,
+      "categorieId": 3,
+      "nom": "Ugali sauce poisson",
+      "description": "Pâte de manioc et sauce de poisson",
+      "prix": 7,
+      "tempsPreparationMin": 20,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 8,
+      "categorieId": 3,
+      "nom": "Riz pilaou",
+      "description": "Riz parfumé aux épices, viande de boeuf",
+      "prix": 6.5,
+      "tempsPreparationMin": 20,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 9,
+      "categorieId": 3,
+      "nom": "Matoke au boeuf",
+      "description": "Bananes plantain mijotées avec du boeuf",
+      "prix": 7.5,
+      "tempsPreparationMin": 25,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 10,
+      "categorieId": 3,
+      "nom": "Fufu et feuilles de manioc",
+      "description": "Plat végétarien traditionnel",
+      "prix": 7,
+      "tempsPreparationMin": 20,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 11,
+      "categorieId": 4,
+      "nom": "Sambaza frits",
+      "description": "Petits poissons du lac, croustillants",
+      "prix": 6,
+      "tempsPreparationMin": 15,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 12,
+      "categorieId": 4,
+      "nom": "Capitaine grillé",
+      "description": "Poisson entier grillé, sauce tomate",
+      "prix": 12,
+      "tempsPreparationMin": 25,
+      "disponible": false,
+      "imageUrl": ""
+    },
+    {
+      "id": 13,
+      "categorieId": 4,
+      "nom": "Tilapia entier",
+      "description": "Frit ou grillé, au choix",
+      "prix": 11,
+      "tempsPreparationMin": 25,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 14,
+      "categorieId": 5,
+      "nom": "Primus 65cl",
+      "description": "Bière blonde bien fraîche",
+      "prix": 3,
+      "tempsPreparationMin": 1,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 15,
+      "categorieId": 5,
+      "nom": "Fanta",
+      "description": "Bouteille 30cl",
+      "prix": 1.5,
+      "tempsPreparationMin": 1,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 16,
+      "categorieId": 5,
+      "nom": "Jus de fruit de la passion",
+      "description": "Pressé le jour même",
+      "prix": 2.5,
+      "tempsPreparationMin": 4,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 17,
+      "categorieId": 5,
+      "nom": "Café du Kivu",
+      "description": "Café local, grain torréfié",
+      "prix": 2,
+      "tempsPreparationMin": 4,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 18,
+      "categorieId": 5,
+      "nom": "Eau minérale",
+      "description": "Bouteille 50cl",
+      "prix": 1,
+      "tempsPreparationMin": 1,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 19,
+      "categorieId": 6,
+      "nom": "Mandazi",
+      "description": "Beignets sucrés, trois pièces",
+      "prix": 2,
+      "tempsPreparationMin": 8,
+      "disponible": true,
+      "imageUrl": ""
+    },
+    {
+      "id": 20,
+      "categorieId": 6,
+      "nom": "Salade de fruits",
+      "description": "Fruits de saison",
+      "prix": 3,
+      "tempsPreparationMin": 6,
+      "disponible": true,
+      "imageUrl": ""
+    }
+  ],
+  "reservations": [
+    {
+      "id": 1,
+      "tableId": 10,
+      "nomClient": "Famille Tshibangu",
+      "telephone": "+243 990 000 101",
+      "nbPersonnes": 7,
+      "date": "2026-10-22",
+      "heure": "19:30",
+      "statut": "confirmee",
+      "note": "Anniversaire"
+    },
+    {
+      "id": 2,
+      "tableId": 3,
+      "nomClient": "Mme Aïcha Safari",
+      "telephone": "+243 990 000 102",
+      "nbPersonnes": 4,
+      "date": "2026-10-22",
+      "heure": "20:00",
+      "statut": "confirmee",
+      "note": ""
+    },
+    {
+      "id": 3,
+      "tableId": 8,
+      "nomClient": "Société Virunga Conseil",
+      "telephone": "+243 990 000 103",
+      "nbPersonnes": 6,
+      "date": "2026-10-23",
+      "heure": "12:30",
+      "statut": "confirmee",
+      "note": "Déjeuner d'affaires"
+    },
+    {
+      "id": 4,
+      "tableId": 5,
+      "nomClient": "M. Patrick Lwanzo",
+      "telephone": "+243 990 000 104",
+      "nbPersonnes": 2,
+      "date": "2026-10-21",
+      "heure": "20:30",
+      "statut": "confirmee",
+      "note": ""
+    },
+    {
+      "id": 5,
+      "tableId": 2,
+      "nomClient": "Mlle Grâce Kahindo",
+      "telephone": "+243 990 000 105",
+      "nbPersonnes": 2,
+      "date": "2026-10-20",
+      "heure": "19:00",
+      "statut": "annulee",
+      "note": "A annulé par téléphone"
+    }
+  ],
+  "tables": [
+    {
+      "id": 1,
+      "numero": 1,
+      "capacite": 2,
+      "zone": "terrasse",
+      "actif": true
+    },
+    {
+      "id": 2,
+      "numero": 2,
+      "capacite": 2,
+      "zone": "terrasse",
+      "actif": true
+    },
+    {
+      "id": 3,
+      "numero": 3,
+      "capacite": 4,
+      "zone": "terrasse",
+      "actif": true
+    },
+    {
+      "id": 4,
+      "numero": 4,
+      "capacite": 4,
+      "zone": "terrasse",
+      "actif": true
+    },
+    {
+      "id": 5,
+      "numero": 5,
+      "capacite": 4,
+      "zone": "salle",
+      "actif": true
+    },
+    {
+      "id": 6,
+      "numero": 6,
+      "capacite": 4,
+      "zone": "salle",
+      "actif": true
+    },
+    {
+      "id": 7,
+      "numero": 7,
+      "capacite": 4,
+      "zone": "salle",
+      "actif": true
+    },
+    {
+      "id": 8,
+      "numero": 8,
+      "capacite": 6,
+      "zone": "salle",
+      "actif": true
+    },
+    {
+      "id": 9,
+      "numero": 9,
+      "capacite": 6,
+      "zone": "salle",
+      "actif": true
+    },
+    {
+      "id": 10,
+      "numero": 10,
+      "capacite": 8,
+      "zone": "vip",
+      "actif": true
+    }
+  ]
+}

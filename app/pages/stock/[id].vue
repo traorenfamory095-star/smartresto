@@ -1,14 +1,18 @@
-
+```vue
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 
 const route = useRoute()
-const id = String(route.params.id)
+const router = useRouter()
 
-useHead({ title: `Détail de l’ingrédient | SmartResto` })
-
-const { lire, modifier } = useApi()
+const { lire, modifier, supprimer } = useApi()
 const { succes, erreur } = useNotifier()
+
+const id = computed(() => String(route.params.id))
+
+useHead(() => ({
+  title: `Détail de l’ingrédient | SmartResto`,
+}))
 
 const {
   data: ingredient,
@@ -16,272 +20,457 @@ const {
   error: erreurChargement,
   refresh,
 } = await useAsyncData(
-  `stock-ingredient-${id}`,
-  () => lire(`/ingredients/${encodeURIComponent(id)}`),
+  () => `stock-ingredient-${id.value}`,
+  () => lire(`/ingredients/${id.value}`),
 )
 
-const { data: fournisseurs } = await useAsyncData(
-  'stock-fournisseurs',
+const formulaire = reactive({
+  nom: '',
+  unite: 'kg',
+  stock: 0,
+  seuilAlerte: 0,
+  prixUnitaire: 0,
+  fournisseurId: '',
+})
+
+const enregistrement = ref(false)
+const suppression = ref(false)
+const erreurFormulaire = ref('')
+const confirmationSuppression = ref(false)
+
+const {
+  data: fournisseurs,
+  error: erreurFournisseurs,
+} = await useAsyncData(
+  'stock-detail-fournisseurs',
   () => lire('/fournisseurs'),
   { default: () => [] },
 )
 
-const formulaire = reactive({
-  nom: ingredient.value?.nom ?? '',
-  unite: ingredient.value?.unite ?? 'kg',
-  stock: ingredient.value?.stock ?? 0,
-  seuilAlerte: ingredient.value?.seuilAlerte ?? 0,
-  prixUnitaire: ingredient.value?.prixUnitaire ?? 0,
-  fournisseurId: ingredient.value?.fournisseurId ?? '',
-})
+watch(
+  ingredient,
+  (valeur) => {
+    if (!valeur) return
 
-const chargement = ref(false)
-const messageErreur = ref('')
+    formulaire.nom = valeur.nom ?? ''
+    formulaire.unite = valeur.unite ?? 'kg'
+    formulaire.stock = Number(valeur.stock ?? 0)
+    formulaire.seuilAlerte = Number(valeur.seuilAlerte ?? 0)
+    formulaire.prixUnitaire = Number(valeur.prixUnitaire ?? 0)
+    formulaire.fournisseurId = valeur.fournisseurId != null
+      ? String(valeur.fournisseurId)
+      : ''
+  },
+  { immediate: true },
+)
 
-async function enregistrerModifications() {
-  messageErreur.value = ''
+const estEnAlerte = computed(() =>
+  Number(formulaire.stock) <= Number(formulaire.seuilAlerte),
+)
 
+const fournisseurSelectionne = computed(() =>
+  (fournisseurs.value ?? []).find(
+    (fournisseur) =>
+      String(fournisseur.id) === String(formulaire.fournisseurId),
+  ),
+)
+
+const formulaireValide = computed(() =>
+  formulaire.nom.trim().length > 0 &&
+  Number.isFinite(Number(formulaire.stock)) &&
+  Number(formulaire.stock) >= 0 &&
+  Number.isFinite(Number(formulaire.seuilAlerte)) &&
+  Number(formulaire.seuilAlerte) >= 0 &&
+  Number.isFinite(Number(formulaire.prixUnitaire)) &&
+  Number(formulaire.prixUnitaire) >= 0,
+)
+
+function formaterNombre(valeur) {
+  return new Intl.NumberFormat('fr-FR', {
+    maximumFractionDigits: 2,
+  }).format(Number(valeur) || 0)
+}
+
+function valider() {
   if (!formulaire.nom.trim()) {
-    messageErreur.value = 'Le nom de l’ingrédient est obligatoire.'
-    return
+    return 'Le nom de l’ingrédient est obligatoire.'
   }
 
-  const champsNumeriques = [
-    ['Stock', formulaire.stock],
-    ['Seuil d’alerte', formulaire.seuilAlerte],
-    ['Prix unitaire', formulaire.prixUnitaire],
-  ]
-
-  for (const [nom, valeur] of champsNumeriques) {
-    if (
-      valeur === '' ||
-      !Number.isFinite(Number(valeur)) ||
-      Number(valeur) < 0
-    ) {
-      messageErreur.value = `${nom} doit être un nombre positif ou nul.`
-      return
-    }
+  if (!formulaire.unite) {
+    return 'Sélectionne une unité.'
   }
 
-  chargement.value = true
+  if (
+    !Number.isFinite(Number(formulaire.stock)) ||
+    Number(formulaire.stock) < 0
+  ) {
+    return 'Le stock doit être positif ou nul.'
+  }
+
+  if (
+    !Number.isFinite(Number(formulaire.seuilAlerte)) ||
+    Number(formulaire.seuilAlerte) < 0
+  ) {
+    return 'Le seuil d’alerte doit être positif ou nul.'
+  }
+
+  if (
+    !Number.isFinite(Number(formulaire.prixUnitaire)) ||
+    Number(formulaire.prixUnitaire) < 0
+  ) {
+    return 'Le prix unitaire doit être positif ou nul.'
+  }
+
+  return ''
+}
+
+async function enregistrer() {
+  erreurFormulaire.value = valider()
+
+  if (erreurFormulaire.value || enregistrement.value) return
+
+  enregistrement.value = true
 
   try {
-    await modifier(`/ingredients/${encodeURIComponent(id)}`, {
+    await modifier(`/ingredients/${id.value}`, {
       nom: formulaire.nom.trim(),
       unite: formulaire.unite,
       stock: Number(formulaire.stock),
       seuilAlerte: Number(formulaire.seuilAlerte),
       prixUnitaire: Number(formulaire.prixUnitaire),
-      fournisseurId: formulaire.fournisseurId || null,
+      fournisseurId: formulaire.fournisseurId
+        ? Number(formulaire.fournisseurId)
+        : null,
     })
 
+    succes('Ingrédient mis à jour avec succès.')
     await refresh()
-    succes('Les modifications ont été enregistrées.')
-    await navigateTo('/stock')
   } catch (e) {
-    messageErreur.value = e?.message || 'Impossible de modifier cet ingrédient.'
+    erreur(e)
   } finally {
-    chargement.value = false
+    enregistrement.value = false
+  }
+}
+
+async function supprimerIngredient() {
+  if (suppression.value) return
+
+  suppression.value = true
+
+  try {
+    const mouvements = await lire('/mouvementsStock', {
+      ingredientId: id.value,
+    })
+
+    if (mouvements.length > 0) {
+      erreur(
+        'Impossible de supprimer cet ingrédient : il possède déjà un historique de mouvements.',
+      )
+      return
+    }
+
+    await supprimer(`/ingredients/${id.value}`)
+
+    succes('Ingrédient supprimé avec succès.')
+    await router.push('/stock')
+  } catch (e) {
+    erreur(e)
+  } finally {
+    suppression.value = false
+    confirmationSuppression.value = false
   }
 }
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl space-y-6">
-    <NuxtLink
-      to="/stock"
-      class="text-sm font-medium text-orange-600 hover:text-orange-700"
-    >
-      ← Retour au stock
-    </NuxtLink>
+  <main class="min-h-screen space-y-6 bg-bg p-4 text-ink sm:p-6">
+    <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight text-head sm:text-3xl">
+          Détail de l’ingrédient
+        </h1>
+        <p class="mt-2 text-sm text-mut">
+          Consultez et modifiez les informations de votre inventaire.
+        </p>
+      </div>
 
-    <div v-if="pending" class="rounded-xl border bg-white p-8 text-gray-500" role="status">
+      <NuxtLink
+        to="/stock"
+        class="inline-flex items-center justify-center rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold text-ink transition-colors hover:border-pri hover:text-pri"
+      >
+        ← Retour au stock
+      </NuxtLink>
+    </header>
+
+    <section
+      v-if="pending"
+      class="rounded-carte border border-line bg-card p-8 text-center text-mut"
+    >
       Chargement de l’ingrédient...
-    </div>
+    </section>
 
     <section
       v-else-if="erreurChargement || !ingredient"
-      class="rounded-xl border border-red-200 bg-red-50 p-6"
+      class="rounded-carte border border-err/30 bg-card p-6"
     >
-      <h1 class="text-xl font-bold text-red-800">
+      <h2 class="font-semibold text-err">
         Ingrédient introuvable
-      </h1>
-      <p class="mt-2 text-sm text-red-700">
-        Impossible de charger cet ingrédient. Vérifie son identifiant et le serveur API.
+      </h2>
+      <p class="mt-2 text-sm text-mut">
+        Vérifiez l’identifiant ou réessayez le chargement.
       </p>
-      <NuxtLink to="/stock" class="mt-4 inline-block font-medium text-red-800 underline">
-        Revenir à la liste
-      </NuxtLink>
+      <button
+        type="button"
+        class="mt-4 rounded-xl bg-degrade px-4 py-2.5 font-semibold text-on-pri"
+        @click="refresh()"
+      >
+        Réessayer
+      </button>
     </section>
 
     <template v-else>
-      <header>
-        <p class="text-sm font-medium text-orange-600">INGRÉDIENT #{{ ingredient.id }}</p>
-        <h1 class="mt-2 text-3xl font-bold text-gray-900">
-          {{ ingredient.nom }}
-        </h1>
-        <p class="mt-2 text-sm text-gray-500">
-          Consulte et modifie les informations de cet ingrédient.
-        </p>
-      </header>
+      <!-- Résumé -->
+      <section class="rounded-carte border border-line bg-card p-5 sm:p-6">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p class="text-sm text-mut">Ingrédient</p>
+            <h2 class="mt-1 text-2xl font-bold text-head">
+              {{ ingredient.nom }}
+            </h2>
+            <p class="mt-2 text-sm text-mut">
+              {{ fournisseurSelectionne?.nom ?? 'Aucun fournisseur associé' }}
+            </p>
+          </div>
 
-      <section class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-gray-200 bg-white p-5">
-          <p class="text-sm text-gray-500">Stock actuel</p>
-          <p class="mt-2 text-2xl font-bold text-gray-900">
-            {{ ingredient.stock }} {{ ingredient.unite }}
-          </p>
-        </div>
-
-        <div class="rounded-xl border border-gray-200 bg-white p-5">
-          <p class="text-sm text-gray-500">Seuil d’alerte</p>
-          <p class="mt-2 text-2xl font-bold text-gray-900">
-            {{ ingredient.seuilAlerte }} {{ ingredient.unite }}
-          </p>
-        </div>
-
-        <div class="rounded-xl border border-gray-200 bg-white p-5">
-          <p class="text-sm text-gray-500">État du stock</p>
-          <p
-            class="mt-2 font-bold"
-            :class="Number(ingredient.stock) <= Number(ingredient.seuilAlerte)
-              ? 'text-red-600'
-              : 'text-emerald-600'"
+          <span
+            class="rounded-full px-3 py-1.5 text-xs font-semibold"
+            :class="estEnAlerte
+              ? 'bg-err/10 text-err'
+              : 'bg-ok/10 text-ok'"
           >
-            {{ Number(ingredient.stock) <= Number(ingredient.seuilAlerte)
-              ? 'Stock en alerte'
-              : 'Stock disponible' }}
-          </p>
+            {{ estEnAlerte ? 'Stock faible' : 'Stock normal' }}
+          </span>
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div class="rounded-xl bg-soft p-4">
+            <p class="text-sm text-mut">Stock disponible</p>
+            <p class="mt-2 text-xl font-bold text-head">
+              {{ formaterNombre(formulaire.stock) }}
+              <span class="text-sm font-medium text-mut">
+                {{ formulaire.unite }}
+              </span>
+            </p>
+          </div>
+
+          <div class="rounded-xl bg-soft p-4">
+            <p class="text-sm text-mut">Seuil d’alerte</p>
+            <p class="mt-2 text-xl font-bold text-head">
+              {{ formaterNombre(formulaire.seuilAlerte) }}
+              <span class="text-sm font-medium text-mut">
+                {{ formulaire.unite }}
+              </span>
+            </p>
+          </div>
+
+          <div class="rounded-xl bg-soft p-4">
+            <p class="text-sm text-mut">Prix unitaire</p>
+            <p class="mt-2 text-xl font-bold text-head">
+              {{ formaterNombre(formulaire.prixUnitaire) }}
+            </p>
+          </div>
         </div>
       </section>
 
-      <form
-        class="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-        @submit.prevent="enregistrerModifications"
-      >
-        <h2 class="text-lg font-semibold text-gray-900">
-          Modifier les informations
-        </h2>
-
-        <div>
-          <label for="nom" class="mb-2 block text-sm font-medium text-gray-700">
-            Nom *
-          </label>
-          <input
-            id="nom"
-            v-model="formulaire.nom"
-            required
-            maxlength="100"
-            class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-200"
-          />
+      <!-- Modification -->
+      <section class="rounded-carte border border-line bg-card p-5 sm:p-7">
+        <div class="mb-6 border-b border-line pb-5">
+          <h2 class="text-lg font-bold text-head">
+            Modifier l’ingrédient
+          </h2>
+          <p class="mt-1 text-sm text-mut">
+            Les changements seront enregistrés dans l’inventaire.
+          </p>
         </div>
 
-        <div class="grid gap-5 sm:grid-cols-2">
+        <form class="space-y-5" @submit.prevent="enregistrer">
           <div>
-            <label for="unite" class="mb-2 block text-sm font-medium text-gray-700">
-              Unité *
+            <label for="nom" class="mb-2 block text-sm font-medium text-ink">
+              Nom *
             </label>
-            <select
-              id="unite"
-              v-model="formulaire.unite"
+            <input
+              id="nom"
+              v-model="formulaire.nom"
               required
-              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3"
-            >
-              <option value="kg">Kilogramme (kg)</option>
-              <option value="L">Litre (L)</option>
-              <option value="pièce">Pièce</option>
-              <option value="paquet">Paquet</option>
-              <option value="bouteille">Bouteille</option>
-            </select>
+              maxlength="100"
+              class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+            />
           </div>
 
-          <div>
-            <label for="fournisseur" class="mb-2 block text-sm font-medium text-gray-700">
-              Fournisseur
-            </label>
-            <select
-              id="fournisseur"
-              v-model="formulaire.fournisseurId"
-              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3"
-            >
-              <option value="">Aucun fournisseur</option>
-              <option
-                v-for="fournisseur in fournisseurs"
-                :key="fournisseur.id"
-                :value="fournisseur.id"
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label for="unite" class="mb-2 block text-sm font-medium text-ink">
+                Unité *
+              </label>
+              <select
+                id="unite"
+                v-model="formulaire.unite"
+                required
+                class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
               >
-                {{ fournisseur.nom }}
-              </option>
-            </select>
+                <option value="kg">Kilogramme (kg)</option>
+                <option value="g">Gramme (g)</option>
+                <option value="L">Litre (L)</option>
+                <option value="mL">Millilitre (mL)</option>
+                <option value="pièce">Pièce</option>
+                <option value="sachet">Sachet</option>
+                <option value="paquet">Paquet</option>
+                <option value="bouteille">Bouteille</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="fournisseur" class="mb-2 block text-sm font-medium text-ink">
+                Fournisseur
+              </label>
+              <select
+                id="fournisseur"
+                v-model="formulaire.fournisseurId"
+                class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+              >
+                <option value="">Aucun fournisseur</option>
+                <option
+                  v-for="fournisseur in fournisseurs"
+                  :key="fournisseur.id"
+                  :value="String(fournisseur.id)"
+                >
+                  {{ fournisseur.nom }}
+                </option>
+              </select>
+              <p v-if="erreurFournisseurs" class="mt-1 text-xs text-err">
+                Les fournisseurs n’ont pas pu être chargés.
+              </p>
+            </div>
           </div>
 
-          <div>
-            <label for="stock" class="mb-2 block text-sm font-medium text-gray-700">
-              Stock *
-            </label>
-            <input
-              id="stock"
-              v-model.number="formulaire.stock"
-              type="number"
-              min="0"
-              step="any"
-              required
-              class="w-full rounded-lg border border-gray-300 px-4 py-3"
-            />
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div>
+              <label for="stock" class="mb-2 block text-sm font-medium text-ink">
+                Stock *
+              </label>
+              <input
+                id="stock"
+                v-model.number="formulaire.stock"
+                type="number"
+                min="0"
+                step="any"
+                required
+                class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+              />
+              <p class="mt-1 text-xs text-mut">
+                Pour une traçabilité complète, privilégie la page Mouvement de stock pour changer la quantité.
+              </p>
+            </div>
+
+            <div>
+              <label for="seuil" class="mb-2 block text-sm font-medium text-ink">
+                Seuil d’alerte *
+              </label>
+              <input
+                id="seuil"
+                v-model.number="formulaire.seuilAlerte"
+                type="number"
+                min="0"
+                step="any"
+                required
+                class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+              />
+            </div>
+
+            <div>
+              <label for="prix" class="mb-2 block text-sm font-medium text-ink">
+                Prix unitaire *
+              </label>
+              <input
+                id="prix"
+                v-model.number="formulaire.prixUnitaire"
+                type="number"
+                min="0"
+                step="any"
+                required
+                class="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-pri focus:ring-2 focus:ring-pri/20"
+              />
+            </div>
           </div>
 
-          <div>
-            <label for="seuil" class="mb-2 block text-sm font-medium text-gray-700">
-              Seuil d’alerte *
-            </label>
-            <input
-              id="seuil"
-              v-model.number="formulaire.seuilAlerte"
-              type="number"
-              min="0"
-              step="any"
-              required
-              class="w-full rounded-lg border border-gray-300 px-4 py-3"
-            />
-          </div>
-
-          <div class="sm:col-span-2">
-            <label for="prix" class="mb-2 block text-sm font-medium text-gray-700">
-              Prix unitaire ($) *
-            </label>
-            <input
-              id="prix"
-              v-model.number="formulaire.prixUnitaire"
-              type="number"
-              min="0"
-              step="any"
-              required
-              class="w-full rounded-lg border border-gray-300 px-4 py-3"
-            />
-          </div>
-        </div>
-
-        <p v-if="messageErreur" class="text-sm text-red-600" role="alert">
-          {{ messageErreur }}
-        </p>
-
-        <div class="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
-          <NuxtLink
-            to="/stock"
-            class="rounded-lg border border-gray-300 px-5 py-3 text-center font-medium text-gray-700"
+          <div
+            v-if="erreurFormulaire"
+            class="rounded-xl border border-err/30 bg-err/5 px-4 py-3 text-sm text-err"
+            role="alert"
           >
-            Annuler
-          </NuxtLink>
+            {{ erreurFormulaire }}
+          </div>
 
-          <button
-            type="submit"
-            :disabled="chargement"
-            class="rounded-lg bg-orange-600 px-5 py-3 font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
-          >
-            {{ chargement ? 'Enregistrement...' : 'Enregistrer les modifications' }}
-          </button>
-        </div>
-      </form>
+          <div class="flex flex-col-reverse justify-between gap-3 border-t border-line pt-5 sm:flex-row">
+            <button
+              type="button"
+              class="rounded-xl border border-err/30 px-5 py-3 font-semibold text-err transition-colors hover:bg-err/5"
+              @click="confirmationSuppression = true"
+            >
+              Supprimer l’ingrédient
+            </button>
+
+            <button
+              type="submit"
+              :disabled="enregistrement || !formulaireValide"
+              class="rounded-xl bg-degrade px-5 py-3 font-semibold text-on-pri transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {{ enregistrement ? 'Enregistrement...' : 'Enregistrer les modifications' }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Confirmation de suppression -->
+      <div
+        v-if="confirmationSuppression"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+        @click.self="confirmationSuppression = false"
+      >
+        <section
+          class="w-full max-w-md rounded-carte border border-line bg-card p-6 shadow-2xl"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titre-suppression"
+        >
+          <h2 id="titre-suppression" class="text-lg font-bold text-head">
+            Supprimer cet ingrédient ?
+          </h2>
+          <p class="mt-2 text-sm leading-6 text-mut">
+            Cette action est définitive. Un ingrédient ayant des mouvements enregistrés ne pourra pas être supprimé.
+          </p>
+
+          <div class="mt-6 flex flex-col-reverse justify-end gap-3 sm:flex-row">
+            <button
+              type="button"
+              :disabled="suppression"
+              class="rounded-xl border border-line px-4 py-2.5 font-semibold text-ink"
+              @click="confirmationSuppression = false"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              :disabled="suppression"
+              class="rounded-xl bg-err px-4 py-2.5 font-semibold text-white disabled:opacity-50"
+              @click="supprimerIngredient"
+            >
+              {{ suppression ? 'Suppression...' : 'Confirmer la suppression' }}
+            </button>
+          </div>
+        </section>
+      </div>
     </template>
   </main>
 </template>
+```

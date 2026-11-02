@@ -67,6 +67,8 @@
 }
 
 /* 4. On branche ces variables sur Tailwind */
+/* Tailwind CSS v4 at-rule (not an unknown CSS rule). */
+/* stylelint-disable-next-line at-rule-no-unknown */
 @theme inline {
   --color-bg: var(--bg);
   --color-card: var(--card);

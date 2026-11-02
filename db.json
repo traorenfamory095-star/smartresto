@@ -1822,7 +1822,7 @@
       "nbPersonnes": 7,
       "date": "2026-10-22",
       "heure": "19:30",
-      "statut": "annulee",
+      "statut": "confirmee",
       "note": "Anniversaire"
     },
     {
@@ -1833,7 +1833,7 @@
       "nbPersonnes": 4,
       "date": "2026-10-22",
       "heure": "20:00",
-      "statut": "annulee",
+      "statut": "confirmee",
       "note": ""
     },
     {
@@ -1844,7 +1844,7 @@
       "nbPersonnes": 6,
       "date": "2026-10-23",
       "heure": "12:30",
-      "statut": "annulee",
+      "statut": "confirmee",
       "note": "Déjeuner d'affaires"
     },
     {
@@ -1855,7 +1855,7 @@
       "nbPersonnes": 2,
       "date": "2026-10-21",
       "heure": "20:30",
-      "statut": "annulee",
+      "statut": "confirmee",
       "note": ""
     },
     {

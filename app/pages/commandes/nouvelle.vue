@@ -5,6 +5,8 @@ useHead({ title: 'Nouvelle commande' })
 const { lire } = useApi()
 const notifier = useNotifier()
 const panier = usePanier()
+const { creerCommande } = useCommandes()
+const { utilisateur } = useAuth()
 
 // Quatre lectures en parallèle ; chacune reste affichable même si une autre échoue.
 const { data, pending, error, refresh } = await useAsyncData('nouvelle-commande', async () => {
@@ -40,9 +42,30 @@ const problemes = computed(() =>
   ),
 )
 
-// La validation (création de la commande et de ses lignes) est branchée à l'étape 2.
-function valider() {
-  notifier.erreur('La validation sera branchée à l’étape 2.')
+// Validation : une seule fois à la fois (le bouton est désactivé pendant l'envoi : pas de double clic).
+const envoi = ref(false)
+
+async function valider() {
+  if (envoi.value || problemes.value.length) return
+  envoi.value = true
+  try {
+    const commande = await creerCommande({
+      tableId: panier.tableId.value,
+      serveurId: utilisateur.value?.id ?? null,
+      nbCouverts: panier.nbCouverts.value,
+      note: panier.note.value,
+      lignes: panier.lignes.value,
+    })
+    notifier.succes(`Commande #${commande.id} enregistrée.`)
+    panier.vider()
+    await navigateTo(`/commandes/${commande.id}`)
+  } catch (e) {
+    // Le panier est CONSERVÉ : l'utilisateur peut corriger (autre table...) et réessayer.
+    notifier.erreur(e)
+    await refresh() // met à jour les tables occupées
+  } finally {
+    envoi.value = false
+  }
 }
 </script>
 
@@ -111,8 +134,8 @@ function valider() {
           </ul>
 
           <div class="mt-4 grid gap-3">
-            <UiBouton taille="lg" :disabled="problemes.length > 0" @click="valider">Valider la commande</UiBouton>
-            <UiBouton v-if="panier.lignes.value.length" variante="discret" @click="panier.vider()">Vider le panier</UiBouton>
+            <UiBouton taille="lg" :disabled="problemes.length > 0" :chargement="envoi" @click="valider">Valider la commande</UiBouton>
+            <UiBouton v-if="panier.lignes.value.length" variante="discret" :disabled="envoi" @click="panier.vider()">Vider le panier</UiBouton>
           </div>
         </UiCarte>
       </div>
