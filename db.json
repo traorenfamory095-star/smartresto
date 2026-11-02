@@ -57,13 +57,13 @@
     {
       "id": 1,
       "nom": "Entrées",
-      "ordre": 1,
+      "ordre": 2,
       "description": "Pour commencer le repas"
     },
     {
       "id": 2,
       "nom": "Grillades",
-      "ordre": 2,
+      "ordre": 1,
       "description": "Viandes cuites au feu de bois"
     },
     {
@@ -81,13 +81,13 @@
     {
       "id": 5,
       "nom": "Boissons",
-      "ordre": 5,
+      "ordre": 7,
       "description": "Bières, sodas, jus et boissons chaudes"
     },
     {
       "id": 6,
       "nom": "Desserts",
-      "ordre": 6,
+      "ordre": 5,
       "description": "Pour finir en douceur"
     }
   ],
@@ -298,15 +298,6 @@
       "creeLe": "2026-10-21T12:55:00",
       "nbCouverts": 2,
       "note": "Allergie aux arachides"
-    },
-    {
-      "tableId": 1,
-      "serveurId": 1,
-      "statut": "annulee",
-      "creeLe": "2026-10-30T13:32:01",
-      "nbCouverts": 2,
-      "note": "",
-      "id": 24
     }
   ],
   "demandes": [],
@@ -1382,42 +1373,6 @@
       "prixUnitaire": 8,
       "statutCuisine": "en_attente",
       "remarque": ""
-    },
-    {
-      "commandeId": 24,
-      "platId": 1,
-      "quantite": 1,
-      "prixUnitaire": 3.5,
-      "statutCuisine": "en_attente",
-      "remarque": "",
-      "id": 71
-    },
-    {
-      "commandeId": 24,
-      "platId": 2,
-      "quantite": 1,
-      "prixUnitaire": 4,
-      "statutCuisine": "en_attente",
-      "remarque": "",
-      "id": 72
-    },
-    {
-      "commandeId": 24,
-      "platId": 3,
-      "quantite": 1,
-      "prixUnitaire": 4.5,
-      "statutCuisine": "en_attente",
-      "remarque": "",
-      "id": 73
-    },
-    {
-      "commandeId": 24,
-      "platId": 6,
-      "quantite": 1,
-      "prixUnitaire": 10,
-      "statutCuisine": "en_attente",
-      "remarque": "",
-      "id": 74
     }
   ],
   "mouvementsStock": [
@@ -2194,27 +2149,6 @@
       "capacite": 8,
       "zone": "vip",
       "actif": true
-    },
-    {
-      "numero": 11,
-      "capacite": 4,
-      "zone": "terrasse",
-      "actif": true,
-      "id": 11
-    },
-    {
-      "numero": 12,
-      "capacite": 2,
-      "zone": "terrasse",
-      "actif": true,
-      "id": 12
-    },
-    {
-      "numero": 13,
-      "capacite": 8,
-      "zone": "Bar / Comptoir",
-      "actif": true,
-      "id": 13
     }
   ]
 }
