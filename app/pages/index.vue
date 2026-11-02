@@ -19,8 +19,15 @@ useHead({
 })
 
 const { lire } = useApi()
-const panier = usePanier()
+const panier = usePanierPublic()
 const nbArticles = panier.nbArticles
+const panierOuvert = ref(false)
+
+// Nom de la catégorie : on utilise celles déjà chargées (le plat n'a que `categorieId`).
+const nomCategorie = (plat, secours) =>
+  data.value?.categories?.find((c) => c.id === plat.categorieId)?.nom ?? secours
+
+onUnmounted(() => clearTimeout(minuteurConfirmation))
 const messagePanier = ref('')
 
 let minuteurConfirmation
@@ -273,10 +280,13 @@ const avisClients = [
             <h2 class="text-3xl font-extrabold tracking-tight sm:text-4xl">
               <span class="text-pri">⌜</span>Nos plats du jour<span class="text-pri">⌟</span>
             </h2>
-            <p class="mt-3 inline-flex rounded-full border border-line bg-card px-3 py-1.5 text-sm font-semibold text-mut">
-              Panier : <span class="ml-1 text-pri">{{ nbArticles }}</span>
-              <span class="ml-1">{{ nbArticles === 1 ? 'article' : 'articles' }}</span>
-            </p>
+                        <button
+              type="button"
+              class="mt-3 inline-flex rounded-full border border-line bg-card px-3 py-1.5 text-sm font-semibold text-ink transition hover:border-pri focus-visible:outline-2 focus-visible:outline-cy"
+              @click="panierOuvert = true"
+            >
+              Ma commande ({{ nbArticles }})
+            </button>
           </div>
 
           <NuxtLink
@@ -312,7 +322,7 @@ const avisClients = [
 
                 <div class="p-5">
                   <p class="text-sm font-semibold text-pri">
-                    {{ plat.categorieNom || plat.categorie || 'Sélection du chef' }}
+                    {{ nomCategorie(plat, 'Sélection du chef') }}
                   </p>
 
                   <h3 class="mt-2 text-xl font-bold">
@@ -325,7 +335,7 @@ const avisClients = [
 
                   <div class="mt-5 flex items-center justify-between gap-3">
                     <p class="font-extrabold">
-                      {{ plat.prix != null ? `${plat.prix} $` : '' }}
+                      {{ formaterPrix(plat.prix) }}
                     </p>
                     <button
                       type="button"
@@ -354,10 +364,13 @@ const avisClients = [
             <h2 class="text-3xl font-extrabold tracking-tight sm:text-4xl">
               <span class="text-pri">⌜</span>Notre carte<span class="text-pri">⌟</span>
             </h2>
-            <p class="mt-3 inline-flex rounded-full border border-line bg-card px-3 py-1.5 text-sm font-semibold text-mut">
-              Panier : <span class="ml-1 text-pri">{{ nbArticles }}</span>
-              <span class="ml-1">{{ nbArticles === 1 ? 'article' : 'articles' }}</span>
-            </p>
+                        <button
+              type="button"
+              class="mt-3 inline-flex rounded-full border border-line bg-card px-3 py-1.5 text-sm font-semibold text-ink transition hover:border-pri focus-visible:outline-2 focus-visible:outline-cy"
+              @click="panierOuvert = true"
+            >
+              Ma commande ({{ nbArticles }})
+            </button>
           </div>
 
           <NuxtLink
@@ -413,7 +426,7 @@ const avisClients = [
 
                   <div class="p-5">
                     <p class="text-sm font-semibold text-pri">
-                      {{ plat.categorieNom || plat.categorie || 'Saveurs de chez nous' }}
+                      {{ nomCategorie(plat, 'Saveurs de chez nous') }}
                     </p>
 
                     <h3 class="mt-2 text-xl font-bold">
@@ -426,7 +439,7 @@ const avisClients = [
 
                     <div class="mt-4 flex items-center justify-between gap-3">
                       <p v-if="plat.prix != null" class="font-extrabold">
-                        {{ plat.prix }} $
+                        {{ formaterPrix(plat.prix) }}
                       </p>
                       <button
                         type="button"
@@ -572,5 +585,6 @@ const avisClients = [
         </div>
       </div>
     </section>
+    <PublicPanier v-model="panierOuvert" />
   </div>
 </template>

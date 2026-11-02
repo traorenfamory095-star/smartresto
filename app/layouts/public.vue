@@ -29,7 +29,7 @@ watch(
 
     <header class="sticky top-0 z-30 border-b border-bordure bg-fond/90 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
-        <NuxtLink to="/" class="text-xl font-bold text-accent">SmartResto</NuxtLink>
+        <NuxtLink to="/" class="text-xl font-extrabold text-accent">Smart<span class="text-acc">Resto</span></NuxtLink>
 
         <nav aria-label="Navigation principale" class="hidden flex-1 justify-center md:flex">
           <ul class="flex items-center gap-1">
@@ -47,7 +47,7 @@ watch(
         </nav>
 
         <div class="ml-auto hidden items-center gap-4 md:flex">
-          <NuxtLink to="/connexion" class="text-sm font-medium text-accent hover:text-accent-clair">
+          <NuxtLink to="/connexion" class="text-sm font-medium text-acc hover:text-accent-clair">
             Connexion
           </NuxtLink>
           <UiBouton to="/reserver" taille="sm">Réserver</UiBouton>

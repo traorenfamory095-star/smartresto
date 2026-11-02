@@ -26,6 +26,10 @@ const ICONES = {
   plus: ['M12 5v14', 'M5 12h14'],
   coche: ['M5 12l5 5 10-10'],
   alerte: ['M12 4l9 16H3z', 'M12 10v4', 'M12 17h.01'],
+    lieu: ['M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z', 'M9.5 10a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0'],
+  telephone: ['M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z'],
+  courriel: ['M3 6h18v12H3z', 'M3 7l9 6 9-6'],
+  horloge: ['M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0', 'M12 7v5l3 2'],
 }
 
 const chemins = computed(() => ICONES[props.nom] ?? [])
