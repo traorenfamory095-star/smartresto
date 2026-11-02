@@ -298,6 +298,15 @@
       "creeLe": "2026-10-21T12:55:00",
       "nbCouverts": 2,
       "note": "Allergie aux arachides"
+    },
+    {
+      "tableId": 1,
+      "serveurId": 1,
+      "statut": "annulee",
+      "creeLe": "2026-10-30T13:32:01",
+      "nbCouverts": 2,
+      "note": "",
+      "id": 24
     }
   ],
   "demandes": [],
@@ -1373,6 +1382,42 @@
       "prixUnitaire": 8,
       "statutCuisine": "en_attente",
       "remarque": ""
+    },
+    {
+      "commandeId": 24,
+      "platId": 1,
+      "quantite": 1,
+      "prixUnitaire": 3.5,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 71
+    },
+    {
+      "commandeId": 24,
+      "platId": 2,
+      "quantite": 1,
+      "prixUnitaire": 4,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 72
+    },
+    {
+      "commandeId": 24,
+      "platId": 3,
+      "quantite": 1,
+      "prixUnitaire": 4.5,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 73
+    },
+    {
+      "commandeId": 24,
+      "platId": 6,
+      "quantite": 1,
+      "prixUnitaire": 10,
+      "statutCuisine": "en_attente",
+      "remarque": "",
+      "id": 74
     }
   ],
   "mouvementsStock": [
@@ -1824,6 +1869,226 @@
       "heure": "19:00",
       "statut": "annulee",
       "note": "A annulé par téléphone"
+    },
+    {
+      "nomClient": "Théophile Lumbala",
+      "telephone": "0898989890",
+      "nbPersonnes": 4,
+      "date": "2026-10-31",
+      "heure": "13:07",
+      "tableId": 3,
+      "statut": "annulee",
+      "note": "",
+      "id": 6
+    },
+    {
+      "nomClient": "Théophile Lumbala",
+      "telephone": "090909090",
+      "nbPersonnes": 3,
+      "date": "2026-10-31",
+      "heure": "13:47",
+      "tableId": 4,
+      "statut": "annulee",
+      "note": "",
+      "id": 7
+    },
+    {
+      "nomClient": "Jean Paul",
+      "telephone": "090690900",
+      "nbPersonnes": 2,
+      "date": "2026-10-31",
+      "heure": "13:30",
+      "tableId": 1,
+      "statut": "annulee",
+      "note": "",
+      "id": 8
+    },
+    {
+      "nomClient": "Théophile Lumbala",
+      "telephone": "09847759384",
+      "nbPersonnes": 5,
+      "date": "2026-10-31",
+      "heure": "13:12",
+      "tableId": 8,
+      "statut": "annulee",
+      "note": "",
+      "id": 9
+    },
+    {
+      "nomClient": "Theo",
+      "telephone": "09846374834",
+      "nbPersonnes": 2,
+      "date": "2026-10-31",
+      "heure": "13:14",
+      "tableId": 4,
+      "statut": "annulee",
+      "note": "",
+      "id": 10
+    },
+    {
+      "nomClient": "David",
+      "telephone": "2384785764",
+      "nbPersonnes": 1,
+      "date": "2026-11-02",
+      "heure": "12:00",
+      "tableId": 1,
+      "statut": "annulee",
+      "note": "",
+      "id": 11
+    },
+    {
+      "nomClient": "Paul",
+      "telephone": "+243899384759",
+      "nbPersonnes": 1,
+      "date": "2026-11-02",
+      "heure": "12:04",
+      "tableId": 2,
+      "statut": "annulee",
+      "note": "",
+      "id": 12
+    },
+    {
+      "nomClient": "Paul",
+      "telephone": "+243 89398403",
+      "nbPersonnes": 2,
+      "date": "2026-11-02",
+      "heure": "11:30",
+      "tableId": 1,
+      "statut": "annulee",
+      "note": "",
+      "id": 13
+    },
+    {
+      "nomClient": "Andres",
+      "telephone": "+24390039847",
+      "nbPersonnes": 2,
+      "date": "2026-11-08",
+      "heure": "15:35",
+      "tableId": 5,
+      "statut": "annulee",
+      "note": "Dejeuner d'affaire",
+      "id": 14
+    },
+    {
+      "nomClient": "Famille Mbungu",
+      "telephone": "+243988746532",
+      "nbPersonnes": 5,
+      "date": "2026-11-02",
+      "heure": "10:26",
+      "tableId": 10,
+      "statut": "annulee",
+      "note": "",
+      "id": 15
+    },
+    {
+      "nomClient": "Aline Mwamba",
+      "telephone": "+243 897767345",
+      "nbPersonnes": 2,
+      "date": "2026-11-01",
+      "heure": "14:45",
+      "tableId": 1,
+      "statut": "annulee",
+      "note": "",
+      "id": 16
+    },
+    {
+      "nomClient": "Patrick Mbuku",
+      "telephone": "+243 987456789",
+      "nbPersonnes": 2,
+      "date": "2026-11-08",
+      "heure": "15:00",
+      "tableId": 2,
+      "statut": "annulee",
+      "note": "",
+      "id": 17
+    },
+    {
+      "nomClient": "Théophile Lumbala",
+      "telephone": "+243890996329",
+      "nbPersonnes": 6,
+      "date": "2026-11-03",
+      "heure": "10:35",
+      "tableId": 8,
+      "statut": "annulee",
+      "note": "Le test de la réservation côté client",
+      "id": 18
+    },
+    {
+      "nomClient": "Jean",
+      "telephone": "0899898987",
+      "nbPersonnes": 6,
+      "date": "2026-11-03",
+      "heure": "10:35",
+      "tableId": 9,
+      "statut": "confirmee",
+      "note": "Deuxième réservation pour verifier les conflits",
+      "id": 19
+    },
+    {
+      "nomClient": "Gaby",
+      "telephone": "09876540",
+      "nbPersonnes": 6,
+      "date": "2026-11-03",
+      "heure": "21:44",
+      "tableId": 10,
+      "statut": "confirmee",
+      "note": "",
+      "id": 20
+    },
+    {
+      "nomClient": "Carl",
+      "telephone": "089924568",
+      "nbPersonnes": 6,
+      "date": "2026-11-03",
+      "heure": "20:58",
+      "tableId": 8,
+      "statut": "confirmee",
+      "note": "",
+      "id": 21
+    },
+    {
+      "nomClient": "Olivier Mbala",
+      "telephone": "089939495",
+      "nbPersonnes": 4,
+      "date": "2026-11-03",
+      "heure": "10:00",
+      "tableId": 3,
+      "statut": "confirmee",
+      "note": "",
+      "id": 22
+    },
+    {
+      "nomClient": "Andres",
+      "telephone": "09845622",
+      "nbPersonnes": 2,
+      "date": "2026-11-02",
+      "heure": "09:00",
+      "tableId": 2,
+      "statut": "annulee",
+      "note": "",
+      "id": 23
+    },
+    {
+      "nomClient": "Jacques",
+      "telephone": "+2439854875",
+      "nbPersonnes": 2,
+      "date": "2026-11-02",
+      "heure": "18:30",
+      "tableId": 1,
+      "statut": "annulee",
+      "note": "Test chevauchement",
+      "id": 24
+    },
+    {
+      "nomClient": "Paul Kanda",
+      "telephone": "+24398707069",
+      "nbPersonnes": 2,
+      "date": "2026-11-02",
+      "heure": "09:00",
+      "tableId": 1,
+      "statut": "annulee",
+      "note": "",
+      "id": 25
     }
   ],
   "tables": [
@@ -1896,6 +2161,27 @@
       "capacite": 8,
       "zone": "vip",
       "actif": true
+    },
+    {
+      "numero": 11,
+      "capacite": 4,
+      "zone": "terrasse",
+      "actif": true,
+      "id": 11
+    },
+    {
+      "numero": 12,
+      "capacite": 2,
+      "zone": "terrasse",
+      "actif": true,
+      "id": 12
+    },
+    {
+      "numero": 13,
+      "capacite": 8,
+      "zone": "Bar / Comptoir",
+      "actif": true,
+      "id": 13
     }
   ]
 }

@@ -92,7 +92,7 @@ const tablesFiltrees = computed(() => {
   }
 
   return tablesActives.value.filter(
-    (table) => table.zone === zoneSelectionnee.value
+    (table) => table.zone?.toLowerCase() === zoneSelectionnee.value
   )
 })
 
@@ -169,7 +169,7 @@ onBeforeUnmount(() => {
 
       <NuxtLink
         to="/tables/gestion"
-        class="inline-flex items-center justify-center gap-2 rounded-xl bg-degrade px-5 py-3 text-sm font-semibold text-on-pri shadow-lg shadow-pri/10 transition hover:opacity-90"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-degrade px-5 py-3 text-sm font-semibold shadow-lg shadow-pri/10 transition hover:opacity-90"
       >
         <span class="text-lg">+</span>
         Gérer les tables
