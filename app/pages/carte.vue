@@ -21,9 +21,17 @@ useHead({
 const { lire } = useApi()
 const panier = usePanier()
 const notifier = useNotifier()
-const { peut } = useAuth()
-const afficherAjout = computed(() => peut('/commandes'))
 const ajouterDepuisCarte = creerAjoutDepuisCarte(panier, notifier)
+const {
+  tables,
+  chargementTables,
+  erreurTables,
+  rechargerTables,
+  confirmer,
+  changerQuantite,
+  retirer,
+  changerRemarque,
+} = useCommandeClient()
 const ajoutFeedback = ref({ platId: null, numero: 0 })
 const {
   categories,
@@ -40,8 +48,17 @@ const {
 
 const categorieIdActive = ref(null)
 const recherche = ref('')
+const tiroirOuvert = ref(false)
+const etapeCommande = ref(1)
+const envoiCommande = ref(false)
+const erreursConfirmation = ref({})
+const platsIndisponibles = ref([])
+const resumeCommande = ref(null)
 const chargement = computed(() => chargementCategories.value || chargementPlats.value)
 const erreur = computed(() => erreurCategories.value || erreurPlats.value)
+const lignesPanier = computed(() => panier.lignes.value)
+const nombreArticles = computed(() => panier.nbArticles.value)
+const totalPanier = computed(() => panier.total.value)
 const pastilles = computed(() => construirePastilles(categories.value ?? [], plats.value ?? []))
 const carte = computed(() =>
   construireCarte(
@@ -76,6 +93,72 @@ function addToCart(dish) {
       platId: dish.id,
       numero: ajoutFeedback.value.numero + 1,
     }
+  }
+}
+
+function ouvrirPanier() {
+  tiroirOuvert.value = true
+}
+
+async function passerALaConfirmation() {
+  if (!lignesPanier.value.length) return
+  erreursConfirmation.value = {}
+  platsIndisponibles.value = []
+  await rechargerTables()
+  etapeCommande.value = 2
+}
+
+function revenirAuPanier() {
+  erreursConfirmation.value = {}
+  platsIndisponibles.value = []
+  etapeCommande.value = 1
+}
+
+function fermerPanier() {
+  tiroirOuvert.value = false
+  if (etapeCommande.value === 3) {
+    etapeCommande.value = 1
+    resumeCommande.value = null
+  }
+}
+
+async function confirmerLaCommande() {
+  if (envoiCommande.value) return
+
+  const erreurs = validerConfirmation({
+    tableId: panier.tableId.value,
+    nbCouverts: panier.nbCouverts.value,
+    note: panier.note.value,
+  }, tables.value)
+  erreursConfirmation.value = erreurs
+  platsIndisponibles.value = []
+  if (Object.keys(erreurs).length) return
+
+  envoiCommande.value = true
+  try {
+    const resultat = await confirmer({
+      tableId: panier.tableId.value,
+      nbCouverts: panier.nbCouverts.value,
+      note: panier.note.value,
+    })
+
+    if (resultat.indisponibles?.length) {
+      platsIndisponibles.value = resultat.indisponibles
+      return
+    }
+
+    if (resultat.erreur) return
+
+    resumeCommande.value = {
+      ...resultat.resume,
+      commandeId: resultat.commande.id,
+      tableNumero: tables.value.find(
+        (table) => String(table.id) === String(resultat.resume.tableId),
+      )?.numero,
+    }
+    etapeCommande.value = 3
+  } finally {
+    envoiCommande.value = false
   }
 }
 
@@ -166,14 +249,104 @@ async function actualiserCarte() {
             :key="categorie.id"
             :categorie="categorie"
             :plats="categorie.plats"
-            :afficher-ajout="afficherAjout"
             :ajout-feedback="ajoutFeedback"
-            @add="addToCart"
+            @ajouter="addToCart"
             @image-error="basculerImageSecours"
           />
         </div>
       </div>
     </main>
+
+    <CategoriesBoutonPanierFlottant
+      v-if="nombreArticles > 0 || etapeCommande === 3"
+      :nombre-articles="nombreArticles"
+      :total="totalPanier"
+      @ouvrir="ouvrirPanier"
+    />
+
+    <CategoriesTiroirPanier
+      :ouvert="tiroirOuvert"
+      :etape="etapeCommande"
+      :envoi="envoiCommande"
+      @fermer="fermerPanier"
+    >
+      <template v-if="etapeCommande === 1">
+        <p v-if="!lignesPanier.length" class="cart-empty">
+          Votre panier est vide. Ajoutez un plat pour commencer.
+        </p>
+        <template v-else>
+          <ul class="cart-lines">
+            <CategoriesLignePanierClient
+              v-for="ligne in lignesPanier"
+              :key="ligne.platId"
+              :ligne="ligne"
+              @changer-quantite="changerQuantite"
+              @retirer="retirer"
+              @modifier-remarque="changerRemarque"
+            />
+          </ul>
+
+          <label class="order-note">
+            <span>Note pour la cuisine <small>(facultatif)</small></span>
+            <textarea
+              :value="panier.note.value"
+              rows="3"
+              maxlength="200"
+              placeholder="Allergies ou précisions..."
+              @input="panier.note.value = $event.target.value"
+            />
+          </label>
+
+          <div class="cart-total" aria-live="polite">
+            <span>Total · {{ libelleArticles(nombreArticles) }}</span>
+            <strong>{{ formaterPrix(totalPanier) }}</strong>
+          </div>
+
+          <div class="cart-actions">
+            <button type="button" class="clear-cart-button" @click="panier.vider()">
+              Vider le panier
+            </button>
+            <button type="button" class="continue-button" @click="passerALaConfirmation">
+              Continuer
+            </button>
+          </div>
+        </template>
+      </template>
+
+      <CategoriesFormulaireConfirmation
+        v-else-if="etapeCommande === 2"
+        :tables="tables"
+        :table-id="panier.tableId.value"
+        :nb-couverts="panier.nbCouverts.value"
+        :note="panier.note.value"
+        :erreurs="erreursConfirmation"
+        :chargement-tables="chargementTables"
+        :erreur-tables="erreurTables"
+        :envoi="envoiCommande"
+        @update:table-id="panier.tableId.value = $event"
+        @update:nb-couverts="panier.nbCouverts.value = $event"
+        @update:note="panier.note.value = $event"
+        @retour="revenirAuPanier"
+        @confirmer="confirmerLaCommande"
+        @reessayer="rechargerTables"
+      />
+
+      <div v-if="platsIndisponibles.length" class="unavailable-message" role="alert">
+        <p>Certains plats ne sont plus disponibles. Retirez-les du panier pour continuer :</p>
+        <ul>
+          <li v-for="ligne in platsIndisponibles" :key="ligne.platId">
+            {{ ligne.nom }}
+            <button type="button" @click="retirer(ligne.platId)">Retirer</button>
+          </li>
+        </ul>
+      </div>
+
+      <CategoriesSuccesCommande
+        v-if="etapeCommande === 3 && resumeCommande"
+        :resume="resumeCommande"
+        @fermer="fermerPanier"
+      />
+    </CategoriesTiroirPanier>
   </div>
 </template>
 
@@ -328,6 +501,155 @@ async function actualiserCarte() {
 .retry-button:focus-visible {
   outline: 2px solid #ffa64d;
   outline-offset: 3px;
+}
+
+.cart-lines {
+  margin: 0;
+  padding: 0;
+}
+
+.cart-empty {
+  margin: 0;
+  padding: 28px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: #111;
+  color: #a3a3a3;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.order-note {
+  display: grid;
+  gap: 9px;
+  margin-top: 20px;
+  color: #bdbdbd;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.order-note small {
+  color: #7a7a7a;
+  font-weight: 400;
+}
+
+.order-note textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 11px;
+  outline: none;
+  background: #0e0e0e;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.order-note textarea:focus-visible {
+  border-color: #f97316;
+  outline: 2px solid rgba(249, 115, 22, 0.3);
+  outline-offset: 2px;
+}
+
+.cart-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 17px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  color: #a3a3a3;
+  font-size: 12px;
+}
+
+.cart-total strong {
+  color: #fff;
+  font-size: 20px;
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.clear-cart-button,
+.continue-button {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.clear-cart-button {
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.05);
+  color: #a3a3a3;
+}
+
+.continue-button {
+  flex: 1;
+  border: 0;
+  background: linear-gradient(135deg, #ff8a00, #f15a00);
+  color: #fff;
+}
+
+.clear-cart-button:focus-visible,
+.continue-button:focus-visible,
+.unavailable-message button:focus-visible {
+  outline: 2px solid #ffa64d;
+  outline-offset: 3px;
+}
+
+.unavailable-message {
+  margin-top: 18px;
+  padding: 13px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #ff9a9a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.unavailable-message p {
+  margin: 0;
+}
+
+.unavailable-message ul {
+  margin: 9px 0 0;
+  padding-left: 18px;
+}
+
+.unavailable-message li {
+  padding: 4px 0;
+}
+
+.unavailable-message button {
+  margin-left: 7px;
+  padding: 4px 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 7px;
+  background: #171111;
+  color: #ffb0b0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+
+.clear-cart-button:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.continue-button:hover {
+  background: #ffa64d;
 }
 
 .menu-state {

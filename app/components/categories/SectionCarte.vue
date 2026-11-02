@@ -2,11 +2,10 @@
 defineProps({
   categorie: { type: Object, required: true },
   plats: { type: Array, required: true },
-  afficherAjout: { type: Boolean, default: false },
   ajoutFeedback: { type: Object, default: null },
 })
 
-const emit = defineEmits(['add', 'image-error'])
+const emit = defineEmits(['ajouter', 'image-error'])
 
 function relayerErreurImage(event, plat, categorie) {
   emit('image-error', event, plat, categorie)
@@ -26,9 +25,8 @@ function relayerErreurImage(event, plat, categorie) {
         <CategoriesCartePlat
           :plat="plat"
           :categorie="categorie"
-          :afficher-ajout="afficherAjout"
           :ajout-feedback="ajoutFeedback"
-          @add="emit('add', $event)"
+          @ajouter="emit('ajouter', $event)"
           @image-error="relayerErreurImage"
         />
       </li>
