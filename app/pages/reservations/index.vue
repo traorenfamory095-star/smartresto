@@ -747,7 +747,7 @@ async function enregistrerReservation() {
               <button
                 type="submit"
                 :disabled="enregistrement || !tablesAdaptees.length"
-                class="rounded-xl bg-degrade px-6 py-3 text-sm font-semibold text-on-pri shadow-lg shadow-pri/10 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                class="rounded-xl bg-degrade px-6 py-3 text-sm font-semibold shadow-lg shadow-pri/10 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {{
                   enregistrement
