@@ -84,6 +84,91 @@ export function libellePlats(nombre) {
   return `${quantite} ${quantite === 1 ? 'dish' : 'dishes'}`
 }
 
+export function verifierDisponibilite(lignes, plats) {
+  const platsParId = new Map((plats ?? []).map((plat) => [String(plat.id), plat]))
+  return (lignes ?? []).filter((ligne) => platsParId.get(String(ligne.platId))?.disponible !== true)
+}
+
+export function validerConfirmation({ tableId, nbCouverts, note }, tables) {
+  const erreurs = {}
+  const table = (tables ?? []).find((element) => String(element.id) === String(tableId))
+  const couverts = Number(nbCouverts)
+
+  if (!tableId) {
+    erreurs.tableId = 'Choisissez une table.'
+  } else if (!table || !table.actif) {
+    erreurs.tableId = "Cette table n'est pas disponible."
+  }
+
+  if (!Number.isInteger(couverts) || couverts < 1) {
+    erreurs.nbCouverts = 'Le nombre de couverts doit être au moins égal à 1.'
+  } else if (table && couverts > Number(table.capacite)) {
+    erreurs.nbCouverts = `Cette table accueille au maximum ${table.capacite} personnes.`
+  }
+
+  if (String(note ?? '').length > 200) {
+    erreurs.note = 'La note ne peut pas dépasser 200 caractères.'
+  }
+
+  return erreurs
+}
+
+export function libelleArticles(nombre) {
+  const quantite = Number(nombre)
+  return `${quantite} ${quantite === 1 ? 'article' : 'articles'}`
+}
+
+export function montantLigneCentimes(ligne) {
+  return Math.round(Number(ligne.prixUnitaire) * 100) * Number(ligne.quantite)
+}
+
+export function creerServiceCommandeClient({
+  panier,
+  creerCommande,
+  notifier,
+  lirePlats,
+  lireServeurId,
+}) {
+  async function confirmer({ tableId, nbCouverts, note }) {
+    if (!panier.lignes.value.length) {
+      return { erreur: new Error('Ajoutez au moins un plat avant de confirmer la commande.') }
+    }
+
+    try {
+      const plats = await lirePlats()
+      const indisponibles = verifierDisponibilite(panier.lignes.value, plats)
+      if (indisponibles.length) return { indisponibles }
+
+      const serveurId = lireServeurId()
+      if (serveurId === null || serveurId === undefined) {
+        throw new Error("Impossible d'associer un serveur à cette commande.")
+      }
+
+      const resume = {
+        total: panier.total.value,
+        nbArticles: panier.nbArticles.value,
+        tableId: Number(tableId),
+      }
+      const commande = await creerCommande({
+        tableId: Number(tableId),
+        serveurId,
+        nbCouverts: Number(nbCouverts),
+        note: String(note ?? ''),
+        lignes: panier.lignes.value.map((ligne) => ({ ...ligne })),
+      })
+
+      panier.vider()
+      notifier.succes(`Commande #${commande.id} enregistrée.`)
+      return { commande, resume }
+    } catch (erreur) {
+      notifier.erreur(erreur)
+      return { erreur }
+    }
+  }
+
+  return { confirmer }
+}
+
 function normaliserNomCategorie(nom) {
   return String(nom ?? '')
     .normalize('NFD')
@@ -273,5 +358,40 @@ export function useCategories() {
     supprimer,
     monter,
     descendre,
+  }
+}
+
+export function useCommandeClient() {
+  const api = useApi()
+  const panier = usePanier()
+  const notifier = useNotifier()
+  const { creerCommande } = useCommandes()
+  const { utilisateur } = useAuth()
+
+  const {
+    data: donneesTables,
+    pending: chargementTables,
+    error: erreurTables,
+    refresh: rechargerTables,
+  } = useAsyncData('carte-tables-client', () => api.lire('/tables'), { default: () => [] })
+
+  const service = creerServiceCommandeClient({
+    panier,
+    creerCommande,
+    notifier,
+    lirePlats: () => api.lire('/plats'),
+    lireServeurId: () => utilisateur.value?.id,
+  })
+
+  return {
+    panier,
+    tables: computed(() => (donneesTables.value ?? []).filter((table) => table.actif)),
+    chargementTables,
+    erreurTables,
+    rechargerTables,
+    confirmer: service.confirmer,
+    changerQuantite: panier.changerQuantite,
+    retirer: panier.retirer,
+    changerRemarque: panier.changerRemarque,
   }
 }

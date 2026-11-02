@@ -2,11 +2,10 @@
 const props = defineProps({
   plat: { type: Object, required: true },
   categorie: { type: Object, required: true },
-  afficherAjout: { type: Boolean, default: false },
   ajoutFeedback: { type: Object, default: null },
 })
 
-const emit = defineEmits(['add', 'image-error'])
+const emit = defineEmits(['ajouter', 'image-error'])
 const ajoutConfirme = ref(false)
 let minuteurConfirmation
 
@@ -51,11 +50,10 @@ onUnmounted(() => {
       <div class="dish-footer">
         <p class="dish-price">{{ formaterPrix(plat.prix) }}</p>
         <button
-          v-if="afficherAjout"
           type="button"
           class="add-button"
-          :aria-label="`Add ${plat.nom} to cart`"
-          @click="emit('add', plat)"
+          :aria-label="`Ajouter ${plat.nom} au panier`"
+          @click="emit('ajouter', plat)"
         >
           <svg
             v-if="!ajoutConfirme"
