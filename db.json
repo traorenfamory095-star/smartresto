@@ -2164,14 +2164,14 @@
     {
       "numero": 11,
       "capacite": 4,
-      "zone": "Terrasse",
+      "zone": "terrasse",
       "actif": true,
       "id": 11
     },
     {
       "numero": 12,
       "capacite": 2,
-      "zone": "Terrasse",
+      "zone": "terrasse",
       "actif": true,
       "id": 12
     },
