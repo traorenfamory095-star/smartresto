@@ -95,7 +95,7 @@ const detailStock = computed(() => {
 
 // Raccourcis vers les autres modules (ceux que le rôle peut ouvrir).
 const raccourcis = computed(() =>
-  MENU_ADMIN.filter((lien) => lien.chemin !== '/tableau-de-bord' && peut(lien.chemin)),
+  LIENS_MENU_ADMIN.filter((lien) => lien.nom && peut(lien.nom)),
 )
 </script>
 

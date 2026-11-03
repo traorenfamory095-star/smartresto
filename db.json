@@ -57,13 +57,13 @@
     {
       "id": 1,
       "nom": "Entrées",
-      "ordre": 2,
+      "ordre": 1,
       "description": "Pour commencer le repas"
     },
     {
       "id": 2,
       "nom": "Grillades",
-      "ordre": 1,
+      "ordre": 2,
       "description": "Viandes cuites au feu de bois"
     },
     {
@@ -81,13 +81,13 @@
     {
       "id": 5,
       "nom": "Boissons",
-      "ordre": 7,
+      "ordre": 5,
       "description": "Bières, sodas, jus et boissons chaudes"
     },
     {
       "id": 6,
       "nom": "Desserts",
-      "ordre": 5,
+      "ordre": 6,
       "description": "Pour finir en douceur"
     }
   ],
