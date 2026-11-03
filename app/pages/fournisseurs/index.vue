@@ -1,126 +1,132 @@
 <script setup>
 const { lister } = useFournisseurs()
+
 const fournisseurs = ref([])
 const chargement = ref(true)
-const erreurMsg = ref(null)
+const erreurMsg = ref('')
 const recherche = ref('')
 const categorie = ref('')
 
-const filtres = computed(() => filtrerFournisseurs(fournisseurs.value, { recherche: recherche.value, categorie: categorie.value }))
-const categories = computed(() => [...new Set(fournisseurs.value.map(f => f.categorie))])
+const btnPrimaire =
+  'inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-[#ff8a00] to-[#f15a00] px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(249,115,22,0.2)] transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0d]'
 
-onMounted(async () => {
-  try { fournisseurs.value = await lister() }
-  catch (e) { erreurMsg.value = e.message }
-  finally { chargement.value = false }
-})
+const categories = computed(() => [...new Set(fournisseurs.value.map(f => f.categorie).filter(Boolean))])
+const filtres = computed(() =>
+  filtrerFournisseurs(fournisseurs.value, { recherche: recherche.value, categorie: categorie.value })
+)
+
+// Initiales : première lettre du premier et du dernier mot du nom
+function initiales(nom = '') {
+  const mots = nom.trim().split(/\s+/).filter(Boolean)
+  if (!mots.length) return '?'
+  const lettres = mots.length === 1 ? mots[0].slice(0, 2) : mots[0][0] + mots[mots.length - 1][0]
+  return lettres.toUpperCase()
+}
+
+async function charger() {
+  chargement.value = true
+  erreurMsg.value = ''
+  try {
+    const liste = await lister()
+    fournisseurs.value = Array.isArray(liste) ? liste : []
+  } catch (e) {
+    erreurMsg.value = e.message || 'Erreur inconnue.'
+  } finally {
+    chargement.value = false
+  }
+}
+
+onMounted(charger)
 </script>
 
 <template>
-  <main class="space-y-6">
-    <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-orange-600">Gestion des achats</p>
-        <h1 class="mt-1 text-3xl font-bold text-gray-900">Fournisseurs</h1>
-        <p class="mt-2 text-sm text-gray-500">Retrouvez vos partenaires et les produits qu’ils proposent.</p>
-      </div>
-      <NuxtLink
-        to="/fournisseurs/nouveau"
-        class="inline-flex items-center justify-center rounded-lg bg-orange-600 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-      >
-        <span aria-hidden="true" class="mr-2 text-lg leading-none">+</span>
+  <main class="space-y-5">
+    <h1 class="sr-only">Fournisseurs</h1>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <label class="flex h-11 min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-white/[0.13] bg-[#111] px-3.5 text-neutral-500 focus-within:border-orange-500 sm:min-w-[260px]">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" />
+        </svg>
+        <span class="sr-only">Rechercher un fournisseur</span>
+        <input
+          v-model="recherche"
+          type="search"
+          placeholder="Rechercher un fournisseur..."
+          class="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-500"
+        />
+      </label>
+      <label>
+        <span class="sr-only">Filtrer par catégorie</span>
+        <select
+          v-model="categorie"
+          class="h-11 min-w-[160px] rounded-xl border border-white/[0.13] bg-[#0e0e0e] px-3.5 text-sm text-white outline-none [color-scheme:dark] focus:border-orange-500"
+        >
+          <option value="">Toutes</option>
+          <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+        </select>
+      </label>
+      <NuxtLink to="/fournisseurs/nouveau" :class="btnPrimaire" class="w-full sm:w-auto">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
         Nouveau fournisseur
       </NuxtLink>
-    </header>
+    </div>
 
-    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <p class="text-sm text-gray-500">Fournisseurs enregistrés</p>
-        <p class="mt-2 text-3xl font-bold text-gray-900">{{ fournisseurs.length }}</p>
-        <p class="mt-1 text-sm text-gray-500">Partenaires de votre restaurant</p>
-      </div>
-      <div class="rounded-xl border border-orange-200 bg-orange-50 p-5 shadow-sm">
-        <p class="text-sm font-medium text-orange-800">Catégories représentées</p>
-        <p class="mt-2 text-3xl font-bold text-orange-800">{{ categories.length }}</p>
-        <p class="mt-1 text-sm text-orange-700">Types de produits disponibles</p>
-      </div>
-    </section>
+    <p v-if="chargement" class="rounded-[20px] border border-white/[0.13] bg-[#141414]/80 py-14 text-center text-sm text-neutral-400" role="status">
+      Chargement des fournisseurs…
+    </p>
 
-    <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div class="mb-4">
-        <h2 class="font-semibold text-gray-900">Rechercher un partenaire</h2>
-        <p class="mt-1 text-sm text-gray-500">Filtrez par nom ou par catégorie.</p>
-      </div>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <label class="block">
-          <span class="mb-1.5 block text-sm font-medium text-gray-700">Nom du fournisseur</span>
-          <input
-            v-model="recherche"
-            type="search"
-            placeholder="Ex. : Maraîchers..."
-            aria-label="Rechercher"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-          />
-        </label>
-        <label class="block">
-          <span class="mb-1.5 block text-sm font-medium text-gray-700">Catégorie</span>
-          <select
-            v-model="categorie"
-            aria-label="Catégorie"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-          >
-            <option value="">Toutes les catégories</option>
-            <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-          </select>
-        </label>
-      </div>
-    </section>
+    <div v-else-if="erreurMsg" class="rounded-[20px] border border-red-500/25 bg-red-500/10 px-5 py-6 text-center" role="alert">
+      <p class="font-semibold text-red-300">Impossible de charger les fournisseurs.</p>
+      <p class="mt-1 text-sm text-neutral-400">{{ erreurMsg }}</p>
+      <button type="button" class="mt-4 rounded-lg bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20" @click="charger">
+        Réessayer
+      </button>
+    </div>
 
-    <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-        <h2 class="font-semibold text-gray-900">Liste des fournisseurs</h2>
-        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-          {{ filtres.length }} résultat(s)
-        </span>
-      </div>
-      <div v-if="chargement" class="p-10 text-center text-sm text-gray-500" role="status">
-        Chargement des fournisseurs…
-      </div>
-      <div v-else-if="erreurMsg" class="p-8 text-center" role="alert">
-        <p class="font-medium text-red-700">Impossible de charger les fournisseurs.</p>
-        <p class="mt-1 text-sm text-gray-500">{{ erreurMsg }}</p>
-      </div>
-      <ul v-else-if="filtres.length" class="divide-y divide-gray-100">
-        <li
-          v-for="f in filtres"
-          :key="f.id"
-          class="flex flex-col gap-4 px-5 py-4 transition hover:bg-orange-50/50 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div class="flex min-w-0 items-start gap-3">
-            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-sm font-bold text-orange-700">
-              {{ f.nom.slice(0, 1).toUpperCase() }}
+    <ul v-else-if="filtres.length" class="grid gap-4 md:grid-cols-2">
+      <li v-for="f in filtres" :key="f.id">
+        <article class="group h-full rounded-3xl border border-white/[0.13] bg-[#141414]/80 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur transition hover:-translate-y-1 hover:border-orange-500/40">
+          <div class="flex items-center justify-between gap-3">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-orange-500/[0.13] text-sm font-bold text-orange-500">
+              {{ initiales(f.nom) }}
             </span>
-            <div class="min-w-0">
-              <p class="truncate font-semibold text-gray-900">{{ f.nom }}</p>
-              <span class="mt-1 inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
-                {{ f.categorie }}
-              </span>
-              <p class="mt-2 break-all text-sm text-gray-500">{{ f.telephone || 'Téléphone non renseigné' }} · {{ f.email || 'E-mail non renseigné' }}</p>
-            </div>
+            <span class="truncate rounded-full bg-orange-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-orange-500">
+              {{ f.categorie || 'Sans catégorie' }}
+            </span>
           </div>
+          <h2 class="my-5 text-[17px] font-semibold text-white">{{ f.nom }}</h2>
+          <dl class="grid gap-3 border-y border-white/[0.13] py-4 sm:grid-cols-3">
+            <div class="min-w-0">
+              <dt class="text-[11px] text-neutral-500">Contact</dt>
+              <dd class="mt-1 break-words text-xs font-semibold text-white">{{ f.contact || '—' }}</dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="text-[11px] text-neutral-500">Téléphone</dt>
+              <dd class="mt-1 break-words text-xs font-semibold text-white">{{ f.telephone || '—' }}</dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="text-[11px] text-neutral-500">Adresse</dt>
+              <dd class="mt-1 break-words text-xs font-semibold text-white">{{ f.adresse || '—' }}</dd>
+            </div>
+          </dl>
           <NuxtLink
             :to="`/fournisseurs/${f.id}`"
-            class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 sm:shrink-0"
+            class="mt-4 inline-flex items-center rounded-md text-xs font-medium text-neutral-400 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
           >
-            Voir la fiche
-            <span aria-hidden="true" class="ml-2">→</span>
+            Voir la fiche <span aria-hidden="true" class="ml-1.5 text-base text-orange-500">→</span>
           </NuxtLink>
-        </li>
-      </ul>
-      <div v-else class="px-5 py-12 text-center">
-        <p class="font-semibold text-gray-900">Aucun fournisseur trouvé</p>
-        <p class="mt-1 text-sm text-gray-500">Essayez une autre recherche ou ajoutez un fournisseur.</p>
-      </div>
-    </section>
+        </article>
+      </li>
+    </ul>
+
+    <div v-else class="rounded-[20px] border border-white/[0.13] bg-[#141414]/80 px-5 py-14 text-center">
+      <p class="font-semibold text-white">
+        {{ fournisseurs.length ? 'Aucun fournisseur trouvé' : 'Aucun fournisseur enregistré' }}
+      </p>
+      <p class="mt-1 text-sm text-neutral-400">
+        {{ fournisseurs.length ? 'Essayez une autre recherche ou une autre catégorie.' : 'Ajoutez votre premier fournisseur pour préparer vos commandes.' }}
+      </p>
+    </div>
   </main>
 </template>
