@@ -1,10 +1,20 @@
 // Vérifie que les références entre ressources sont valides (clés étrangères).
-// À lancer avant chaque Pull Request qui touche à db/ :  npm run db:check
-const fs = require('fs');
-const path = require('path');
+// À lancer avant chaque Pull Request qui touche à db/ : npm run db:check
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const dossier = path.join(__dirname, '..', 'db');
-const lire = (nom) => JSON.parse(fs.readFileSync(path.join(dossier, `${nom}.json`), 'utf8'));
+
+const lire = (nom) =>
+  JSON.parse(
+    fs.readFileSync(path.join(dossier, `${nom}.json`), 'utf8')
+  );
+
 const ids = (nom) => new Set(lire(nom).map((x) => x.id));
 
 // [ressource, champ, ressource cible]
@@ -23,11 +33,15 @@ const regles = [
 ];
 
 let erreurs = 0;
+
 for (const [source, champ, cible] of regles) {
   const valides = ids(cible);
+
   for (const ligne of lire(source)) {
     if (!valides.has(ligne[champ])) {
-      console.error(`ERREUR  ${source} #${ligne.id} : ${champ} = ${ligne[champ]} n'existe pas dans ${cible}`);
+      console.error(
+        `ERREUR ${source} #${ligne.id} : ${champ} = ${ligne[champ]} n'existe pas dans ${cible}`
+      );
       erreurs++;
     }
   }
@@ -37,4 +51,5 @@ if (erreurs) {
   console.error(`\n${erreurs} référence(s) invalide(s).`);
   process.exit(1);
 }
+
 console.log('Toutes les références entre ressources sont valides.');
