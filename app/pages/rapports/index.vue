@@ -43,11 +43,12 @@ const conicGradientStyle = computed(() => {
 
   const pEsp = (esp / total) * 100
   const pMob = pEsp + (mob / total) * 100
+  const pCart = pMob + (cart / total) * 100
 
   return `conic-gradient(
     #f97316 0% ${pEsp}%, 
     #f59e0b ${pEsp}% ${pMob}%, 
-    #71717a ${pMob}% 100%
+    #71717a ${pMob}% ${pCart}%
   )`
 })
 
