@@ -1,126 +1,227 @@
 <script setup>
-const { lister } = useFournisseurs()
-const fournisseurs = ref([])
-const chargement = ref(true)
-const erreurMsg = ref(null)
-const recherche = ref('')
-const categorie = ref('')
+const { creer } = useFournisseurs()
+const router = useRouter()
+const { succes, erreur } = useNotifier()
 
-const filtres = computed(() => filtrerFournisseurs(fournisseurs.value, { recherche: recherche.value, categorie: categorie.value }))
-const categories = computed(() => [...new Set(fournisseurs.value.map(f => f.categorie))])
+const categories = ['Poissons', 'Viandes', 'Légumes et fruits', 'Boissons']
+const form = reactive({ nom: '', categorie: '', contact: '', telephone: '', email: '', adresse: '' })
+const envoi = ref(false)
+const erreurFormulaire = ref('')
 
-onMounted(async () => {
-  try { fournisseurs.value = await lister() }
-  catch (e) { erreurMsg.value = e.message }
-  finally { chargement.value = false }
-})
+const champ =
+  'h-12 w-full min-w-0 rounded-xl border border-white/[0.13] bg-[#0e0e0e] px-3.5 text-sm text-white outline-none transition [color-scheme:dark] placeholder:text-neutral-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20'
+
+watch(form, () => { erreurFormulaire.value = '' }, { deep: true })
+
+async function soumettre() {
+  if (envoi.value) return
+  const donnees = Object.fromEntries(Object.entries(form).map(([cle, valeur]) => [cle, valeur.trim()]))
+  if (!donnees.nom) {
+    erreurFormulaire.value = 'Le nom du fournisseur est obligatoire.'
+    return
+  }
+  if (!donnees.categorie) {
+    erreurFormulaire.value = 'Choisissez une catégorie.'
+    return
+  }
+  envoi.value = true
+  try {
+    await creer(donnees)
+    succes('Fournisseur créé')
+    router.push('/fournisseurs')
+  } catch (e) {
+    erreur(e.message)
+  } finally {
+    envoi.value = false
+  }
+}
 </script>
 
 <template>
-  <main class="space-y-6">
-    <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-orange-600">Gestion des achats</p>
-        <h1 class="mt-1 text-3xl font-bold text-gray-900">Fournisseurs</h1>
-        <p class="mt-2 text-sm text-gray-500">Retrouvez vos partenaires et les produits qu’ils proposent.</p>
-      </div>
+  <main class="mx-auto max-w-3xl space-y-5">
+    <header class="flex flex-wrap items-center gap-x-5 gap-y-3">
       <NuxtLink
-        to="/fournisseurs/nouveau"
-        class="inline-flex items-center justify-center rounded-lg bg-orange-600 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+        to="/fournisseurs"
+        class="rounded-md text-xs text-neutral-400 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
       >
-        <span aria-hidden="true" class="mr-2 text-lg leading-none">+</span>
-        Nouveau fournisseur
+        <span aria-hidden="true">←</span> Retour aux fournisseurs
       </NuxtLink>
+      <div class="min-w-0 flex-1 sm:border-l sm:border-white/[0.13] sm:pl-5">
+        <h1 class="text-xl font-bold text-white">Nouveau fournisseur</h1>
+        <p class="mt-1 text-xs text-neutral-500">Enregistrez les coordonnées de votre partenaire</p>
+      </div>
     </header>
 
-    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <p class="text-sm text-gray-500">Fournisseurs enregistrés</p>
-        <p class="mt-2 text-3xl font-bold text-gray-900">{{ fournisseurs.length }}</p>
-        <p class="mt-1 text-sm text-gray-500">Partenaires de votre restaurant</p>
-      </div>
-      <div class="rounded-xl border border-orange-200 bg-orange-50 p-5 shadow-sm">
-        <p class="text-sm font-medium text-orange-800">Catégories représentées</p>
-        <p class="mt-2 text-3xl font-bold text-orange-800">{{ categories.length }}</p>
-        <p class="mt-1 text-sm text-orange-700">Types de produits disponibles</p>
-      </div>
-    </section>
+    <form
+      class="rounded-3xl border border-white/[0.13] bg-[#141414]/80 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur sm:p-8"
+      novalidate
+      @submit.prevent="soumettre"
+    >
+      <h2 class="mb-1 text-sm font-semibold text-white">Informations du fournisseur</h2>
+      <p class="mb-6 text-xs text-neutral-500">Les champs marqués d'un astérisque sont obligatoires.</p>
 
-    <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div class="mb-4">
-        <h2 class="font-semibold text-gray-900">Rechercher un partenaire</h2>
-        <p class="mt-1 text-sm text-gray-500">Filtrez par nom ou par catégorie.</p>
-      </div>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <label class="block">
-          <span class="mb-1.5 block text-sm font-medium text-gray-700">Nom du fournisseur</span>
-          <input
-            v-model="recherche"
-            type="search"
-            placeholder="Ex. : Maraîchers..."
-            aria-label="Rechercher"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-          />
+      <p v-if="erreurFormulaire" class="mb-5 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-300" role="alert">
+        {{ erreurFormulaire }}
+      </p>
+
+      <div class="grid gap-[18px] sm:grid-cols-2">
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300 sm:col-span-2">
+          <span>Nom <span class="text-orange-500">*</span></span>
+          <input v-model="form.nom" required autocomplete="organization" placeholder="Ex. : Maraîchers de Virunga" :class="champ" />
         </label>
-        <label class="block">
-          <span class="mb-1.5 block text-sm font-medium text-gray-700">Catégorie</span>
-          <select
-            v-model="categorie"
-            aria-label="Catégorie"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-          >
-            <option value="">Toutes les catégories</option>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300">
+          <span>Catégorie <span class="text-orange-500">*</span></span>
+          <select v-model="form.categorie" required :class="champ">
+            <option value="" disabled>Sélectionnez une catégorie</option>
             <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
           </select>
         </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300">
+          <span>Contact</span>
+          <input v-model="form.contact" autocomplete="name" placeholder="Nom du contact" :class="champ" />
+        </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300">
+          <span>Téléphone</span>
+          <input v-model="form.telephone" type="tel" autocomplete="tel" placeholder="+243 ..." :class="champ" />
+        </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300">
+          <span>Adresse e-mail</span>
+          <input v-model="form.email" type="email" autocomplete="email" placeholder="contact@exemple.com" :class="champ" />
+        </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300 sm:col-span-2">
+          <span>Adresse</span>
+          <input v-model="form.adresse" autocomplete="street-address" placeholder="Adresse complète" :class="champ" />
+        </label>
       </div>
-    </section>
 
-    <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-        <h2 class="font-semibold text-gray-900">Liste des fournisseurs</h2>
-        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-          {{ filtres.length }} résultat(s)
-        </span>
-      </div>
-      <div v-if="chargement" class="p-10 text-center text-sm text-gray-500" role="status">
-        Chargement des fournisseurs…
-      </div>
-      <div v-else-if="erreurMsg" class="p-8 text-center" role="alert">
-        <p class="font-medium text-red-700">Impossible de charger les fournisseurs.</p>
-        <p class="mt-1 text-sm text-gray-500">{{ erreurMsg }}</p>
-      </div>
-      <ul v-else-if="filtres.length" class="divide-y divide-gray-100">
-        <li
-          v-for="f in filtres"
-          :key="f.id"
-          class="flex flex-col gap-4 px-5 py-4 transition hover:bg-orange-50/50 sm:flex-row sm:items-center sm:justify-between"
+      <div class="mt-8 flex flex-col-reverse gap-3 border-t border-white/[0.13] pt-5 sm:flex-row sm:justify-end">
+        <NuxtLink
+          to="/fournisseurs"
+          class="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-white/5 px-5 text-sm font-semibold text-neutral-400 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
         >
-          <div class="flex min-w-0 items-start gap-3">
-            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-sm font-bold text-orange-700">
-              {{ f.nom.slice(0, 1).toUpperCase() }}
-            </span>
-            <div class="min-w-0">
-              <p class="truncate font-semibold text-gray-900">{{ f.nom }}</p>
-              <span class="mt-1 inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
-                {{ f.categorie }}
-              </span>
-              <p class="mt-2 break-all text-sm text-gray-500">{{ f.telephone || 'Téléphone non renseigné' }} · {{ f.email || 'E-mail non renseigné' }}</p>
-            </div>
-          </div>
-          <NuxtLink
-            :to="`/fournisseurs/${f.id}`"
-            class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 sm:shrink-0"
-          >
-            Voir la fiche
-            <span aria-hidden="true" class="ml-2">→</span>
-          </NuxtLink>
-        </li>
-      </ul>
-      <div v-else class="px-5 py-12 text-center">
-        <p class="font-semibold text-gray-900">Aucun fournisseur trouvé</p>
-        <p class="mt-1 text-sm text-gray-500">Essayez une autre recherche ou ajoutez un fournisseur.</p>
+          Annuler
+        </NuxtLink>
+        <button
+          type="submit"
+          :disabled="envoi"
+          class="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-gradient-to-br from-[#ff8a00] to-[#f15a00] px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(249,115,22,0.2)] transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0d] disabled:cursor-wait disabled:opacity-60"
+        >
+          {{ envoi ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
       </div>
-    </section>
+    </form>
+  </main>
+</template><script setup>
+const { creer } = useFournisseurs()
+const router = useRouter()
+const { succes, erreur } = useNotifier()
+
+const categories = ['Poissons', 'Viandes', 'Légumes et fruits', 'Boissons']
+const form = reactive({ nom: '', categorie: '', contact: '', telephone: '', email: '', adresse: '' })
+const envoi = ref(false)
+const erreurFormulaire = ref('')
+
+const champ =
+  'h-12 w-full min-w-0 rounded-xl border border-white/[0.13] bg-[#0e0e0e] px-3.5 text-sm text-white outline-none transition [color-scheme:dark] placeholder:text-neutral-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20'
+
+watch(form, () => { erreurFormulaire.value = '' }, { deep: true })
+
+async function soumettre() {
+  if (envoi.value) return
+  const donnees = Object.fromEntries(Object.entries(form).map(([cle, valeur]) => [cle, valeur.trim()]))
+  if (!donnees.nom) {
+    erreurFormulaire.value = 'Le nom du fournisseur est obligatoire.'
+    return
+  }
+  if (!donnees.categorie) {
+    erreurFormulaire.value = 'Choisissez une catégorie.'
+    return
+  }
+  envoi.value = true
+  try {
+    await creer(donnees)
+    succes('Fournisseur créé')
+    router.push('/fournisseurs')
+  } catch (e) {
+    erreur(e.message)
+  } finally {
+    envoi.value = false
+  }
+}
+</script>
+
+<template>
+  <main class="mx-auto max-w-3xl space-y-5">
+    <header class="flex flex-wrap items-center gap-x-5 gap-y-3">
+      <NuxtLink
+        to="/fournisseurs"
+        class="rounded-md text-xs text-neutral-400 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+      >
+        <span aria-hidden="true">←</span> Retour aux fournisseurs
+      </NuxtLink>
+      <div class="min-w-0 flex-1 sm:border-l sm:border-white/[0.13] sm:pl-5">
+        <h1 class="text-xl font-bold text-white">Nouveau fournisseur</h1>
+        <p class="mt-1 text-xs text-neutral-500">Enregistrez les coordonnées de votre partenaire</p>
+      </div>
+    </header>
+
+    <form
+      class="rounded-3xl border border-white/[0.13] bg-[#141414]/80 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur sm:p-8"
+      novalidate
+      @submit.prevent="soumettre"
+    >
+      <h2 class="mb-1 text-sm font-semibold text-white">Informations du fournisseur</h2>
+      <p class="mb-6 text-xs text-neutral-500">Les champs marqués d'un astérisque sont obligatoires.</p>
+
+      <p v-if="erreurFormulaire" class="mb-5 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-300" role="alert">
+        {{ erreurFormulaire }}
+      </p>
+
+      <div class="grid gap-[18px] sm:grid-cols-2">
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300 sm:col-span-2">
+          <span>Nom <span class="text-orange-500">*</span></span>
+          <input v-model="form.nom" required autocomplete="organization" placeholder="Ex. : Maraîchers de Virunga" :class="champ" />
+        </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300">
+          <span>Catégorie <span class="text-orange-500">*</span></span>
+          <select v-model="form.categorie" required :class="champ">
+            <option value="" disabled>Sélectionnez une catégorie</option>
+            <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300">
+          <span>Contact</span>
+          <input v-model="form.contact" autocomplete="name" placeholder="Nom du contact" :class="champ" />
+        </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300">
+          <span>Téléphone</span>
+          <input v-model="form.telephone" type="tel" autocomplete="tel" placeholder="+243 ..." :class="champ" />
+        </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300">
+          <span>Adresse e-mail</span>
+          <input v-model="form.email" type="email" autocomplete="email" placeholder="contact@exemple.com" :class="champ" />
+        </label>
+        <label class="flex flex-col gap-2 text-xs font-medium text-neutral-300 sm:col-span-2">
+          <span>Adresse</span>
+          <input v-model="form.adresse" autocomplete="street-address" placeholder="Adresse complète" :class="champ" />
+        </label>
+      </div>
+
+      <div class="mt-8 flex flex-col-reverse gap-3 border-t border-white/[0.13] pt-5 sm:flex-row sm:justify-end">
+        <NuxtLink
+          to="/fournisseurs"
+          class="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-white/5 px-5 text-sm font-semibold text-neutral-400 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+        >
+          Annuler
+        </NuxtLink>
+        <button
+          type="submit"
+          :disabled="envoi"
+          class="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-gradient-to-br from-[#ff8a00] to-[#f15a00] px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(249,115,22,0.2)] transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0d] disabled:cursor-wait disabled:opacity-60"
+        >
+          {{ envoi ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
   </main>
 </template>
