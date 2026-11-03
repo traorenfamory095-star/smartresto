@@ -1,5 +1,6 @@
 // Logique du module Commandes. Propriétaire : Traoré.
 // Les fonctions pures (sans Nuxt) sont exportées pour être testées : tests/commandes/.
+import { infoStatut, transitionCommandeValide } from '../utils/statuts.js'
 
 // --- Argent : on calcule en centimes (entiers) pour éviter 0.1 + 0.2 = 0.30000000000000004 ---
 export const enCentimes = (montant) => Math.round(Number(montant) * 100) || 0
@@ -83,7 +84,14 @@ export function assemblerDetail({ commande, lignes = [], plats = [], table = nul
     plat: platParId.get(l.platId) ?? null,
     total: calculerTotal([l]),
   }))
-  return { ...commande, table, serveur, lignes: lignesDetaillees, total: calculerTotal(lignes) }
+  return {
+    ...commande,
+    table,
+    serveur,
+    lignes: lignesDetaillees,
+    total: calculerTotal(lignes),
+    catalogue: plats.filter((p) => p.disponible), // pour « Ajouter un plat »
+  }
 }
 
 // Date et heure LOCALES au format des données ("2026-10-21T12:05:00"), sans fuseau.
@@ -157,6 +165,88 @@ export async function creerCommandeAvecLignes(api, { tableId, serveurId, nbCouve
   }
 }
 
+// --- Modification des lignes (seulement tant que la commande est « en_attente ») ---
+export const QUANTITE_MAX_LIGNE = 20
+
+// Relit la commande sur le serveur : la cuisine a pu la démarrer depuis l'ouverture de la page.
+async function garantirModifiable(api, commandeId) {
+  const commande = await api.lire(`/commandes/${commandeId}`)
+  if (!actionsDisponibles(commande.statut).modifiable) {
+    throw new Error(
+      `Cette commande est « ${infoStatut('commande', commande.statut).libelle} » : ses lignes ne peuvent plus être modifiées.`,
+    )
+  }
+  return commande
+}
+
+// Change la quantité et/ou la remarque d'une ligne.
+export async function modifierLigneCommande(api, commandeId, ligneId, { quantite, remarque } = {}) {
+  await garantirModifiable(api, commandeId)
+  const ligne = await api.lire(`/lignesCommande/${ligneId}`)
+  if (ligne.commandeId !== Number(commandeId)) throw new Error("Cette ligne n'appartient pas à cette commande.")
+
+  const champs = {}
+  if (quantite !== undefined) {
+    const q = Math.floor(Number(quantite))
+    if (!(q >= 1 && q <= QUANTITE_MAX_LIGNE)) {
+      throw new Error(`La quantité doit être comprise entre 1 et ${QUANTITE_MAX_LIGNE}.`)
+    }
+    champs.quantite = q
+  }
+  if (remarque !== undefined) champs.remarque = String(remarque).slice(0, 120)
+  if (!Object.keys(champs).length) return ligne
+  return api.modifier(`/lignesCommande/${ligneId}`, champs)
+}
+
+// Retire une ligne. Une commande ne peut pas devenir vide : pour tout supprimer, on l'annule.
+export async function retirerLigneCommande(api, commandeId, ligneId) {
+  await garantirModifiable(api, commandeId)
+  const lignes = await api.lire('/lignesCommande', { commandeId })
+  if (!lignes.some((l) => l.id === Number(ligneId))) throw new Error("Cette ligne n'existe plus.")
+  if (lignes.length <= 1) {
+    throw new Error('Une commande doit garder au moins une ligne. Annulez-la pour tout supprimer.')
+  }
+  await api.supprimer(`/lignesCommande/${ligneId}`)
+}
+
+// Ajoute un plat : si la commande le contient déjà, on augmente sa quantité (pas de doublon).
+// Le prix unitaire est copié depuis le plat à cet instant.
+export async function ajouterPlatACommande(api, commandeId, platId, quantite = 1) {
+  await garantirModifiable(api, commandeId)
+  const plat = await api.lire(`/plats/${platId}`)
+  if (!plat.disponible) throw new Error(`« ${plat.nom} » n'est plus disponible.`)
+
+  const lignes = await api.lire('/lignesCommande', { commandeId })
+  const existante = lignes.find((l) => l.platId === plat.id)
+  if (existante) {
+    const q = Math.min(existante.quantite + quantite, QUANTITE_MAX_LIGNE)
+    return api.modifier(`/lignesCommande/${existante.id}`, { quantite: q })
+  }
+  return api.creer('/lignesCommande', {
+    commandeId: Number(commandeId),
+    platId: plat.id,
+    quantite,
+    prixUnitaire: plat.prix,
+    statutCuisine: 'en_attente',
+    remarque: '',
+  })
+}
+
+// Change le statut d'une commande en respectant le cycle de vie (CONTRIBUTING.md, section 3).
+// On relit l'état réel avant d'écrire : pas de transition sur une donnée périmée.
+export async function changerStatutCommande(api, id, nouveauStatut) {
+  const actuelle = await api.lire(`/commandes/${id}`)
+  if (actuelle.statut === 'payee' && nouveauStatut === 'annulee') {
+    throw new Error('Une commande payée ne peut pas être annulée.')
+  }
+  if (!transitionCommandeValide(actuelle.statut, nouveauStatut)) {
+    throw new Error(
+      `Impossible de passer cette commande de « ${infoStatut('commande', actuelle.statut).libelle} » à « ${infoStatut('commande', nouveauStatut).libelle} ».`,
+    )
+  }
+  return api.modifier(`/commandes/${id}`, { statut: nouveauStatut })
+}
+
 // Composable : chargements et actions du module. À appeler au niveau du setup.
 export function useCommandes() {
   const { lire, creer, modifier, supprimer } = useApi()
@@ -184,25 +274,17 @@ export function useCommandes() {
     return assemblerDetail({ commande, lignes, plats, table, serveur })
   }
 
-  // On relit l'état réel avant d'écrire : pas de transition sur une donnée périmée.
-  async function changerStatut(id, nouveauStatut) {
-    const actuelle = await lire(`/commandes/${id}`)
-    if (!transitionCommandeValide(actuelle.statut, nouveauStatut)) {
-      throw new Error(
-        `Impossible de passer cette commande de « ${infoStatut('commande', actuelle.statut).libelle} » à « ${infoStatut('commande', nouveauStatut).libelle} ».`,
-      )
-    }
-    return modifier(`/commandes/${id}`, { statut: nouveauStatut })
-  }
-
-  // Crée la commande et ses lignes, ou rien (voir creerCommandeAvecLignes).
-  const creerCommande = (donnees) => creerCommandeAvecLignes({ lire, creer, supprimer }, donnees)
+  const api = { lire, creer, modifier, supprimer }
+  const creerCommande = (donnees) => creerCommandeAvecLignes(api, donnees)
 
   return {
     chargerListe,
     chargerDetail,
     creerCommande,
-    marquerServie: (id) => changerStatut(id, 'servie'),
-    annuler: (id) => changerStatut(id, 'annulee'),
+    modifierLigne: (commandeId, ligneId, champs) => modifierLigneCommande(api, commandeId, ligneId, champs),
+    retirerLigne: (commandeId, ligneId) => retirerLigneCommande(api, commandeId, ligneId),
+    ajouterPlat: (commandeId, platId, quantite) => ajouterPlatACommande(api, commandeId, platId, quantite),
+    marquerServie: (id) => changerStatutCommande(api, id, 'servie'),
+    annuler: (id) => changerStatutCommande(api, id, 'annulee'),
   }
 }
